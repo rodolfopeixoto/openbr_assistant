@@ -206,4 +206,11 @@ export type AppViewState = {
   // Commands menu state
   commandsMenuOpen: boolean;
   handleToggleCommandsMenu: () => void;
+  // Config documentation panel state
+  configDocPanelOpen: boolean;
+  configDocSearchQuery: string;
+  handleToggleConfigDocPanel: () => void;
+  handleConfigDocSearchChange: (query: string) => void;
+  handleInsertConfigTemplate: (template: string) => void;
+  handleInsertConfigField: (field: string) => void;
 };

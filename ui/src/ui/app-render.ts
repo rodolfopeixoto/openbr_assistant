@@ -553,6 +553,12 @@ export function renderApp(state: AppViewState) {
                 onSave: () => saveConfig(state),
                 onApply: () => applyConfig(state),
                 onUpdate: () => runUpdate(state),
+                docPanelOpen: state.configDocPanelOpen,
+                docSearchQuery: state.configDocSearchQuery,
+                onDocPanelToggle: () => state.handleToggleConfigDocPanel(),
+                onDocSearchChange: (query) => state.handleConfigDocSearchChange(query),
+                onInsertTemplate: (template) => state.handleInsertConfigTemplate(template),
+                onInsertField: (field) => state.handleInsertConfigField(field),
               })
             : nothing
         }
