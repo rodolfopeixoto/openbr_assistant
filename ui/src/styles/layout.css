@@ -1,12 +1,12 @@
 /* ===========================================
-   Shell Layout
+   Shell Layout - Improved spacing
    =========================================== */
 
 .shell {
   --shell-pad: 16px;
   --shell-gap: 16px;
-  --shell-nav-width: 220px;
-  --shell-topbar-height: 56px;
+  --shell-nav-width: 240px;
+  --shell-topbar-height: 60px;
   --shell-focus-duration: 200ms;
   --shell-focus-ease: var(--ease-out);
   height: 100vh;
@@ -134,7 +134,7 @@
 .brand-title {
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: normal;
   line-height: 1.1;
   color: var(--text-strong);
 }
@@ -412,12 +412,12 @@
 }
 
 /* ===========================================
-   Content Area
+   Content Area - Improved spacing
    =========================================== */
 
 .content {
   grid-area: content;
-  padding: 12px 16px 32px;
+  padding: 16px 24px 32px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -461,9 +461,9 @@
 }
 
 .page-title {
-  font-size: 26px;
+  font-size: var(--text-2xl);
   font-weight: 700;
-  letter-spacing: -0.035em;
+  letter-spacing: normal;
   line-height: 1.15;
   color: var(--text-strong);
 }
@@ -473,7 +473,7 @@
   font-size: 14px;
   font-weight: 400;
   margin-top: 6px;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 .page-meta {

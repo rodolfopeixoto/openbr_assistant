@@ -1,63 +1,78 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  /* Background - Warmer dark with depth */
-  --bg: #12141a;
-  --bg-accent: #14161d;
-  --bg-elevated: #1a1d25;
-  --bg-hover: #262a35;
-  --bg-muted: #262a35;
+  /* ===========================================
+     Background - Richer dark with better depth
+     =========================================== */
+  --bg: #0a0a0f;
+  --bg-accent: #12121a;
+  --bg-elevated: #1a1a24;
+  --bg-hover: #252532;
+  --bg-muted: #2a2a3a;
 
-  /* Card / Surface - More contrast between levels */
-  --card: #181b22;
+  /* ===========================================
+     Card / Surface - More contrast between levels
+     =========================================== */
+  --card: #161620;
   --card-foreground: #f4f4f5;
-  --card-highlight: rgba(255, 255, 255, 0.05);
-  --popover: #181b22;
+  --card-highlight: rgba(255, 255, 255, 0.04);
+  --popover: #1e1e2a;
   --popover-foreground: #f4f4f5;
 
-  /* Panel */
-  --panel: #12141a;
-  --panel-strong: #1a1d25;
-  --panel-hover: #262a35;
-  --chrome: rgba(18, 20, 26, 0.95);
-  --chrome-strong: rgba(18, 20, 26, 0.98);
+  /* ===========================================
+     Panel
+     =========================================== */
+  --panel: #0a0a0f;
+  --panel-strong: #12121a;
+  --panel-hover: #1a1a24;
+  --chrome: rgba(10, 10, 15, 0.95);
+  --chrome-strong: rgba(10, 10, 15, 0.98);
 
-  /* Text - Slightly warmer */
-  --text: #e4e4e7;
-  --text-strong: #fafafa;
-  --chat-text: #e4e4e7;
-  --muted: #71717a;
-  --muted-strong: #52525b;
-  --muted-foreground: #71717a;
+  /* ===========================================
+     Text - Slightly warmer, better contrast
+     =========================================== */
+  --text: #e2e2e8;
+  --text-strong: #ffffff;
+  --chat-text: #e2e2e8;
+  --muted: #6b6b78;
+  --muted-strong: #8a8a98;
+  --muted-foreground: #6b6b78;
 
-  /* Border - Subtle but defined */
-  --border: #27272a;
-  --border-strong: #3f3f46;
-  --border-hover: #52525b;
-  --input: #27272a;
-  --ring: #ff5c5c;
+  /* ===========================================
+     Border - Defined but subtle
+     =========================================== */
+  --border: #2a2a38;
+  --border-strong: #3d3d50;
+  --border-hover: #52526b;
+  --input: #2a2a38;
 
-  /* Accent - Punchy signature red */
-  --accent: #ff5c5c;
-  --accent-hover: #ff7070;
-  --accent-muted: #ff5c5c;
-  --accent-subtle: rgba(255, 92, 92, 0.15);
-  --accent-foreground: #fafafa;
-  --accent-glow: rgba(255, 92, 92, 0.25);
-  --primary: #ff5c5c;
+  /* ===========================================
+     Accent - Modern Indigo (professional, calm)
+     =========================================== */
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-muted: #a5b4fc;
+  --accent-subtle: rgba(99, 102, 241, 0.15);
+  --accent-foreground: #ffffff;
+  --accent-glow: rgba(99, 102, 241, 0.3);
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
 
-  /* Secondary - Teal accent for variety */
-  --secondary: #1e2028;
+  /* ===========================================
+     Secondary - Teal accent for variety
+     =========================================== */
+  --secondary: #1e1e2a;
   --secondary-foreground: #f4f4f5;
   --accent-2: #14b8a6;
   --accent-2-muted: rgba(20, 184, 166, 0.7);
   --accent-2-subtle: rgba(20, 184, 166, 0.15);
 
-  /* Semantic - More saturated */
-  --ok: #22c55e;
-  --ok-muted: rgba(34, 197, 94, 0.75);
-  --ok-subtle: rgba(34, 197, 94, 0.12);
+  /* ===========================================
+     Semantic - Calmer colors
+     =========================================== */
+  --ok: #10b981;
+  --ok-muted: rgba(16, 185, 129, 0.75);
+  --ok-subtle: rgba(16, 185, 129, 0.12);
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
   --warn: #f59e0b;
@@ -68,91 +83,125 @@
   --danger-subtle: rgba(239, 68, 68, 0.12);
   --info: #3b82f6;
 
-  /* Focus - With glow */
-  --focus: rgba(255, 92, 92, 0.25);
+  /* ===========================================
+     Focus - Indigo glow
+     =========================================== */
+  --ring: #6366f1;
+  --focus: rgba(99, 102, 241, 0.25);
   --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring);
   --focus-glow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring), 0 0 20px var(--accent-glow);
 
-  /* Grid */
+  /* ===========================================
+     Grid
+     =========================================== */
   --grid-line: rgba(255, 255, 255, 0.04);
 
-  /* Theme transition */
+  /* ===========================================
+     Theme transition
+     =========================================== */
   --theme-switch-x: 50%;
   --theme-switch-y: 50%;
 
-  /* Typography - Space Grotesk for personality */
+  /* ===========================================
+     Typography - Inter for better readability
+     =========================================== */
   --mono:
     "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
-  --font-body: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display:
-    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Shadows - Richer with subtle color */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.03);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.03);
-  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  /* ===========================================
+     Typography Scale
+     =========================================== */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 21px;
+  --text-2xl: 26px;
+
+  /* ===========================================
+     Line Heights
+     =========================================== */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* ===========================================
+     Shadows - Refined
+     =========================================== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.02);
   --shadow-glow: 0 0 30px var(--accent-glow);
 
-  /* Radii - Slightly larger for friendlier feel */
+  /* ===========================================
+     Radii - Slightly larger for friendlier feel
+     =========================================== */
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
-  --radius: 8px;
+  --radius: 10px;
 
-  /* Transitions - Snappy but smooth */
+  /* ===========================================
+     Transitions - Snappy but smooth
+     =========================================== */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast: 120ms;
+  --duration-fast: 150ms;
   --duration-normal: 200ms;
-  --duration-slow: 350ms;
+  --duration-slow: 300ms;
 
   color-scheme: dark;
 }
 
-/* Light theme - Clean with subtle warmth */
+/* ===========================================
+   Light theme - Clean with subtle warmth
+   =========================================== */
 :root[data-theme="light"] {
   --bg: #fafafa;
-  --bg-accent: #f5f5f5;
+  --bg-accent: #f5f5f7;
   --bg-elevated: #ffffff;
-  --bg-hover: #f0f0f0;
-  --bg-muted: #f0f0f0;
-  --bg-content: #f5f5f5;
+  --bg-hover: #f0f0f2;
+  --bg-muted: #f0f0f2;
+  --bg-content: #f5f5f7;
 
   --card: #ffffff;
   --card-foreground: #18181b;
-  --card-highlight: rgba(0, 0, 0, 0.03);
+  --card-highlight: rgba(0, 0, 0, 0.02);
   --popover: #ffffff;
   --popover-foreground: #18181b;
 
   --panel: #fafafa;
-  --panel-strong: #f5f5f5;
-  --panel-hover: #ebebeb;
+  --panel-strong: #f5f5f7;
+  --panel-hover: #ebebed;
   --chrome: rgba(250, 250, 250, 0.95);
   --chrome-strong: rgba(250, 250, 250, 0.98);
 
-  --text: #3f3f46;
-  --text-strong: #18181b;
-  --chat-text: #3f3f46;
-  --muted: #71717a;
-  --muted-strong: #52525b;
-  --muted-foreground: #71717a;
+  --text: #27272a;
+  --text-strong: #09090b;
+  --chat-text: #27272a;
+  --muted: #52525b;
+  --muted-strong: #71717a;
+  --muted-foreground: #52525b;
 
   --border: #e4e4e7;
   --border-strong: #d4d4d8;
   --border-hover: #a1a1aa;
   --input: #e4e4e7;
 
-  --accent: #dc2626;
-  --accent-hover: #ef4444;
-  --accent-muted: #dc2626;
-  --accent-subtle: rgba(220, 38, 38, 0.12);
+  /* Accent - Darker indigo for contrast in light mode */
+  --accent: #4f46e5;
+  --accent-hover: #6366f1;
+  --accent-muted: #818cf8;
+  --accent-subtle: rgba(79, 70, 229, 0.12);
   --accent-foreground: #ffffff;
-  --accent-glow: rgba(220, 38, 38, 0.15);
-  --primary: #dc2626;
+  --accent-glow: rgba(79, 70, 229, 0.2);
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
 
   --secondary: #f4f4f5;
@@ -161,9 +210,9 @@
   --accent-2-muted: rgba(13, 148, 136, 0.75);
   --accent-2-subtle: rgba(13, 148, 136, 0.12);
 
-  --ok: #16a34a;
-  --ok-muted: rgba(22, 163, 74, 0.75);
-  --ok-subtle: rgba(22, 163, 74, 0.1);
+  --ok: #10b981;
+  --ok-muted: rgba(16, 185, 129, 0.75);
+  --ok-subtle: rgba(16, 185, 129, 0.1);
   --destructive: #dc2626;
   --destructive-foreground: #fafafa;
   --warn: #d97706;
@@ -174,16 +223,17 @@
   --danger-subtle: rgba(220, 38, 38, 0.1);
   --info: #2563eb;
 
-  --focus: rgba(220, 38, 38, 0.2);
+  --ring: #4f46e5;
+  --focus: rgba(79, 70, 229, 0.2);
   --focus-glow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring), 0 0 16px var(--accent-glow);
 
   --grid-line: rgba(0, 0, 0, 0.05);
 
   /* Light shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.02);
   --shadow-glow: 0 0 24px var(--accent-glow);
 
   color-scheme: light;
@@ -200,15 +250,17 @@ body {
 
 body {
   margin: 0;
-  font: 400 14px/1.55 var(--font-body);
-  letter-spacing: -0.02em;
+  font: 400 15px/1.5 var(--font-body);
+  letter-spacing: normal;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Theme transition */
+/* ===========================================
+   Theme transition
+   =========================================== */
 @keyframes theme-circle-transition {
   0% {
     clip-path: circle(0% at var(--theme-switch-x, 50%) var(--theme-switch-y, 50%));
@@ -270,7 +322,9 @@ select {
   color: var(--text-strong);
 }
 
-/* Scrollbar styling */
+/* ===========================================
+   Scrollbar styling
+   =========================================== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -289,7 +343,9 @@ select {
   background: var(--border-strong);
 }
 
-/* Animations - Polished with spring feel */
+/* ===========================================
+   Animations - Polished with spring feel
+   =========================================== */
 @keyframes rise {
   from {
     opacity: 0;
@@ -351,37 +407,44 @@ select {
   }
 }
 
-@keyframes glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(255, 92, 92, 0);
-  }
-  50% {
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
-}
+/* ===========================================
+   Spacing Utilities - 8px grid
+   =========================================== */
+.space-y-1 > * + * { margin-top: 4px; }
+.space-y-2 > * + * { margin-top: 8px; }
+.space-y-3 > * + * { margin-top: 12px; }
+.space-y-4 > * + * { margin-top: 16px; }
+.space-y-5 > * + * { margin-top: 20px; }
+.space-y-6 > * + * { margin-top: 24px; }
 
-/* Stagger animation delays for grouped elements */
-.stagger-1 {
-  animation-delay: 0ms;
-}
-.stagger-2 {
-  animation-delay: 50ms;
-}
-.stagger-3 {
-  animation-delay: 100ms;
-}
-.stagger-4 {
-  animation-delay: 150ms;
-}
-.stagger-5 {
-  animation-delay: 200ms;
-}
-.stagger-6 {
-  animation-delay: 250ms;
-}
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-5 { gap: 20px; }
+.gap-6 { gap: 24px; }
 
-/* Focus visible styles */
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 20px; }
+.mt-6 { margin-top: 24px; }
+
+/* ===========================================
+   Stagger animation delays for grouped elements
+   =========================================== */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 50ms; }
+.stagger-3 { animation-delay: 100ms; }
+.stagger-4 { animation-delay: 150ms; }
+.stagger-5 { animation-delay: 200ms; }
+.stagger-6 { animation-delay: 250ms; }
+
+/* ===========================================
+   Focus visible styles
+   =========================================== */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
