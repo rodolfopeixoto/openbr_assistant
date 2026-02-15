@@ -1,0 +1,52 @@
+{
+  "name": "@openbr-enterprise/infra-database",
+  "version": "1.0.0",
+  "description": "Database infrastructure with unified adapter for SQLite, PostgreSQL, and MongoDB",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./adapters/*": "./dist/adapters/*.js",
+    "./types": "./dist/types/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "pg": "^8.13.0",
+    "mongodb": "^6.10.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    }
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "database",
+    "sqlite",
+    "postgresql",
+    "mongodb",
+    "adapter",
+    "enterprise"
+  ]
+}
