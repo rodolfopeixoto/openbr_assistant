@@ -76,6 +76,7 @@ import {
 } from "./navigation";
 import { renderChannels } from "./views/channels";
 import { renderChat } from "./views/chat";
+import { renderCompliance } from "./views/compliance";
 import { renderConfig } from "./views/config";
 import { renderCron } from "./views/cron";
 import { renderDebug } from "./views/debug";
@@ -559,6 +560,26 @@ export function renderApp(state: AppViewState) {
                 onDocSearchChange: (query) => state.handleConfigDocSearchChange(query),
                 onInsertTemplate: (template) => state.handleInsertConfigTemplate(template),
                 onInsertField: (field) => state.handleInsertConfigField(field),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "compliance"
+            ? renderCompliance({
+                loading: state.complianceLoading,
+                error: state.complianceError,
+                status: state.complianceStatus,
+                reports: state.complianceReports,
+                selectedFramework: state.complianceSelectedFramework,
+                activeTab: state.complianceActiveTab,
+                onTabChange: (tab) => state.handleComplianceTabChange(tab),
+                onFrameworkChange: (framework) => state.handleComplianceFrameworkChange(framework),
+                onRefresh: () => state.handleComplianceRefresh(),
+                onGenerateReport: (framework) => state.handleComplianceGenerateReport(framework),
+                onExportData: () => state.handleComplianceExportData(),
+                onViolationAcknowledge: (id) => state.handleComplianceViolationAcknowledge(id),
+                onViolationResolve: (id) => state.handleComplianceViolationResolve(id),
               })
             : nothing
         }
