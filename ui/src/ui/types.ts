@@ -524,3 +524,40 @@ export type LogEntry = {
   message?: string | null;
   meta?: Record<string, unknown> | null;
 };
+
+// ==================== COMPLIANCE TYPES ====================
+
+export type ComplianceFramework = "gdpr" | "lgpd" | "soc2" | "hipaa";
+
+export type ComplianceStatus = {
+  overallStatus: "compliant" | "at-risk" | "non-compliant" | "pending";
+  violationsCount: number;
+  lastScanAt: string;
+  nextAuditAt: string;
+  frameworks: Record<ComplianceFramework, { status: string; score: number; lastAudit: string }>;
+  recentViolations: ComplianceViolation[];
+};
+
+export type ComplianceViolation = {
+  id: string;
+  framework: ComplianceFramework;
+  severity: "critical" | "high" | "medium" | "low";
+  status: "open" | "acknowledged" | "resolved";
+  title: string;
+  description: string;
+  resource?: string;
+  detectedAt: string;
+  resolvedAt?: string;
+  remediation?: string;
+};
+
+export type ComplianceReport = {
+  id: string;
+  framework: ComplianceFramework;
+  generatedAt: string;
+  status: "compliant" | "at-risk" | "non-compliant";
+  score: number;
+  violationsCount: number;
+  summary: string;
+  details: Record<string, unknown>;
+};
