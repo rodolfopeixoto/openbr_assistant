@@ -1,6 +1,7 @@
 import { html, nothing } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { repeat } from "lit/directives/repeat.js";
+import { state } from "lit/decorators.js";
 import type { SessionsListResult } from "../types";
 import type { ChatItem, MessageGroup } from "../types/chat-types";
 import type { ChatAttachment, ChatQueueItem } from "../ui-types";
@@ -13,6 +14,46 @@ import { normalizeMessage, normalizeRoleForGrouping } from "../chat/message-norm
 import { icons } from "../icons";
 import { renderMarkdownSidebar } from "./markdown-sidebar";
 import "../components/resizable-divider";
+
+// Quick commands definition
+interface QuickCommand {
+  id: string;
+  label: string;
+  description: string;
+  icon: keyof typeof icons;
+  template: string;
+}
+
+const QUICK_COMMANDS: QuickCommand[] = [
+  {
+    id: 'memory',
+    label: 'Search Memory',
+    description: 'Search your stored memories',
+    icon: 'brain',
+    template: 'Search my memory for: '
+  },
+  {
+    id: 'file',
+    label: 'Analyze File',
+    description: 'Analyze or process a file',
+    icon: 'fileText',
+    template: 'Please analyze this file and tell me: '
+  },
+  {
+    id: 'help',
+    label: 'Help',
+    description: 'Get help with available commands',
+    icon: 'book',
+    template: '/help'
+  },
+  {
+    id: 'clear',
+    label: 'Clear Context',
+    description: 'Start fresh with cleared context',
+    icon: 'refreshCw',
+    template: '/clear'
+  }
+];
 
 export type CompactionIndicatorStatus = {
   active: boolean;
@@ -53,6 +94,9 @@ export type ChatProps = {
   // Image attachments
   attachments?: ChatAttachment[];
   onAttachmentsChange?: (attachments: ChatAttachment[]) => void;
+  // Commands menu state
+  commandsMenuOpen?: boolean;
+  onToggleCommandsMenu?: () => void;
   // Event handlers
   onRefresh: () => void;
   onToggleFocusMode: () => void;
@@ -149,15 +193,15 @@ function renderAttachmentPreview(props: ChatProps) {
       ${attachments.map(
         (att) => html`
           <div class="chat-attachment">
-            <img
-              src=${att.dataUrl}
-              alt="Attachment preview"
-              class="chat-attachment__img"
-            />
-            <button
-              class="chat-attachment__remove"
-              type="button"
-              aria-label="Remove attachment"
+             <img
+               src=${att.dataUrl}
+               alt="Attached image"
+               class="chat-attachment__img"
+             />
+             <button
+               class="chat-attachment__remove"
+               type="button"
+               aria-label="Remove attachment"
               @click=${() => {
                 const next = (props.attachments ?? []).filter((a) => a.id !== att.id);
                 props.onAttachmentsChange?.(next);
@@ -168,6 +212,49 @@ function renderAttachmentPreview(props: ChatProps) {
           </div>
         `,
       )}
+    </div>
+  `;
+}
+
+function renderCommandsMenu(props: ChatProps) {
+  return html`
+    <div class="chat-commands-menu">
+      <div class="chat-commands-menu__header">
+        <span>Quick Commands</span>
+        <button 
+          class="chat-commands-menu__close"
+          @click=${props.onToggleCommandsMenu}
+          aria-label="Close commands menu"
+        >
+          ${icons.x}
+        </button>
+      </div>
+      <div class="chat-commands-menu__list">
+        ${QUICK_COMMANDS.map(cmd => html`
+          <button 
+            class="chat-commands-menu__item"
+            @click=${() => {
+              props.onDraftChange(cmd.template);
+              props.onToggleCommandsMenu?.();
+              // Focus the textarea after selecting a command
+              setTimeout(() => {
+                const textarea = document.querySelector('.chat-input__textarea') as HTMLTextAreaElement;
+                if (textarea) {
+                  textarea.focus();
+                  // Place cursor at the end
+                  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+                }
+              }, 0);
+            }}
+          >
+            <span class="chat-commands-menu__icon">${icons[cmd.icon]}</span>
+            <div class="chat-commands-menu__content">
+              <span class="chat-commands-menu__label">${cmd.label}</span>
+              <span class="chat-commands-menu__desc">${cmd.description}</span>
+            </div>
+          </button>
+        `)}
+      </div>
     </div>
   `;
 }
@@ -188,7 +275,7 @@ export function renderChat(props: ChatProps) {
   const composePlaceholder = props.connected
     ? hasAttachments
       ? "Add a message or paste more images..."
-      : "Message (↩ to send, Shift+↩ for line breaks, paste images)"
+      : "Type your message... (Enter to send, Shift+Enter for new line)"
     : "Connect to the gateway to start chatting…";
 
   const splitRatio = props.splitRatio ?? 0.6;
@@ -330,17 +417,68 @@ export function renderChat(props: ChatProps) {
 
       <div class="chat-compose">
         ${renderAttachmentPreview(props)}
-        <div class="chat-compose__row">
-          <label class="field chat-compose__field">
-            <span>Message</span>
+        
+        <div class="chat-input-container">
+          <!-- Quick Actions Toolbar -->
+          <div class="chat-input-toolbar">
+            <button 
+              class="chat-input-toolbar__btn" 
+              title="Attach file"
+              @click=${() => document.getElementById('file-input')?.click()}
+            >
+              ${icons.paperclip} Attach
+            </button>
+            <button 
+              class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
+              title="Quick commands"
+              @click=${props.onToggleCommandsMenu}
+            >
+              ${icons.zap} Commands
+            </button>
+            <button class="chat-input-toolbar__btn" title="New chat session" @click=${props.onNewSession}>
+              ${icons.refreshCw} New Chat
+            </button>
+          </div>
+          
+          ${props.commandsMenuOpen ? renderCommandsMenu(props) : nothing}
+          
+          <!-- Hidden file input -->
+          <input 
+            type="file" 
+            id="file-input" 
+            style="display: none" 
+            accept="image/*"
+            @change=${(e: Event) => {
+              const input = e.target as HTMLInputElement;
+              if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const dataUrl = reader.result as string;
+                  const newAttachment: ChatAttachment = {
+                    id: generateAttachmentId(),
+                    dataUrl,
+                    mimeType: file.type,
+                  };
+                  const current = props.attachments ?? [];
+                  props.onAttachmentsChange?.([...current, newAttachment]);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
+          
+          <!-- Main Input Area -->
+          <div class="chat-input-main">
             <textarea
+              class="chat-input__textarea"
               ${ref((el) => el && adjustTextareaHeight(el as HTMLTextAreaElement))}
               .value=${props.draft}
               ?disabled=${!props.connected}
               @keydown=${(e: KeyboardEvent) => {
                 if (e.key !== "Enter") return;
                 if (e.isComposing || e.keyCode === 229) return;
-                if (e.shiftKey) return; // Allow Shift+Enter for line breaks
+                if (e.shiftKey) return;
                 if (!props.connected) return;
                 e.preventDefault();
                 if (canCompose) props.onSend();
@@ -352,23 +490,40 @@ export function renderChat(props: ChatProps) {
               }}
               @paste=${(e: ClipboardEvent) => handlePaste(e, props)}
               placeholder=${composePlaceholder}
+              rows="1"
             ></textarea>
-          </label>
-          <div class="chat-compose__actions">
-            <button
-              class="btn"
-              ?disabled=${!props.connected || (!canAbort && props.sending)}
-              @click=${canAbort ? props.onAbort : props.onNewSession}
-            >
-              ${canAbort ? "Stop" : "New session"}
-            </button>
-            <button
-              class="btn primary"
-              ?disabled=${!props.connected}
-              @click=${props.onSend}
-            >
-              ${isBusy ? "Queue" : "Send"}<kbd class="btn-kbd">↵</kbd>
-            </button>
+          </div>
+          
+          <!-- Input Actions -->
+          <div class="chat-input__actions">
+            <span class="chat-input__hint">
+              ${props.connected ? html`<span class="kbd-hint">↵ Enter</span> to send` : nothing}
+            </span>
+
+            <div class="chat-input__buttons">
+              ${canAbort
+                ? html`
+                  <button
+                    class="chat-input__stop-btn"
+                    @click=${props.onAbort}
+                    title="Stop generation"
+                  >
+                    ${icons.stopCircle} Stop
+                  </button>
+                `
+                : html`
+                  <button
+                    class="chat-input__send-btn"
+                    ?disabled=${!props.connected || (!props.draft.trim() && !hasAttachments)}
+                    @click=${props.onSend}
+                    title=${isBusy ? "Add to queue" : "Send message"}
+                  >
+                    ${isBusy ? icons.loader : icons.send}
+                    <span>${isBusy ? "Queue" : "Send"}</span>
+                  </button>
+                `
+              }
+            </div>
           </div>
         </div>
       </div>
