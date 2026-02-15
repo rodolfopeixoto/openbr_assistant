@@ -1,0 +1,43 @@
+{
+  "name": "@openbr-enterprise/compliance-soc2",
+  "version": "1.0.0",
+  "description": "SOC2 compliance controls with ChangeManagement, AnomalyDetection, and IncidentResponse",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./change-management": "./dist/change-management/index.js",
+    "./anomaly-detection": "./dist/anomaly-detection/index.js",
+    "./incident-response": "./dist/incident-response/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "ml-matrix": "^6.12.0",
+    "simple-statistics": "^7.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "@openbr-enterprise/security-core": "^1.0.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "soc2",
+    "compliance",
+    "audit",
+    "enterprise"
+  ]
+}

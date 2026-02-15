@@ -1,0 +1,46 @@
+{
+  "name": "@openbr-enterprise/security-core",
+  "version": "1.0.0",
+  "description": "Enterprise security core with SecretVault, SecureString, TokenRotation, LeakDetection, and ChannelIsolation",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./vault": "./dist/vault/index.js",
+    "./secure-string": "./dist/secure-string/index.js",
+    "./token-rotation": "./dist/token-rotation/index.js",
+    "./leak-detection": "./dist/leak-detection/index.js",
+    "./channel-isolation": "./dist/channel-isolation/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "keytar": "^7.9.0",
+    "libsodium-wrappers": "^0.7.13",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/libsodium-wrappers": "^0.7.14",
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "security",
+    "vault",
+    "secrets",
+    "enterprise"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@openbr-enterprise/performance-optimizer",
+  "version": "1.0.0",
+  "description": "Performance optimization with SecureMemoryPool, ConnectionPool, and MessageBatching",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./memory-pool": "./dist/memory-pool/index.js",
+    "./connection-pool": "./dist/connection-pool/index.js",
+    "./message-batching": "./dist/message-batching/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "generic-pool": "^3.9.0",
+    "msgpackr": "^1.11.0",
+    "pako": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pako": "^2.0.3",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "@openbr-enterprise/security-core": "^1.0.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "performance",
+    "optimization",
+    "memory",
+    "enterprise"
+  ]
+}

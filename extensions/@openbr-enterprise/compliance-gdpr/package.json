@@ -1,0 +1,45 @@
+{
+  "name": "@openbr-enterprise/compliance-gdpr",
+  "version": "1.0.0",
+  "description": "GDPR compliance module with DataExport, RightToErasure, and ConsentManager",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./data-export": "./dist/data-export/index.js",
+    "./right-to-erasure": "./dist/right-to-erasure/index.js",
+    "./consent-manager": "./dist/consent-manager/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "json2csv": "^6.0.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/json2csv": "^5.0.7",
+    "@types/node": "^22.0.0",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "@openbr-enterprise/security-core": "^1.0.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "gdpr",
+    "compliance",
+    "privacy",
+    "enterprise"
+  ]
+}

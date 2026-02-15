@@ -1,0 +1,43 @@
+{
+  "name": "@openbr-enterprise/compliance-lgpd",
+  "version": "1.0.0",
+  "description": "LGPD (Lei Geral de Proteção de Dados) compliance for Brazilian regulations",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./dpo": "./dist/dpo/index.js",
+    "./anpd-reports": "./dist/anpd-reports/index.js",
+    "./legal-basis": "./dist/legal-basis/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "@openbr-enterprise/compliance-gdpr": "^1.0.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "lgpd",
+    "brazil",
+    "compliance",
+    "privacy",
+    "enterprise"
+  ]
+}
