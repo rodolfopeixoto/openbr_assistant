@@ -126,6 +126,7 @@ export class OpenClawApp extends LitElement {
   @state() chatThinkingLevel: string | null = null;
   @state() chatQueue: ChatQueueItem[] = [];
   @state() chatAttachments: ChatAttachment[] = [];
+  @state() commandsMenuOpen = false;
   // Sidebar state for tool output viewing
   @state() sidebarOpen = false;
   @state() sidebarContent: string | null = null;
@@ -466,6 +467,10 @@ export class OpenClawApp extends LitElement {
     const newRatio = Math.max(0.4, Math.min(0.7, ratio));
     this.splitRatio = newRatio;
     this.applySettings({ ...this.settings, splitRatio: newRatio });
+  }
+
+  handleToggleCommandsMenu() {
+    this.commandsMenuOpen = !this.commandsMenuOpen;
   }
 
   render() {
