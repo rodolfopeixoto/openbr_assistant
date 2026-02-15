@@ -16,6 +16,8 @@ export type JsonSchema = {
   nullable?: boolean;
 };
 
+export type LabelContext = "section" | "subsection" | "field";
+
 export function schemaType(schema: JsonSchema): string | undefined {
   if (!schema) return undefined;
   if (Array.isArray(schema.type)) {
@@ -69,6 +71,67 @@ export function hintForPath(path: Array<string | number>, hints: ConfigUiHints) 
     if (match) return hint;
   }
   return undefined;
+}
+
+/**
+ * Resolves a label for a config field/section with context awareness.
+ * Prevents label duplication by considering the context (section/subsection/field).
+ */
+export function resolveLabel(
+  path: Array<string | number>,
+  schema: JsonSchema | undefined,
+  hints: ConfigUiHints,
+  context: LabelContext
+): string {
+  const hint = hintForPath(path, hints);
+  
+  // Priority 1: UI Hint (most specific)
+  if (hint?.label) {
+    return hint.label;
+  }
+  
+  // Priority 2: Schema title
+  if (schema?.title) {
+    return schema.title;
+  }
+  
+  // Priority 3: Humanized key name (fallback)
+  const lastSegment = path[path.length - 1];
+  if (typeof lastSegment === "string") {
+    return humanize(lastSegment);
+  }
+  
+  return "";
+}
+
+/**
+ * Checks if a label should be shown in the given context.
+ * Prevents showing the same label at multiple levels (e.g., section title + field label).
+ */
+export function shouldShowLabel(
+  path: Array<string | number>,
+  schema: JsonSchema | undefined,
+  hints: ConfigUiHints,
+  context: LabelContext,
+  parentLabel?: string
+): boolean {
+  const label = resolveLabel(path, schema, hints, context);
+  
+  // Don't show if same as parent label
+  if (parentLabel && label.toLowerCase() === parentLabel.toLowerCase()) {
+    return false;
+  }
+  
+  // In subsection context, don't show if it's just the subsection name repeated
+  if (context === "field" && path.length >= 2) {
+    const parentPath = path.slice(0, -1);
+    const parentHint = hintForPath(parentPath, hints);
+    if (parentHint?.label?.toLowerCase() === label.toLowerCase()) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 export function humanize(raw: string) {

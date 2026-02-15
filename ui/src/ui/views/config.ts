@@ -2,6 +2,7 @@ import { html, nothing } from "lit";
 import type { ConfigUiHints } from "../types";
 import { analyzeConfigSchema, renderConfigForm, SECTION_META } from "./config-form";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "./config-form.shared";
+import { renderRawEditor } from "./config-raw";
 
 export type ConfigProps = {
   raw: string;
@@ -262,21 +263,85 @@ const sidebarIcons = {
   `,
 };
 
-// Section definitions
-const SECTIONS: Array<{ key: string; label: string }> = [
-  { key: "env", label: "Environment" },
-  { key: "update", label: "Updates" },
-  { key: "agents", label: "Agents" },
-  { key: "auth", label: "Authentication" },
-  { key: "channels", label: "Channels" },
-  { key: "messages", label: "Messages" },
-  { key: "commands", label: "Commands" },
-  { key: "hooks", label: "Hooks" },
-  { key: "skills", label: "Skills" },
-  { key: "tools", label: "Tools" },
-  { key: "gateway", label: "Gateway" },
-  { key: "wizard", label: "Setup Wizard" },
+// Section group definitions - organized by function
+const SECTION_GROUPS: Array<{
+  id: string;
+  label: string;
+  sections: Array<{ key: string; label: string }>;
+}> = [
+  {
+    id: "getting-started",
+    label: "Getting Started",
+    sections: [
+      { key: "wizard", label: "Setup Wizard" },
+      { key: "update", label: "Updates" },
+    ],
+  },
+  {
+    id: "ai-agents",
+    label: "AI & Agents",
+    sections: [
+      { key: "agents", label: "Agents" },
+      { key: "models", label: "Models" },
+      { key: "skills", label: "Skills" },
+      { key: "session", label: "Session" },
+    ],
+  },
+  {
+    id: "connections",
+    label: "Connections",
+    sections: [
+      { key: "gateway", label: "Gateway" },
+      { key: "auth", label: "Authentication" },
+      { key: "channels", label: "Channels" },
+      { key: "discovery", label: "Discovery" },
+    ],
+  },
+  {
+    id: "behavior",
+    label: "Behavior",
+    sections: [
+      { key: "messages", label: "Messages" },
+      { key: "commands", label: "Commands" },
+      { key: "hooks", label: "Hooks" },
+      { key: "cron", label: "Scheduled Tasks" },
+    ],
+  },
+  {
+    id: "tools-capabilities",
+    label: "Tools & Capabilities",
+    sections: [
+      { key: "tools", label: "Tools" },
+      { key: "browser", label: "Browser" },
+      { key: "canvasHost", label: "Canvas" },
+      { key: "talk", label: "Talk" },
+      { key: "audio", label: "Audio" },
+    ],
+  },
+  {
+    id: "system",
+    label: "System",
+    sections: [
+      { key: "env", label: "Environment" },
+      { key: "logging", label: "Logging" },
+      { key: "web", label: "Web Server" },
+      { key: "plugins", label: "Plugins" },
+    ],
+  },
+  {
+    id: "advanced",
+    label: "Advanced",
+    sections: [
+      { key: "meta", label: "Metadata" },
+      { key: "ui", label: "UI" },
+      { key: "bindings", label: "Bindings" },
+      { key: "broadcast", label: "Broadcast" },
+    ],
+  },
 ];
+
+// Flat list for backward compatibility
+const SECTIONS: Array<{ key: string; label: string }> = SECTION_GROUPS.flatMap((g) => g.sections);
 
 type SubsectionEntry = {
   key: string;
@@ -376,7 +441,6 @@ function truncateValue(value: unknown, maxLen = 40): string {
 export function renderConfig(props: ConfigProps) {
   const validity = props.valid == null ? "unknown" : props.valid ? "valid" : "invalid";
   const analysis = analyzeConfigSchema(props.schema);
-  const formUnsafe = analysis.schema ? analysis.unsupportedPaths.length > 0 : false;
 
   // Get available sections from schema
   const schemaProps = analysis.schema?.properties ?? {};
@@ -418,8 +482,7 @@ export function renderConfig(props: ConfigProps) {
   const hasRawChanges = props.formMode === "raw" && props.raw !== props.originalRaw;
   const hasChanges = props.formMode === "form" ? diff.length > 0 : hasRawChanges;
 
-  // Save/apply buttons require actual changes to be enabled.
-  // Note: formUnsafe warns about unsupported schema paths but shouldn't block saving.
+  // Save/apply buttons require actual changes to be enabled
   const canSaveForm = Boolean(props.formValue) && !props.loading && Boolean(analysis.schema);
   const canSave =
     props.connected &&
@@ -468,7 +531,7 @@ export function renderConfig(props: ConfigProps) {
           }
         </div>
 
-        <!-- Section nav -->
+        <!-- Section nav with groups -->
         <nav class="config-nav">
           <button
             class="config-nav__item ${props.activeSection === null ? "active" : ""}"
@@ -477,17 +540,36 @@ export function renderConfig(props: ConfigProps) {
             <span class="config-nav__icon">${sidebarIcons.all}</span>
             <span class="config-nav__label">All Settings</span>
           </button>
-          ${allSections.map(
-            (section) => html`
-            <button
-              class="config-nav__item ${props.activeSection === section.key ? "active" : ""}"
-              @click=${() => props.onSectionChange(section.key)}
-            >
-              <span class="config-nav__icon">${getSectionIcon(section.key)}</span>
-              <span class="config-nav__label">${section.label}</span>
-            </button>
-          `,
-          )}
+          
+          ${SECTION_GROUPS.map((group) => {
+            // Filter sections that exist in the schema
+            const availableSections = group.sections.filter((s) => allSections.some((as) => as.key === s.key));
+            if (availableSections.length === 0) return nothing;
+            
+            // Check if any section in this group is active
+            const isActive = availableSections.some((s) => props.activeSection === s.key);
+            
+            return html`
+              <div class="config-nav__group ${isActive ? "config-nav__group--active" : ""}">
+                <div class="config-nav__group-header">
+                  <span class="config-nav__group-label">${group.label}</span>
+                </div>
+                <div class="config-nav__group-content">
+                  ${availableSections.map(
+                    (section) => html`
+                      <button
+                        class="config-nav__item ${props.activeSection === section.key ? "active" : ""}"
+                        @click=${() => props.onSectionChange(section.key)}
+                      >
+                        <span class="config-nav__icon">${getSectionIcon(section.key)}</span>
+                        <span class="config-nav__label">${section.label}</span>
+                      </button>
+                    `,
+                  )}
+                </div>
+              </div>
+            `;
+          })}
         </nav>
 
         <!-- Mode toggle at bottom -->
@@ -515,40 +597,50 @@ export function renderConfig(props: ConfigProps) {
         <!-- Action bar -->
         <div class="config-actions">
           <div class="config-actions__left">
-            ${
-              hasChanges
-                ? html`
-              <span class="config-changes-badge">${props.formMode === "raw" ? "Unsaved changes" : `${diff.length} unsaved change${diff.length !== 1 ? "s" : ""}`}</span>
-            `
-                : html`
-                    <span class="config-status muted">No changes</span>
-                  `
-            }
+            <div class="config-changes-info">
+              ${
+                hasChanges
+                  ? html`
+                <span class="config-changes-badge">
+                  <span class="config-changes-dot"></span>
+                  ${props.formMode === "raw" ? "Unsaved changes" : `${diff.length} change${diff.length !== 1 ? "s" : ""}`}
+                </span>
+              `
+                  : html`
+                      <span class="config-status config-status--saved">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        Saved
+                      </span>
+                    `
+              }
+            </div>
           </div>
           <div class="config-actions__right">
-            <button class="btn btn--sm" ?disabled=${props.loading} @click=${props.onReload}>
-              ${props.loading ? "Loading…" : "Reload"}
+            <button 
+              class="btn btn--secondary" 
+              ?disabled=${props.loading || !hasChanges} 
+              @click=${props.onReload}
+              title="Discard changes and reload"
+            >
+              ${props.loading ? "Loading…" : "Discard"}
             </button>
             <button
-              class="btn btn--sm primary"
+              class="btn btn--primary"
               ?disabled=${!canSave}
               @click=${props.onSave}
+              title="Save configuration"
             >
               ${props.saving ? "Saving…" : "Save"}
             </button>
             <button
-              class="btn btn--sm"
+              class="btn btn--primary"
               ?disabled=${!canApply}
               @click=${props.onApply}
+              title="Save and apply configuration"
             >
               ${props.applying ? "Applying…" : "Apply"}
-            </button>
-            <button
-              class="btn btn--sm"
-              ?disabled=${!canUpdate}
-              @click=${props.onUpdate}
-            >
-              ${props.updating ? "Updating…" : "Update"}
             </button>
           </div>
         </div>
@@ -654,26 +746,12 @@ export function renderConfig(props: ConfigProps) {
                         activeSubsection: effectiveSubsection,
                       })
                 }
-                ${
-                  formUnsafe
-                    ? html`
-                        <div class="callout danger" style="margin-top: 12px">
-                          Form view can't safely edit some fields. Use Raw to avoid losing config entries.
-                        </div>
-                      `
-                    : nothing
-                }
               `
-              : html`
-                <label class="field config-raw-field">
-                  <span>Raw JSON5</span>
-                  <textarea
-                    .value=${props.raw}
-                    @input=${(e: Event) =>
-                      props.onRawChange((e.target as HTMLTextAreaElement).value)}
-                  ></textarea>
-                </label>
-              `
+              : renderRawEditor({
+                  value: props.raw,
+                  disabled: props.loading,
+                  onChange: props.onRawChange,
+                })
           }
         </div>
 
