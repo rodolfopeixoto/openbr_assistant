@@ -2,6 +2,7 @@ import { html, nothing } from "lit";
 import type { ConfigUiHints } from "../types";
 import { analyzeConfigSchema, renderConfigForm, SECTION_META } from "./config-form";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "./config-form.shared";
+import { renderDocPanel } from "./config-doc";
 import { renderRawEditor } from "./config-raw";
 
 export type ConfigProps = {
@@ -23,6 +24,9 @@ export type ConfigProps = {
   searchQuery: string;
   activeSection: string | null;
   activeSubsection: string | null;
+  // Documentation panel state
+  docSearchQuery?: string;
+  docPanelOpen?: boolean;
   onRawChange: (next: string) => void;
   onFormModeChange: (mode: "form" | "raw") => void;
   onFormPatch: (path: Array<string | number>, value: unknown) => void;
@@ -33,6 +37,11 @@ export type ConfigProps = {
   onSave: () => void;
   onApply: () => void;
   onUpdate: () => void;
+  // Documentation panel handlers
+  onDocSearchChange?: (query: string) => void;
+  onDocPanelToggle?: () => void;
+  onInsertTemplate?: (template: string) => void;
+  onInsertField?: (field: string) => void;
 };
 
 // SVG Icons for sidebar (Lucide-style)
@@ -747,11 +756,33 @@ export function renderConfig(props: ConfigProps) {
                       })
                 }
               `
-              : renderRawEditor({
-                  value: props.raw,
-                  disabled: props.loading,
-                  onChange: props.onRawChange,
-                })
+              : html`
+                <div class="raw-editor-layout ${props.docPanelOpen ? 'raw-editor-layout--with-doc' : ''}">
+                  ${renderRawEditor({
+                    value: props.raw,
+                    disabled: props.loading,
+                    onChange: props.onRawChange,
+                  })}
+                  ${props.docPanelOpen ? renderDocPanel({
+                    searchQuery: props.docSearchQuery ?? '',
+                    onSearchChange: props.onDocSearchChange ?? (() => {}),
+                    onInsertTemplate: props.onInsertTemplate ?? (() => {}),
+                    onInsertField: props.onInsertField ?? (() => {}),
+                  }) : nothing}
+                </div>
+                <button 
+                  class="raw-editor__doc-toggle ${props.docPanelOpen ? 'active' : ''}"
+                  @click=${props.onDocPanelToggle}
+                  title="${props.docPanelOpen ? 'Hide documentation' : 'Show documentation'}"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  ${props.docPanelOpen ? 'Hide Docs' : 'Show Docs'}
+                </button>
+              `
           }
         </div>
 

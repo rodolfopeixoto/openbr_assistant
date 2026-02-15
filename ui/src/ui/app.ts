@@ -172,6 +172,8 @@ export class OpenClawApp extends LitElement {
   @state() configSearchQuery = "";
   @state() configActiveSection: string | null = null;
   @state() configActiveSubsection: string | null = null;
+  @state() configDocPanelOpen = false;
+  @state() configDocSearchQuery = "";
 
   @state() channelsLoading = false;
   @state() channelsSnapshot: ChannelsStatusSnapshot | null = null;
@@ -471,6 +473,53 @@ export class OpenClawApp extends LitElement {
 
   handleToggleCommandsMenu() {
     this.commandsMenuOpen = !this.commandsMenuOpen;
+  }
+
+  handleToggleConfigDocPanel() {
+    this.configDocPanelOpen = !this.configDocPanelOpen;
+  }
+
+  handleConfigDocSearchChange(query: string) {
+    this.configDocSearchQuery = query;
+  }
+
+  handleInsertConfigTemplate(template: string) {
+    // Parse current config
+    try {
+      const current = JSON.parse(this.configRaw);
+      const templateObj = JSON.parse(template);
+      const key = Object.keys(templateObj)[0];
+      
+      // Merge template into current config
+      this.configRaw = JSON.stringify({
+        ...current,
+        [key]: templateObj[key]
+      }, null, 2);
+    } catch {
+      // If parsing fails, just append the template
+      this.configRaw = this.configRaw.trim() + '\n' + template;
+    }
+  }
+
+  handleInsertConfigField(field: string) {
+    // Insert field name at cursor position or append to end
+    const textarea = document.querySelector('.raw-editor__textarea') as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      
+      this.configRaw = value.substring(0, start) + field + value.substring(end);
+      
+      // Restore cursor position after update
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + field.length;
+        textarea.focus();
+      }, 0);
+    } else {
+      // Fallback: append to end
+      this.configRaw = this.configRaw.trim() + '\n' + field;
+    }
   }
 
   render() {
