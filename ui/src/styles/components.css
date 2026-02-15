@@ -1,7 +1,7 @@
 @import "./chat.css";
 
 /* ===========================================
-   Cards - Refined with depth
+   Cards - Refined with depth, no inset shadows
    =========================================== */
 
 .card {
@@ -12,32 +12,27 @@
   animation: rise 0.35s var(--ease-out) backwards;
   transition:
     border-color var(--duration-normal) var(--ease-out),
-    box-shadow var(--duration-normal) var(--ease-out),
-    transform var(--duration-normal) var(--ease-out);
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 var(--card-highlight);
+    box-shadow var(--duration-normal) var(--ease-out);
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    var(--shadow-md),
-    inset 0 1px 0 var(--card-highlight);
+  box-shadow: var(--shadow-md);
 }
 
 .card-title {
-  font-size: 15px;
+  font-size: var(--text-lg);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   color: var(--text-strong);
 }
 
 .card-sub {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-sm);
   margin-top: 6px;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
 }
 
 /* ===========================================
@@ -52,20 +47,18 @@
   transition:
     border-color var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out);
-  box-shadow: inset 0 1px 0 var(--card-highlight);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 var(--card-highlight);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-label {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -74,7 +67,7 @@
   font-size: 24px;
   font-weight: 700;
   margin-top: 6px;
-  letter-spacing: -0.03em;
+  letter-spacing: normal;
   line-height: 1.1;
 }
 
@@ -93,7 +86,7 @@
 
 .note-title {
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 /* ===========================================
@@ -136,10 +129,12 @@
   padding: 12px;
   background: var(--bg-elevated);
   transition: border-color var(--duration-fast) ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .account-card:hover {
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .account-card-header {
@@ -281,26 +276,24 @@
 }
 
 /* ===========================================
-   Status Dot - With glow for emphasis
+   Status Dot - Clean, no animation
    =========================================== */
 
 .statusDot {
   width: 8px;
   height: 8px;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   background: var(--danger);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
-  animation: pulse-subtle 2s ease-in-out infinite;
+  /* Removed: box-shadow glow and animation */
 }
 
 .statusDot.ok {
   background: var(--ok);
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-  animation: none;
+  /* Removed: box-shadow and animation */
 }
 
 /* ===========================================
-   Buttons - Tactile with personality
+   Buttons - Modern, no translateY
    =========================================== */
 
 .btn {
@@ -308,31 +301,30 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   background: var(--bg-elevated);
-  padding: 9px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   cursor: pointer;
   transition:
     border-color var(--duration-fast) var(--ease-out),
     background var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out);
 }
 
 .btn:hover {
   background: var(--bg-hover);
   border-color: var(--border-strong);
-  transform: translateY(-1px);
+  /* Removed: transform: translateY(-1px) */
   box-shadow: var(--shadow-sm);
 }
 
 .btn:active {
   background: var(--secondary);
-  transform: translateY(0);
   box-shadow: none;
 }
 
@@ -360,6 +352,30 @@
   box-shadow:
     var(--shadow-md),
     0 0 20px var(--accent-glow);
+  /* Removed: transform */
+}
+
+/* Secondary button variant */
+.btn.secondary {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn.secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+/* Ghost button variant */
+.btn.ghost {
+  background: transparent;
+  color: var(--muted);
+}
+
+.btn.ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text);
 }
 
 /* Keyboard shortcut badge (shadcn style) */
@@ -404,7 +420,7 @@
 }
 
 .btn.danger:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .btn--sm {
@@ -418,7 +434,7 @@
 }
 
 /* ===========================================
-   Form Fields
+   Form Fields - Modern, no inset shadows
    =========================================== */
 
 .field {
@@ -439,22 +455,35 @@
 .field input,
 .field textarea,
 .field select {
+  width: 100%;
+  padding: 11px 14px;
   border: 1px solid var(--input);
-  background: var(--card);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: 10px;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text);
   outline: none;
-  box-shadow: inset 0 1px 0 var(--card-highlight);
   transition:
+    background-color var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
     box-shadow var(--duration-fast) ease;
+  /* Removed: box-shadow: inset 0 1px 0 var(--card-highlight); */
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
 }
 
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
-  border-color: var(--ring);
-  box-shadow: var(--focus-ring);
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
 .field select {
@@ -500,8 +529,14 @@
 :root[data-theme="light"] .field input,
 :root[data-theme="light"] .field textarea,
 :root[data-theme="light"] .field select {
-  background: var(--card);
-  border-color: var(--input);
+  background: #ffffff;
+  border-color: var(--border-strong);
+}
+
+:root[data-theme="light"] .field input:focus,
+:root[data-theme="light"] .field textarea:focus,
+:root[data-theme="light"] .field select:focus {
+  background: #ffffff;
 }
 
 :root[data-theme="light"] .btn {
@@ -531,7 +566,7 @@
 }
 
 /* ===========================================
-   Callouts - Informative with subtle depth
+   Callouts - Softer borders
    =========================================== */
 
 .callout {
@@ -545,20 +580,20 @@
 }
 
 .callout.danger {
-  border-color: rgba(239, 68, 68, 0.25);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.04) 100%);
+  border-color: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.05);
   color: var(--danger);
 }
 
 .callout.info {
-  border-color: rgba(59, 130, 246, 0.25);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+  border-color: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.05);
   color: var(--info);
 }
 
 .callout.success {
-  border-color: rgba(34, 197, 94, 0.25);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.04) 100%);
+  border-color: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.05);
   color: var(--ok);
 }
 
@@ -632,6 +667,7 @@
   padding: 12px;
   background: var(--card);
   transition: border-color var(--duration-fast) ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .list-item-clickable {
@@ -640,6 +676,7 @@
 
 .list-item-clickable:hover {
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .list-item-selected {
@@ -712,13 +749,11 @@
   background: var(--secondary);
   transition:
     border-color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
+    background var(--duration-fast) var(--ease-out);
 }
 
 .chip:hover {
   border-color: var(--border-strong);
-  transform: translateY(-1px);
 }
 
 .chip input {
@@ -727,7 +762,7 @@
 
 .chip-ok {
   color: var(--ok);
-  border-color: rgba(34, 197, 94, 0.3);
+  border-color: rgba(16, 185, 129, 0.3);
   background: var(--ok-subtle);
 }
 
@@ -767,10 +802,12 @@
   border-radius: var(--radius-md);
   background: var(--card);
   transition: border-color var(--duration-fast) ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .table-row:hover {
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .session-link {
@@ -1024,12 +1061,12 @@
   justify-items: end;
 }
 
-/* Chat bubbles */
+/* Chat bubbles - Redesigned with Indigo */
 .chat-bubble {
   border: 1px solid transparent;
   background: var(--card);
-  border-radius: var(--radius-lg);
-  padding: 10px 14px;
+  border-radius: 18px;
+  padding: 12px 16px;
   min-width: 0;
 }
 
@@ -1038,19 +1075,23 @@
   background: var(--bg);
 }
 
+/* User bubble - Indigo instead of red */
 .chat-line.user .chat-bubble {
   border-color: transparent;
-  background: var(--accent-subtle);
+  background: var(--accent);
+  color: white;
 }
 
 :root[data-theme="light"] .chat-line.user .chat-bubble {
-  border-color: rgba(234, 88, 12, 0.2);
-  background: rgba(251, 146, 60, 0.12);
+  border-color: transparent;
+  background: var(--accent);
+  color: white;
 }
 
+/* Assistant bubble */
 .chat-line.assistant .chat-bubble {
   border-color: transparent;
-  background: var(--secondary);
+  background: var(--bg-elevated);
 }
 
 :root[data-theme="light"] .chat-line.assistant .chat-bubble {
@@ -1350,15 +1391,15 @@
   line-height: 1.5;
   border: 1px solid var(--input);
   background: var(--card);
-  box-shadow: inset 0 1px 0 var(--card-highlight);
   transition:
     border-color var(--duration-fast) ease,
     box-shadow var(--duration-fast) ease;
 }
 
 .chat-compose__field textarea:focus {
-  border-color: var(--ring);
-  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+  outline: none;
 }
 
 .chat-compose__field textarea:disabled {
@@ -1424,6 +1465,7 @@
   border-radius: var(--radius-lg);
   padding: 20px;
   animation: scale-in 0.2s var(--ease-out);
+  box-shadow: var(--shadow-xl);
 }
 
 .exec-approval-header {
