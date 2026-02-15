@@ -213,4 +213,18 @@ export type AppViewState = {
   handleConfigDocSearchChange: (query: string) => void;
   handleInsertConfigTemplate: (template: string) => void;
   handleInsertConfigField: (field: string) => void;
+  // Compliance state
+  complianceLoading: boolean;
+  complianceError: string | null;
+  complianceStatus: import("./types").ComplianceStatus | null;
+  complianceReports: import("./types").ComplianceReport[];
+  complianceSelectedFramework: import("./types").ComplianceFramework | "all";
+  complianceActiveTab: "overview" | "reports" | "violations" | "settings";
+  handleComplianceTabChange: (tab: "overview" | "reports" | "violations" | "settings") => void;
+  handleComplianceFrameworkChange: (framework: import("./types").ComplianceFramework | "all") => void;
+  handleComplianceRefresh: () => Promise<void>;
+  handleComplianceGenerateReport: (framework: import("./types").ComplianceFramework) => Promise<void>;
+  handleComplianceExportData: () => Promise<void>;
+  handleComplianceViolationAcknowledge: (id: string) => Promise<void>;
+  handleComplianceViolationResolve: (id: string) => Promise<void>;
 };
