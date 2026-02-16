@@ -5,6 +5,7 @@ import { agentsHandlers } from "./server-methods/agents.js";
 import { browserHandlers } from "./server-methods/browser.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
+import { complianceHandlers } from "./server-methods/compliance.js";
 import { configHandlers } from "./server-methods/config.js";
 import { connectHandlers } from "./server-methods/connect.js";
 import { cronHandlers } from "./server-methods/cron.js";
@@ -25,6 +26,7 @@ import { usageHandlers } from "./server-methods/usage.js";
 import { voicewakeHandlers } from "./server-methods/voicewake.js";
 import { webHandlers } from "./server-methods/web.js";
 import { wizardHandlers } from "./server-methods/wizard.js";
+import { workspaceHandlers } from "./server-methods/workspace-files.js";
 
 const ADMIN_SCOPE = "operator.admin";
 const READ_SCOPE = "operator.read";
@@ -72,6 +74,9 @@ const READ_METHODS = new Set([
   "node.list",
   "node.describe",
   "chat.history",
+  "compliance.status",
+  "compliance.reports.list",
+  "compliance.violations.list",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -185,6 +190,8 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...agentHandlers,
   ...agentsHandlers,
   ...browserHandlers,
+  ...workspaceHandlers,
+  ...complianceHandlers,
 };
 
 export async function handleGatewayRequest(
