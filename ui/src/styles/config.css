@@ -129,6 +129,15 @@
   color: var(--text);
 }
 
+.config-search__info {
+  padding: 6px 14px;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--bg-accent);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
 /* Navigation */
 .config-nav {
   flex: 1;
@@ -758,6 +767,34 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cfg-field__label-text {
+  flex-shrink: 0;
+}
+
+/* Search match highlighting */
+.cfg-field--search-match {
+  position: relative;
+}
+
+.cfg-field--search-match::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.cfg-field--search-match .cfg-field__label {
+  color: var(--accent);
 }
 
 .cfg-field__help {
@@ -1627,126 +1664,33 @@
   cursor: not-allowed;
 }
 
+.raw-editor__action--docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.raw-editor__action--docs.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .raw-editor__container {
-  display: flex;
-  height: 500px;
+  padding: 16px;
+  background: var(--bg-elevated);
   min-height: 400px;
   max-height: 70vh;
-  position: relative;
-  font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.5;
-  background: var(--bg-elevated);
-}
-
-.raw-editor__line-numbers {
-  width: 50px;
-  padding: 16px 8px;
-  background: var(--bg-accent);
-  border-right: 1px solid var(--border);
-  color: var(--muted);
-  text-align: right;
-  user-select: none;
-  overflow: hidden;
-  white-space: pre;
-  flex-shrink: 0;
-}
-
-.raw-editor__editor-wrapper {
-  flex: 1;
-  position: relative;
   overflow: auto;
 }
 
-.raw-editor__textarea {
-  position: absolute;
-  top: 0;
-  left: 0;
+.raw-editor__container code-editor {
   width: 100%;
   height: 100%;
-  padding: 16px;
-  border: none;
-  background: transparent;
-  color: transparent;
-  caret-color: var(--text);
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  resize: none;
-  outline: none;
-  z-index: 2;
-  white-space: pre;
-  overflow: auto;
-  -webkit-text-fill-color: transparent;
+  min-height: 400px;
 }
 
-.raw-editor__textarea::selection {
-  background: rgba(99, 102, 241, 0.3);
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-.raw-editor__textarea:focus {
-  outline: none;
-}
-
-.raw-editor__highlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  min-height: 100%;
-  padding: 16px;
-  margin: 0;
-  pointer-events: none;
-  z-index: 1;
-  white-space: pre;
-  overflow: hidden;
-  color: var(--text);
-  background: transparent;
-}
-
-.raw-editor__highlight code {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: var(--text);
-  background: transparent;
-}
-
-.raw-editor__highlight code {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-
-/* Syntax highlighting tokens - Dark mode (default) */
-.raw-editor .token.property {
-  color: #818cf8;
-  font-weight: 500;
-}
-
-.raw-editor .token.string {
-  color: #86efac;
-}
-
-.raw-editor .token.number {
-  color: #fca5a5;
-}
-
-.raw-editor .token.keyword {
-  color: #fdba74;
-}
-
-.raw-editor .token.punctuation {
-  color: #9ca3af;
-}
-
-.raw-editor .token.comment {
-  color: #6b7280;
-  font-style: italic;
-}
-
+/* Footer */
 .raw-editor__footer {
   display: flex;
   justify-content: space-between;
@@ -1811,18 +1755,6 @@
 
 :root[data-theme="light"] .raw-editor .token.number {
   color: #dc2626;
-}
-
-:root[data-theme="light"] .raw-editor .token.keyword {
-  color: #c2410c;
-}
-
-:root[data-theme="light"] .raw-editor .token.punctuation {
-  color: #6b7280;
-}
-
-:root[data-theme="light"] .raw-editor .token.comment {
-  color: #9ca3af;
 }
 
 /* ===========================================
@@ -2136,45 +2068,124 @@
   border-left: 1px solid var(--border);
 }
 
-/* Documentation toggle button */
-.raw-editor__doc-toggle {
-  position: absolute;
-  top: 80px;
-  right: 30px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
+/* ===========================================
+   Collapsible Sidebar
+   =========================================== */
+
+.config-layout.sidebar-collapsed {
+  grid-template-columns: 60px minmax(0, 1fr);
 }
 
-.raw-editor__doc-toggle:hover {
+.config-sidebar__toggle {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) ease;
+}
+
+.config-sidebar__toggle:hover {
   background: var(--bg-hover);
-  border-color: var(--border-strong);
   color: var(--text);
 }
 
-.raw-editor__doc-toggle.active {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
-  color: var(--accent);
+.config-sidebar__toggle svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--duration-normal) ease;
 }
 
-.raw-editor__doc-toggle.active:hover {
-  background: var(--accent);
-  color: white;
+.config-layout.sidebar-collapsed .config-sidebar__toggle svg {
+  transform: rotate(180deg);
 }
 
-/* Adjust main content area for raw mode */
-.config-main:has(.raw-editor-layout) {
+/* Hide text elements when collapsed */
+.config-layout.sidebar-collapsed .config-sidebar__title,
+.config-layout.sidebar-collapsed .config-nav__label,
+.config-layout.sidebar-collapsed .config-nav__group-header,
+.config-layout.sidebar-collapsed .config-search__input,
+.config-layout.sidebar-collapsed .config-search__info,
+.config-layout.sidebar-collapsed .config-mode-toggle__btn span {
+  display: none;
+}
+
+/* Adjust sidebar items when collapsed */
+.config-layout.sidebar-collapsed .config-sidebar__header {
+  padding: 18px 12px;
+  justify-content: center;
+}
+
+.config-layout.sidebar-collapsed .config-search {
+  padding: 12px;
+}
+
+.config-layout.sidebar-collapsed .config-search__icon {
+  position: static;
+  transform: none;
+  margin: 0 auto;
+}
+
+.config-layout.sidebar-collapsed .config-nav__item {
+  padding: 12px;
+  justify-content: center;
+}
+
+.config-layout.sidebar-collapsed .config-nav__icon {
+  margin: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.config-layout.sidebar-collapsed .config-sidebar__footer {
+  padding: 12px;
+}
+
+.config-layout.sidebar-collapsed .config-mode-toggle {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-layout.sidebar-collapsed .config-mode-toggle__btn {
+  padding: 8px;
+}
+
+/* Tooltip for collapsed sidebar items */
+.config-layout.sidebar-collapsed .config-nav__item {
   position: relative;
+}
+
+.config-layout.sidebar-collapsed .config-nav__item:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  padding: 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Responsive: Disable collapse on mobile */
+@media (max-width: 768px) {
+  .config-layout.sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+  
+  .config-sidebar__toggle {
+    display: none;
+  }
 }

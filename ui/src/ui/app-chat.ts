@@ -17,6 +17,8 @@ type ChatHost = {
   chatQueue: ChatQueueItem[];
   chatRunId: string | null;
   chatSending: boolean;
+  chatStream: string | null;
+  chatStreamStartedAt: number | null;
   sessionKey: string;
   basePath: string;
   hello: GatewayHelloOk | null;
@@ -28,6 +30,14 @@ export const CHAT_SESSIONS_ACTIVE_MINUTES = 10;
 
 export function isChatBusy(host: ChatHost) {
   return host.chatSending || Boolean(host.chatRunId);
+}
+
+export function resetChatState(host: ChatHost) {
+  console.log('[Chat] Resetting chat state');
+  host.chatSending = false;
+  host.chatRunId = null;
+  host.chatStream = null;
+  host.chatStreamStartedAt = null;
 }
 
 export function isChatStopCommand(text: string) {
@@ -145,17 +155,40 @@ export async function handleSendChat(
   messageOverride?: string,
   opts?: { restoreDraft?: boolean },
 ) {
-  if (!host.connected) return;
+  console.log('[Chat] Send initiated:', {
+    connected: host.connected,
+    isBusy: isChatBusy(host),
+    message: messageOverride ?? host.chatMessage,
+    hasAttachments: (host.chatAttachments ?? []).length > 0,
+  });
+
+  if (!host.connected) {
+    console.warn('[Chat] Cannot send: not connected');
+    return;
+  }
+
   const previousDraft = host.chatMessage;
   const message = (messageOverride ?? host.chatMessage).trim();
   const attachments = host.chatAttachments ?? [];
   const attachmentsToSend = messageOverride == null ? attachments : [];
   const hasAttachments = attachmentsToSend.length > 0;
 
+  console.log('[Chat] Attachments debug:', {
+    messageOverride,
+    attachmentsCount: attachments.length,
+    attachmentsToSendCount: attachmentsToSend.length,
+    hasAttachments,
+    firstAttachment: attachmentsToSend[0] ? { id: attachmentsToSend[0].id, mimeType: attachmentsToSend[0].mimeType, dataUrlLength: attachmentsToSend[0].dataUrl?.length } : null
+  });
+
   // Allow sending with just attachments (no message text required)
-  if (!message && !hasAttachments) return;
+  if (!message && !hasAttachments) {
+    console.log('[Chat] Cannot send: no message or attachments');
+    return;
+  }
 
   if (isChatStopCommand(message)) {
+    console.log('[Chat] Stop command detected, aborting');
     await handleAbortChat(host);
     return;
   }
@@ -168,18 +201,25 @@ export async function handleSendChat(
   }
 
   if (isChatBusy(host)) {
+    console.log('[Chat] Busy, enqueuing message');
     enqueueChatMessage(host, message, attachmentsToSend, refreshSessions);
     return;
   }
 
-  await sendChatMessageNow(host, message, {
-    previousDraft: messageOverride == null ? previousDraft : undefined,
-    restoreDraft: Boolean(messageOverride && opts?.restoreDraft),
-    attachments: hasAttachments ? attachmentsToSend : undefined,
-    previousAttachments: messageOverride == null ? attachments : undefined,
-    restoreAttachments: Boolean(messageOverride && opts?.restoreDraft),
-    refreshSessions,
-  });
+  try {
+    await sendChatMessageNow(host, message, {
+      previousDraft: messageOverride == null ? previousDraft : undefined,
+      restoreDraft: Boolean(messageOverride && opts?.restoreDraft),
+      attachments: hasAttachments ? attachmentsToSend : undefined,
+      previousAttachments: messageOverride == null ? attachments : undefined,
+      restoreAttachments: Boolean(messageOverride && opts?.restoreDraft),
+      refreshSessions,
+    });
+  } catch (err) {
+    console.error('[Chat] Send failed:', err);
+    // Reset state on error to prevent getting stuck
+    resetChatState(host);
+  }
 }
 
 export async function refreshChat(host: ChatHost) {

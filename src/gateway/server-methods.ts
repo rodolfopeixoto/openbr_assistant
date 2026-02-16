@@ -77,6 +77,11 @@ const READ_METHODS = new Set([
   "compliance.status",
   "compliance.reports.list",
   "compliance.violations.list",
+  "workspace.listFiles",
+  "workspace.readFile",
+  "workspace.getTips",
+  "workspace.improveContent",
+  "workspace.resetToTemplate",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -93,6 +98,9 @@ const WRITE_METHODS = new Set([
   "chat.send",
   "chat.abort",
   "browser.request",
+  "workspace.writeFile",
+  "workspace.saveDraft",
+  "workspace.discardDraft",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {

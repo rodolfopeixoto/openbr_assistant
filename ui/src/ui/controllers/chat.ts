@@ -109,14 +109,45 @@ export async function sendChatMessage(
         .filter((a): a is NonNullable<typeof a> => a !== null)
     : undefined;
 
-  try {
-    await state.client.request("chat.send", {
-      sessionKey: state.sessionKey,
-      message: msg,
-      deliver: false,
-      idempotencyKey: runId,
-      attachments: apiAttachments,
+  // Log attachment processing
+  if (hasAttachments) {
+    console.log('[Chat] Attachments processed:', {
+      originalCount: attachments.length,
+      processedCount: apiAttachments?.length ?? 0,
     });
+  }
+
+  // Check if attachments failed to process
+  if (hasAttachments && (!apiAttachments || apiAttachments.length === 0)) {
+    console.error('[Chat] Failed to process image attachments');
+    state.chatSending = false;
+    state.chatRunId = null;
+    state.lastError = "Failed to process image. Please try a different image or check the file format.";
+    return null;
+  }
+
+  try {
+    // Add timeout to prevent indefinite hanging
+    // Images may take longer to process, so use 60s timeout when attachments are present
+    const TIMEOUT_MS = hasAttachments ? 60000 : 30000;
+    console.log('[Chat] Using timeout:', TIMEOUT_MS + 'ms', hasAttachments ? '(includes image processing)' : '');
+    
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout after " + TIMEOUT_MS + "ms. " + 
+        (hasAttachments ? "Image processing may take longer. Try a smaller image or check if the model supports vision." : "Please try again."))), TIMEOUT_MS)
+    );
+
+    await Promise.race([
+      state.client.request("chat.send", {
+        sessionKey: state.sessionKey,
+        message: msg,
+        deliver: false,
+        idempotencyKey: runId,
+        attachments: apiAttachments,
+      }),
+      timeoutPromise,
+    ]);
+
     return runId;
   } catch (err) {
     const error = String(err);

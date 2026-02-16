@@ -24,6 +24,8 @@ export type ConfigProps = {
   searchQuery: string;
   activeSection: string | null;
   activeSubsection: string | null;
+  // Sidebar state
+  sidebarCollapsed?: boolean;
   // Documentation panel state
   docSearchQuery?: string;
   docPanelOpen?: boolean;
@@ -37,6 +39,8 @@ export type ConfigProps = {
   onSave: () => void;
   onApply: () => void;
   onUpdate: () => void;
+  // Sidebar handlers
+  onSidebarToggle?: () => void;
   // Documentation panel handlers
   onDocSearchChange?: (query: string) => void;
   onDocPanelToggle?: () => void;
@@ -407,6 +411,13 @@ function computeDiff(
 
   function compare(orig: unknown, curr: unknown, path: string) {
     if (orig === curr) return;
+    
+    // Don't show changes for undefined -> value (new fields)
+    // Only show changes for value -> undefined (removed fields) or value -> different value
+    if (orig === undefined && curr !== undefined) {
+      return;
+    }
+    
     if (typeof orig !== typeof curr) {
       changes.push({ path, from: orig, to: curr });
       return;
@@ -506,12 +517,23 @@ export function renderConfig(props: ConfigProps) {
     (props.formMode === "raw" ? true : canSaveForm);
   const canUpdate = props.connected && !props.applying && !props.updating;
 
+  const sidebarCollapsed = props.sidebarCollapsed ?? false;
+
   return html`
-    <div class="config-layout">
+    <div class="config-layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}">
       <!-- Sidebar -->
       <aside class="config-sidebar">
         <div class="config-sidebar__header">
           <div class="config-sidebar__title">Settings</div>
+          <button 
+            class="config-sidebar__toggle"
+            @click=${() => props.onSidebarToggle?.()}
+            title="${sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
           <span class="pill pill--sm ${validity === "valid" ? "pill--ok" : validity === "invalid" ? "pill--danger" : ""}">${validity}</span>
         </div>
 
@@ -524,7 +546,7 @@ export function renderConfig(props: ConfigProps) {
           <input
             type="text"
             class="config-search__input"
-            placeholder="Search settings..."
+            placeholder="Search settings, values, descriptions..."
             .value=${props.searchQuery}
             @input=${(e: Event) => props.onSearchChange((e.target as HTMLInputElement).value)}
           />
@@ -534,17 +556,24 @@ export function renderConfig(props: ConfigProps) {
             <button
               class="config-search__clear"
               @click=${() => props.onSearchChange("")}
+              title="Clear search"
             >×</button>
           `
               : nothing
           }
         </div>
+        ${props.searchQuery ? html`
+          <div class="config-search__info">
+            Searching in keys, labels, descriptions, and values
+          </div>
+        ` : nothing}
 
         <!-- Section nav with groups -->
         <nav class="config-nav">
           <button
             class="config-nav__item ${props.activeSection === null ? "active" : ""}"
             @click=${() => props.onSectionChange(null)}
+            data-label="All Settings"
           >
             <span class="config-nav__icon">${sidebarIcons.all}</span>
             <span class="config-nav__label">All Settings</span>
@@ -569,6 +598,7 @@ export function renderConfig(props: ConfigProps) {
                       <button
                         class="config-nav__item ${props.activeSection === section.key ? "active" : ""}"
                         @click=${() => props.onSectionChange(section.key)}
+                        data-label="${section.label}"
                       >
                         <span class="config-nav__icon">${getSectionIcon(section.key)}</span>
                         <span class="config-nav__label">${section.label}</span>
@@ -762,6 +792,20 @@ export function renderConfig(props: ConfigProps) {
                     value: props.raw,
                     disabled: props.loading,
                     onChange: props.onRawChange,
+                    onFormat: () => {
+                      // Format JSON
+                      try {
+                        const formatted = JSON.stringify(JSON.parse(props.raw), null, 2);
+                        props.onRawChange(formatted);
+                      } catch {
+                        // Invalid JSON, don't format
+                      }
+                    },
+                    onValidate: () => {
+                      // Validation happens automatically on change
+                    },
+                    docPanelOpen: props.docPanelOpen,
+                    onDocPanelToggle: props.onDocPanelToggle,
                   })}
                   ${props.docPanelOpen ? renderDocPanel({
                     searchQuery: props.docSearchQuery ?? '',
@@ -770,18 +814,6 @@ export function renderConfig(props: ConfigProps) {
                     onInsertField: props.onInsertField ?? (() => {}),
                   }) : nothing}
                 </div>
-                <button 
-                  class="raw-editor__doc-toggle ${props.docPanelOpen ? 'active' : ''}"
-                  @click=${props.onDocPanelToggle}
-                  title="${props.docPanelOpen ? 'Hide documentation' : 'Show documentation'}"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  ${props.docPanelOpen ? 'Hide Docs' : 'Show Docs'}
-                </button>
               `
           }
         </div>

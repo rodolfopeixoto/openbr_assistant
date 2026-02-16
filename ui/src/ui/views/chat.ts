@@ -97,6 +97,12 @@ export type ChatProps = {
   // Commands menu state
   commandsMenuOpen?: boolean;
   onToggleCommandsMenu?: () => void;
+  // Reasoning toggle and level
+  onToggleThinking?: () => void;
+  onSetThinkingLevel?: (level: string) => void;
+  // Tool display toggle
+  showTools?: boolean;
+  onToggleShowTools?: () => void;
   // Event handlers
   onRefresh: () => void;
   onToggleFocusMode: () => void;
@@ -190,6 +196,10 @@ function renderAttachmentPreview(props: ChatProps) {
 
   return html`
     <div class="chat-attachments">
+      <div class="chat-attachments__warning">
+        <span class="chat-attachments__warning-icon">⚠️</span>
+        <span class="chat-attachments__warning-text">Make sure your AI model supports image analysis (e.g., GPT-4 Vision, Claude 3). Standard GPT-3.5 cannot see images.</span>
+      </div>
       ${attachments.map(
         (att) => html`
           <div class="chat-attachment">
@@ -216,44 +226,91 @@ function renderAttachmentPreview(props: ChatProps) {
   `;
 }
 
+function renderThinkingLevelSelector(props: ChatProps) {
+  const currentLevel = props.thinkingLevel ?? "off";
+  const levels = [
+    { value: "off", label: "Off", icon: icons.brain, desc: "No reasoning" },
+    { value: "minimal", label: "Minimal", icon: icons.info, desc: "Brief thoughts" },
+    { value: "low", label: "Low", icon: icons.sparkles, desc: "Some reasoning" },
+    { value: "medium", label: "Medium", icon: icons.zap, desc: "Balanced" },
+    { value: "high", label: "High", icon: icons.cpu, desc: "Deep reasoning" },
+  ];
+
+  const current = levels.find(l => l.value === currentLevel) ?? levels[0];
+
+  return html`
+    <div class="thinking-level-selector">
+      <button
+        class="chat-input-toolbar__btn ${currentLevel !== 'off' ? 'active' : ''}"
+        title="Thinking: ${current.label} - ${current.desc}"
+        @click=${() => {
+          // Cycle: off -> minimal -> low -> medium -> high -> off
+          const idx = levels.findIndex(l => l.value === currentLevel);
+          const nextIdx = (idx + 1) % levels.length;
+          const nextLevel = levels[nextIdx].value;
+          props.onSetThinkingLevel?.(nextLevel);
+        }}
+      >
+        ${current.icon} ${current.label}
+      </button>
+    </div>
+  `;
+}
+
 function renderCommandsMenu(props: ChatProps) {
+  // Filter commands based on text after "/"
+  const filterText = props.draft.slice(1).toLowerCase().trim();
+  const filteredCommands = filterText
+    ? QUICK_COMMANDS.filter(cmd =>
+        cmd.label.toLowerCase().includes(filterText) ||
+        cmd.id.toLowerCase().includes(filterText) ||
+        cmd.description.toLowerCase().includes(filterText)
+      )
+    : QUICK_COMMANDS;
+
   return html`
     <div class="chat-commands-menu">
       <div class="chat-commands-menu__header">
-        <span>Quick Commands</span>
-        <button 
+        <span>${filterText ? `Commands matching "${filterText}"` : 'Quick Commands'}</span>
+        <button
           class="chat-commands-menu__close"
-          @click=${props.onToggleCommandsMenu}
+          @click=${(e: Event) => {
+            e.stopPropagation();
+            props.onToggleCommandsMenu?.();
+          }}
           aria-label="Close commands menu"
         >
           ${icons.x}
         </button>
       </div>
       <div class="chat-commands-menu__list">
-        ${QUICK_COMMANDS.map(cmd => html`
-          <button 
-            class="chat-commands-menu__item"
-            @click=${() => {
-              props.onDraftChange(cmd.template);
-              props.onToggleCommandsMenu?.();
-              // Focus the textarea after selecting a command
-              setTimeout(() => {
-                const textarea = document.querySelector('.chat-input__textarea') as HTMLTextAreaElement;
-                if (textarea) {
-                  textarea.focus();
-                  // Place cursor at the end
-                  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-                }
-              }, 0);
-            }}
-          >
-            <span class="chat-commands-menu__icon">${icons[cmd.icon]}</span>
-            <div class="chat-commands-menu__content">
-              <span class="chat-commands-menu__label">${cmd.label}</span>
-              <span class="chat-commands-menu__desc">${cmd.description}</span>
-            </div>
-          </button>
-        `)}
+        ${filteredCommands.length === 0
+          ? html`<div class="chat-commands-menu__empty">No commands found</div>`
+          : filteredCommands.map((cmd, index) => html`
+            <button
+              class="chat-commands-menu__item"
+              @click=${() => {
+                props.onDraftChange(cmd.template);
+                props.onToggleCommandsMenu?.();
+                // Focus the textarea after selecting a command
+                setTimeout(() => {
+                  const textarea = document.querySelector('.chat-input__textarea') as HTMLTextAreaElement;
+                  if (textarea) {
+                    textarea.focus();
+                    // Place cursor at the end
+                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+                  }
+                }, 0);
+              }}
+              ${index === 0 ? 'autofocus' : ''}
+            >
+              <span class="chat-commands-menu__icon">${icons[cmd.icon]}</span>
+              <div class="chat-commands-menu__content">
+                <span class="chat-commands-menu__label">${cmd.label}</span>
+                <span class="chat-commands-menu__desc">${cmd.description}</span>
+              </div>
+            </button>
+          `)}
       </div>
     </div>
   `;
@@ -280,6 +337,9 @@ export function renderChat(props: ChatProps) {
 
   const splitRatio = props.splitRatio ?? 0.6;
   const sidebarOpen = Boolean(props.sidebarOpen && props.onCloseSidebar);
+  const chatItems = buildChatItems(props);
+  const hasMessages = chatItems.length > 0;
+  
   const thread = html`
     <div
       class="chat-thread"
@@ -290,12 +350,31 @@ export function renderChat(props: ChatProps) {
       ${
         props.loading
           ? html`
-              <div class="muted">Loading chat…</div>
+              <div class="chat-loading">
+                <div class="chat-loading__spinner"></div>
+                <span>Loading chat history…</span>
+              </div>
             `
-          : nothing
+          : !hasMessages && props.connected
+            ? html`
+                <div class="chat-empty">
+                  <div class="chat-empty__icon">${icons.messageSquare}</div>
+                  <div class="chat-empty__title">No messages yet</div>
+                  <div class="chat-empty__subtitle">Start a conversation by typing a message below.</div>
+                </div>
+              `
+            : !props.connected
+              ? html`
+                  <div class="chat-empty">
+                    <div class="chat-empty__icon">${icons.plug}</div>
+                    <div class="chat-empty__title">Not connected</div>
+                    <div class="chat-empty__subtitle">Connect to the gateway to start chatting.</div>
+                  </div>
+                `
+              : nothing
       }
       ${repeat(
-        buildChatItems(props),
+        chatItems,
         (item) => item.key,
         (item) => {
           if (item.kind === "reading-indicator") {
@@ -315,6 +394,7 @@ export function renderChat(props: ChatProps) {
             return renderMessageGroup(item, {
               onOpenSidebar: props.onOpenSidebar,
               showReasoning,
+              showTools: props.showTools ?? false,
               assistantName: props.assistantName,
               assistantAvatar: assistantIdentity.avatar,
             });
@@ -428,14 +508,31 @@ export function renderChat(props: ChatProps) {
             >
               ${icons.paperclip} Attach
             </button>
-            <button 
-              class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
-              title="Quick commands"
-              @click=${props.onToggleCommandsMenu}
-            >
-              ${icons.zap} Commands
-            </button>
-            <button class="chat-input-toolbar__btn" title="New chat session" @click=${props.onNewSession}>
+          <button 
+            class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
+            title="Quick commands"
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onToggleCommandsMenu?.();
+            }}
+          >
+            ${icons.zap} Commands
+          </button>
+          <button 
+            class="chat-input-toolbar__btn ${props.showTools ? 'active' : ''}" 
+            title="${props.showTools ? 'Hide' : 'Show'} tool execution details"
+            @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onToggleShowTools?.();
+            }}
+          >
+            ${props.showTools ? icons.eye : icons.eyeOff} Tools
+          </button>
+            ${renderThinkingLevelSelector(props)}
+            <button class="chat-input-toolbar__btn" title="New chat session" @click=${(e: Event) => {
+              e.stopPropagation();
+              props.onNewSession();
+            }}>
               ${icons.refreshCw} New Chat
             </button>
           </div>
@@ -452,9 +549,11 @@ export function renderChat(props: ChatProps) {
               const input = e.target as HTMLInputElement;
               if (input.files && input.files[0]) {
                 const file = input.files[0];
+                console.log('[Chat] File selected:', file.name, file.type, file.size);
                 const reader = new FileReader();
                 reader.onload = () => {
                   const dataUrl = reader.result as string;
+                  console.log('[Chat] File loaded as data URL, length:', dataUrl.length);
                   const newAttachment: ChatAttachment = {
                     id: generateAttachmentId(),
                     dataUrl,
@@ -462,9 +561,15 @@ export function renderChat(props: ChatProps) {
                   };
                   const current = props.attachments ?? [];
                   props.onAttachmentsChange?.([...current, newAttachment]);
+                  console.log('[Chat] Attachment added, total:', current.length + 1);
+                };
+                reader.onerror = () => {
+                  console.error('[Chat] Error reading file');
                 };
                 reader.readAsDataURL(file);
               }
+              // Reset input so the same file can be selected again
+              input.value = '';
             }}
           />
           
@@ -476,17 +581,62 @@ export function renderChat(props: ChatProps) {
               .value=${props.draft}
               ?disabled=${!props.connected}
               @keydown=${(e: KeyboardEvent) => {
+                // Handle commands menu navigation
+                if (props.commandsMenuOpen) {
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    props.onToggleCommandsMenu?.();
+                    return;
+                  }
+                  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    const items = document.querySelectorAll('.chat-commands-menu__item');
+                    if (items.length === 0) return;
+                    const current = document.activeElement;
+                    const currentIndex = Array.from(items).indexOf(current as Element);
+                    let nextIndex: number;
+                    if (e.key === "ArrowDown") {
+                      nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+                    } else {
+                      nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+                    }
+                    (items[nextIndex] as HTMLElement).focus();
+                    return;
+                  }
+                  if (e.key === "Enter" && document.activeElement?.classList.contains('chat-commands-menu__item')) {
+                    // Let the button's click handler work
+                    return;
+                  }
+                }
                 if (e.key !== "Enter") return;
                 if (e.isComposing || e.keyCode === 229) return;
                 if (e.shiftKey) return;
-                if (!props.connected) return;
+                if (!props.connected) {
+                  console.log('[Chat] Cannot send: not connected');
+                  return;
+                }
                 e.preventDefault();
-                if (canCompose) props.onSend();
+                console.log('[Chat] Enter pressed, sending message');
+                if (canCompose && props.onSend) {
+                  props.onSend();
+                } else {
+                  console.warn('[Chat] Cannot send: canCompose=', canCompose, 'onSend=', typeof props.onSend);
+                }
               }}
               @input=${(e: Event) => {
                 const target = e.target as HTMLTextAreaElement;
                 adjustTextareaHeight(target);
-                props.onDraftChange(target.value);
+                const value = target.value;
+                props.onDraftChange(value);
+                
+                // Show commands menu when typing "/" at the start
+                if (value.startsWith('/') && !props.commandsMenuOpen) {
+                  props.onToggleCommandsMenu?.();
+                }
+                // Hide when "/" is removed from start
+                if (props.commandsMenuOpen && !value.startsWith('/')) {
+                  props.onToggleCommandsMenu?.();
+                }
               }}
               @paste=${(e: ClipboardEvent) => handlePaste(e, props)}
               placeholder=${composePlaceholder}
@@ -514,12 +664,20 @@ export function renderChat(props: ChatProps) {
                 : html`
                   <button
                     class="chat-input__send-btn"
-                    ?disabled=${!props.connected || (!props.draft.trim() && !hasAttachments)}
-                    @click=${props.onSend}
+                    ?disabled=${!props.connected || isBusy || (!props.draft?.trim() && !hasAttachments)}
+                    @click=${(e: Event) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('[Chat] Send button clicked');
+                      if (props.onSend) {
+                        props.onSend();
+                      } else {
+                        console.error('[Chat] onSend is not defined!');
+                      }
+                    }}
                     title=${isBusy ? "Add to queue" : "Send message"}
                   >
                     ${isBusy ? icons.loader : icons.send}
-                    <span>${isBusy ? "Queue" : "Send"}</span>
                   </button>
                 `
               }

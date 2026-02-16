@@ -4,12 +4,14 @@ import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/ag
 import { installSkill } from "../../agents/skills-install.js";
 import { buildWorkspaceSkillStatus } from "../../agents/skills-status.js";
 import { loadWorkspaceSkillEntries, type SkillEntry } from "../../agents/skills.js";
+import { analyzeSkillFile } from "../../agents/skills/skill-analyzer.js";
 import { loadConfig, writeConfigFile } from "../../config/config.js";
 import { getRemoteSkillEligibility } from "../../infra/skills-remote.js";
 import {
   ErrorCodes,
   errorShape,
   formatValidationErrors,
+  validateSkillsAnalyzeParams,
   validateSkillsBinsParams,
   validateSkillsInstallParams,
   validateSkillsStatusParams,
@@ -194,5 +196,29 @@ export const skillsHandlers: GatewayRequestHandlers = {
     };
     await writeConfigFile(nextConfig);
     respond(true, { ok: true, skillKey: p.skillKey, config: current }, undefined);
+  },
+  "skills.analyze": async ({ params, respond }) => {
+    if (!validateSkillsAnalyzeParams(params)) {
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          `invalid skills.analyze params: ${formatValidationErrors(validateSkillsAnalyzeParams.errors)}`,
+        ),
+      );
+      return;
+    }
+    const p = params as { skillKey: string; filePath: string };
+    try {
+      const result = await analyzeSkillFile(p.filePath);
+      respond(true, result, undefined);
+    } catch (err) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.UNAVAILABLE, `failed to analyze skill: ${String(err)}`),
+      );
+    }
   },
 };

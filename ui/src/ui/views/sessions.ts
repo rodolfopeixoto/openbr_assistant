@@ -3,6 +3,7 @@ import type { GatewaySessionRow, SessionsListResult } from "../types";
 import { formatAgo } from "../format";
 import { pathForTab } from "../navigation";
 import { formatSessionTokens } from "../presenter";
+import { icons } from "../icons";
 
 export type SessionsProps = {
   loading: boolean;
@@ -71,22 +72,39 @@ function resolveThinkLevelPatchValue(value: string, isBinary: boolean): string |
 
 export function renderSessions(props: SessionsProps) {
   const rows = props.result?.sessions ?? [];
-  return html`
-    <section class="card">
-      <div class="row" style="justify-content: space-between;">
-        <div>
-          <div class="card-title">Sessions</div>
-          <div class="card-sub">Active session keys and per-session overrides.</div>
-        </div>
-        <button class="btn" ?disabled=${props.loading} @click=${props.onRefresh}>
-          ${props.loading ? "Loading…" : "Refresh"}
-        </button>
-      </div>
+  const totalSessions = rows.length;
 
-      <div class="filters" style="margin-top: 14px;">
-        <label class="field">
-          <span>Active within (minutes)</span>
+  return html`
+    <div class="sessions-page">
+      <!-- Header -->
+      <header class="sessions-header">
+        <div class="sessions-header__content">
+          <h1 class="sessions-header__title">
+            <span class="sessions-header__icon">${icons.database}</span>
+            Sessions
+          </h1>
+          <p class="sessions-header__subtitle">
+            Active session keys and per-session overrides
+          </p>
+        </div>
+        <button 
+          class="btn btn--secondary" 
+          ?disabled=${props.loading} 
+          @click=${props.onRefresh}
+        >
+          ${props.loading 
+            ? html`<span class="spinner"></span> Refreshing...` 
+            : html`${icons.refreshCw} Refresh`
+          }
+        </button>
+      </header>
+
+      <!-- Filters -->
+      <div class="sessions-filters">
+        <label class="sessions-filter">
+          <span class="sessions-filter__label">Active within (minutes)</span>
           <input
+            class="sessions-filter__input"
             .value=${props.activeMinutes}
             @input=${(e: Event) =>
               props.onFiltersChange({
@@ -97,9 +115,11 @@ export function renderSessions(props: SessionsProps) {
               })}
           />
         </label>
-        <label class="field">
-          <span>Limit</span>
+        
+        <label class="sessions-filter">
+          <span class="sessions-filter__label">Limit</span>
           <input
+            class="sessions-filter__input"
             .value=${props.limit}
             @input=${(e: Event) =>
               props.onFiltersChange({
@@ -110,9 +130,10 @@ export function renderSessions(props: SessionsProps) {
               })}
           />
         </label>
-        <label class="field checkbox">
-          <span>Include global</span>
+        
+        <label class="sessions-filter sessions-filter--checkbox">
           <input
+            class="sessions-filter__checkbox"
             type="checkbox"
             .checked=${props.includeGlobal}
             @change=${(e: Event) =>
@@ -123,10 +144,12 @@ export function renderSessions(props: SessionsProps) {
                 includeUnknown: props.includeUnknown,
               })}
           />
+          <span class="sessions-filter__label">Include global</span>
         </label>
-        <label class="field checkbox">
-          <span>Include unknown</span>
+        
+        <label class="sessions-filter sessions-filter--checkbox">
           <input
+            class="sessions-filter__checkbox"
             type="checkbox"
             .checked=${props.includeUnknown}
             @change=${(e: Event) =>
@@ -137,52 +160,73 @@ export function renderSessions(props: SessionsProps) {
                 includeUnknown: (e.target as HTMLInputElement).checked,
               })}
           />
+          <span class="sessions-filter__label">Include unknown</span>
         </label>
       </div>
 
-      ${
-        props.error
-          ? html`<div class="callout danger" style="margin-top: 12px;">${props.error}</div>`
-          : nothing
-      }
-
-      <div class="muted" style="margin-top: 12px;">
-        ${props.result ? `Store: ${props.result.path}` : ""}
-      </div>
-
-      <div class="table" style="margin-top: 16px;">
-        <div class="table-head">
-          <div>Key</div>
-          <div>Label</div>
-          <div>Kind</div>
-          <div>Updated</div>
-          <div>Tokens</div>
-          <div>Thinking</div>
-          <div>Verbose</div>
-          <div>Reasoning</div>
-          <div>Actions</div>
-        </div>
-        ${
-          rows.length === 0
-            ? html`
-                <div class="muted">No sessions found.</div>
-              `
-            : rows.map((row) =>
-                renderRow(row, props.basePath, props.onPatch, props.onDelete, props.loading),
-              )
+      <!-- Stats -->
+      <div class="sessions-stats">
+        ${props.result 
+          ? `${totalSessions} session${totalSessions !== 1 ? 's' : ''} found • Store: ${props.result.path}`
+          : 'Loading sessions...'
         }
       </div>
-    </section>
+
+      <!-- Error -->
+      ${props.error
+        ? html`<div class="sessions-error" style="margin-bottom: 16px;">${props.error}</div>`
+        : nothing
+      }
+
+      <!-- Desktop Table -->
+      <div class="sessions-table-container">
+        ${rows.length === 0 
+          ? renderEmptyState()
+          : html`
+            <table class="sessions-table">
+              <thead class="sessions-table__head">
+                <tr>
+                  <th>Key</th>
+                  <th>Label</th>
+                  <th>Kind</th>
+                  <th>Updated</th>
+                  <th>Tokens</th>
+                  <th>Thinking</th>
+                  <th>Verbose</th>
+                  <th>Reasoning</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody class="sessions-table__body">
+                ${rows.map((row) => renderTableRow(row, props))}
+              </tbody>
+            </table>
+          `
+        }
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="sessions-mobile">
+        ${rows.length === 0 
+          ? renderEmptyState()
+          : rows.map((row) => renderMobileCard(row, props))
+        }
+      </div>
+    </div>
   `;
 }
 
-function renderRow(
-  row: GatewaySessionRow,
-  basePath: string,
-  onPatch: SessionsProps["onPatch"],
-  onDelete: SessionsProps["onDelete"],
-  disabled: boolean,
-) {
+function renderEmptyState() {
+  return html`
+    <div class="sessions-empty">
+      <div class="sessions-empty__icon">${icons.database}</div>
+      <h3 class="sessions-empty__title">No sessions found</h3>
+      <p class="sessions-empty__text">Try adjusting your filters or refresh the page.</p>
+    </div>
+  `;
+}
+
+function renderTableRow(row: GatewaySessionRow, props: SessionsProps) {
   const updated = row.updatedAt ? formatAgo(row.updatedAt) : "n/a";
   const rawThinking = row.thinkingLevel ?? "";
   const isBinaryThinking = isBinaryThinkingProvider(row.modelProvider);
@@ -193,72 +237,249 @@ function renderRow(
   const displayName = row.displayName ?? row.key;
   const canLink = row.kind !== "global";
   const chatUrl = canLink
-    ? `${pathForTab("chat", basePath)}?session=${encodeURIComponent(row.key)}`
+    ? `${pathForTab("chat", props.basePath)}?session=${encodeURIComponent(row.key)}`
     : null;
 
+  const kindClass = row.kind === 'global' 
+    ? 'sessions-table__kind--global' 
+    : row.kind === 'direct' 
+      ? 'sessions-table__kind--user' 
+      : '';
+
   return html`
-    <div class="table-row">
-      <div class="mono">${
-        canLink ? html`<a href=${chatUrl} class="session-link">${displayName}</a>` : displayName
-      }</div>
-      <div>
+    <tr>
+      <td>
+        <div class="sessions-table__key">
+          ${canLink 
+            ? html`<a href=${chatUrl} target="_blank">${displayName}</a>`
+            : displayName
+          }
+        </div>
+      </td>
+      
+      <td>
         <input
+          class="sessions-table__label-input"
           .value=${row.label ?? ""}
-          ?disabled=${disabled}
+          ?disabled=${props.loading}
           placeholder="(optional)"
           @change=${(e: Event) => {
             const value = (e.target as HTMLInputElement).value.trim();
-            onPatch(row.key, { label: value || null });
+            props.onPatch(row.key, { label: value || null });
           }}
         />
-      </div>
-      <div>${row.kind}</div>
-      <div>${updated}</div>
-      <div>${formatSessionTokens(row)}</div>
-      <div>
+      </td>
+      
+      <td>
+        <span class="sessions-table__kind ${kindClass}">${row.kind}</span>
+      </td>
+      
+      <td class="sessions-table__time">${updated}</td>
+      
+      <td class="sessions-table__tokens">${formatSessionTokens(row)}</td>
+      
+      <td>
         <select
+          class="sessions-table__select"
           .value=${thinking}
-          ?disabled=${disabled}
+          ?disabled=${props.loading}
           @change=${(e: Event) => {
             const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, {
+            props.onPatch(row.key, {
               thinkingLevel: resolveThinkLevelPatchValue(value, isBinaryThinking),
             });
           }}
         >
-          ${thinkLevels.map((level) => html`<option value=${level}>${level || "inherit"}</option>`)}
+          ${thinkLevels.map((level) => html`<option value=${level}>${level || "inherit"}</option>`
+          )}
         </select>
-      </div>
-      <div>
+      </td>
+      
+      <td>
         <select
+          class="sessions-table__select"
           .value=${verbose}
-          ?disabled=${disabled}
+          ?disabled=${props.loading}
           @change=${(e: Event) => {
             const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, { verboseLevel: value || null });
+            props.onPatch(row.key, { verboseLevel: value || null });
           }}
         >
           ${VERBOSE_LEVELS.map(
             (level) => html`<option value=${level.value}>${level.label}</option>`,
           )}
         </select>
-      </div>
-      <div>
+      </td>
+      
+      <td>
         <select
+          class="sessions-table__select"
           .value=${reasoning}
-          ?disabled=${disabled}
+          ?disabled=${props.loading}
           @change=${(e: Event) => {
             const value = (e.target as HTMLSelectElement).value;
-            onPatch(row.key, { reasoningLevel: value || null });
+            props.onPatch(row.key, { reasoningLevel: value || null });
           }}
         >
           ${REASONING_LEVELS.map(
             (level) => html`<option value=${level}>${level || "inherit"}</option>`,
           )}
         </select>
+      </td>
+      
+      <td>
+        <div class="sessions-table__actions">
+          ${canLink 
+            ? html`
+              <a 
+                href=${chatUrl} 
+                target="_blank"
+                class="btn btn--secondary btn--sm"
+              >
+                Chat
+              </a>
+            `
+            : nothing
+          }
+          <button 
+            class="btn btn--danger btn--sm" 
+            ?disabled=${props.loading} 
+            @click=${() => props.onDelete(row.key)}
+          >
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+function renderMobileCard(row: GatewaySessionRow, props: SessionsProps) {
+  const updated = row.updatedAt ? formatAgo(row.updatedAt) : "n/a";
+  const rawThinking = row.thinkingLevel ?? "";
+  const isBinaryThinking = isBinaryThinkingProvider(row.modelProvider);
+  const thinking = resolveThinkLevelDisplay(rawThinking, isBinaryThinking);
+  const thinkLevels = resolveThinkLevelOptions(row.modelProvider);
+  const verbose = row.verboseLevel ?? "";
+  const reasoning = row.reasoningLevel ?? "";
+  const displayName = row.displayName ?? row.key;
+  const canLink = row.kind !== "global";
+  const chatUrl = canLink
+    ? `${pathForTab("chat", props.basePath)}?session=${encodeURIComponent(row.key)}`
+    : null;
+
+  const kindClass = row.kind === 'global'
+    ? 'sessions-table__kind--global'
+    : row.kind === 'direct'
+      ? 'sessions-table__kind--user'
+      : '';
+
+  return html`
+    <div class="session-card">
+      <div class="session-card__header">
+        <div class="session-card__key">
+          <div class="session-card__key-text">
+            ${canLink
+              ? html`<a href=${chatUrl} target="_blank">${displayName}</a>`
+              : displayName
+            }
+          </div>
+          <span class="sessions-table__kind ${kindClass} session-card__kind">${row.kind}</span>
+        </div>
+        <div class="session-card__time">${updated}</div>
       </div>
-      <div>
-        <button class="btn danger" ?disabled=${disabled} @click=${() => onDelete(row.key)}>
+      
+      <div class="session-card__body">
+        <div class="session-card__field">
+          <span class="session-card__field-label">Label</span>
+          <input
+            class="session-card__input"
+            .value=${row.label ?? ""}
+            ?disabled=${props.loading}
+            placeholder="(optional)"
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLInputElement).value.trim();
+              props.onPatch(row.key, { label: value || null });
+            }}
+          />
+        </div>
+        
+        <div class="session-card__field">
+          <span class="session-card__field-label">Tokens</span>
+          <span class="session-card__field-value">${formatSessionTokens(row)}</span>
+        </div>
+        
+        <div class="session-card__field">
+          <span class="session-card__field-label">Thinking</span>
+          <select
+            class="session-card__select"
+            .value=${thinking}
+            ?disabled=${props.loading}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              props.onPatch(row.key, {
+                thinkingLevel: resolveThinkLevelPatchValue(value, isBinaryThinking),
+              });
+            }}
+          >
+            ${thinkLevels.map((level) => html`<option value=${level}>${level || "inherit"}</option>`
+            )}
+          </select>
+        </div>
+        
+        <div class="session-card__field">
+          <span class="session-card__field-label">Verbose</span>
+          <select
+            class="session-card__select"
+            .value=${verbose}
+            ?disabled=${props.loading}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              props.onPatch(row.key, { verboseLevel: value || null });
+            }}
+          >
+            ${VERBOSE_LEVELS.map(
+              (level) => html`<option value=${level.value}>${level.label}</option>`,
+            )}
+          </select>
+        </div>
+        
+        <div class="session-card__field">
+          <span class="session-card__field-label">Reasoning</span>
+          <select
+            class="session-card__select"
+            .value=${reasoning}
+            ?disabled=${props.loading}
+            @change=${(e: Event) => {
+              const value = (e.target as HTMLSelectElement).value;
+              props.onPatch(row.key, { reasoningLevel: value || null });
+            }}
+          >
+            ${REASONING_LEVELS.map(
+              (level) => html`<option value=${level}>${level || "inherit"}</option>`,
+            )}
+          </select>
+        </div>
+      </div>
+      
+      <div class="session-card__footer">
+        ${canLink 
+          ? html`
+            <a 
+              href=${chatUrl} 
+              target="_blank"
+              class="btn btn--secondary"
+            >
+              Open Chat
+            </a>
+          `
+          : nothing
+        }
+        <button 
+          class="btn btn--danger" 
+          ?disabled=${props.loading} 
+          @click=${() => props.onDelete(row.key)}
+        >
           Delete
         </button>
       </div>

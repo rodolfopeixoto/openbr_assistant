@@ -1,5 +1,5 @@
 import type { GatewayBrowserClient } from "../gateway";
-import type { SkillStatusReport } from "../types";
+import type { RichSkillDescription, SkillSecurityScan, SkillStatusReport } from "../types";
 
 export type SkillsState = {
   client: GatewayBrowserClient | null;
@@ -134,5 +134,58 @@ export async function installSkill(
     });
   } finally {
     state.skillsBusyKey = null;
+  }
+}
+
+type AnalyzeSkillResult = {
+  securityScan: SkillSecurityScan;
+  richDescription: RichSkillDescription;
+};
+
+export async function analyzeSkill(
+  state: SkillsState & { 
+    analyzingSkill: string | null;
+    skillAnalysis: Record<string, Partial<AnalyzeSkillResult>>;
+  },
+  skillKey: string,
+  filePath: string,
+) {
+  if (!state.client || !state.connected) return;
+  state.analyzingSkill = skillKey;
+  state.skillsError = null;
+  try {
+    const result = (await state.client.request("skills.analyze", {
+      skillKey,
+      filePath,
+    })) as AnalyzeSkillResult | undefined;
+    
+    if (result) {
+      state.skillAnalysis = {
+        ...state.skillAnalysis,
+        [skillKey]: result,
+      };
+      
+      // Also update the skill in the report if it exists
+      if (state.skillsReport?.skills) {
+        const skillIndex = state.skillsReport.skills.findIndex(s => s.skillKey === skillKey);
+        if (skillIndex >= 0) {
+          const updatedSkills = [...state.skillsReport.skills];
+          updatedSkills[skillIndex] = {
+            ...updatedSkills[skillIndex],
+            securityScan: result.securityScan,
+            richDescription: result.richDescription,
+          };
+          state.skillsReport = {
+            ...state.skillsReport,
+            skills: updatedSkills,
+          };
+        }
+      }
+    }
+  } catch (err) {
+    const message = getErrorMessage(err);
+    state.skillsError = message;
+  } finally {
+    state.analyzingSkill = null;
   }
 }

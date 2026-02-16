@@ -82,3 +82,67 @@ export const SkillsUpdateParamsSchema = Type.Object(
   },
   { additionalProperties: false },
 );
+
+export const SkillsAnalyzeParamsSchema = Type.Object(
+  {
+    skillKey: NonEmptyString,
+    filePath: NonEmptyString,
+  },
+  { additionalProperties: false },
+);
+
+export const SkillsAnalyzeResultSchema = Type.Object(
+  {
+    securityScan: Type.Object({
+      score: Type.Number(),
+      level: Type.Union([
+        Type.Literal("safe"),
+        Type.Literal("low"),
+        Type.Literal("medium"),
+        Type.Literal("high"),
+        Type.Literal("critical"),
+      ]),
+      lastScan: Type.String(),
+      issues: Type.Array(
+        Type.Object({
+          type: Type.String(),
+          severity: Type.Union([
+            Type.Literal("critical"),
+            Type.Literal("high"),
+            Type.Literal("medium"),
+            Type.Literal("low"),
+            Type.Literal("info"),
+          ]),
+          message: Type.String(),
+          line: Type.Optional(Type.Number()),
+          column: Type.Optional(Type.Number()),
+          context: Type.Optional(Type.String()),
+        }),
+      ),
+      permissions: Type.Object({
+        filesystem: Type.Boolean(),
+        network: Type.Boolean(),
+        execution: Type.Boolean(),
+        env: Type.Boolean(),
+        elevated: Type.Boolean(),
+      }),
+      checks: Type.Object({
+        hasHttpsDownloads: Type.Boolean(),
+        hasSignedBinaries: Type.Boolean(),
+        usesTrustedPackageManager: Type.Boolean(),
+        hasDangerousCommands: Type.Boolean(),
+        requiresRoot: Type.Boolean(),
+      }),
+    }),
+    richDescription: Type.Object({
+      short: Type.String(),
+      full: Type.String(),
+      whatIs: Type.String(),
+      capabilities: Type.Array(Type.String()),
+      examples: Type.Array(Type.String()),
+      requirements: Type.Array(Type.String()),
+      securityNotes: Type.Array(Type.String()),
+    }),
+  },
+  { additionalProperties: false },
+);

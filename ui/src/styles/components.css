@@ -930,6 +930,40 @@
 }
 
 /* ===========================================
+   Chat Controls - Top bar
+   =========================================== */
+
+.chat-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.chat-controls__session {
+  min-width: 200px;
+}
+
+.chat-controls__session select {
+  min-width: 180px;
+}
+
+.chat-controls__separator {
+  color: var(--border-strong);
+  font-size: 14px;
+  margin: 0 4px;
+}
+
+.chat-controls .btn--sm {
+  padding: 8px;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+/* ===========================================
    Chat
    =========================================== */
 
@@ -1357,8 +1391,11 @@
 .chat-compose {
   margin-top: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
   gap: 10px;
+  width: 100%;
 }
 
 .shell--chat .chat-compose {
