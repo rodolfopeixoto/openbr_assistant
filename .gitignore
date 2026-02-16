@@ -65,9 +65,24 @@ apps/ios/*.mobileprovision
 # Local untracked files
 .local/
 .vscode/
+.tgz
+
+# Personal agent configuration files - NEVER version these!
+# These contain personal data, goals, routines, and private information.
+# Templates/examples should ONLY be in docs/reference/templates/
+# Users must create their own copies in workspace root (these are ignored)
+# Note: AGENTS.md in root is PROJECT guidelines (OpenClaw), not personal
+SOUL.md
 IDENTITY.md
 USER.md
-.tgz
+TOOLS.md
+MEMORY.md
+BOOTSTRAP.md
+HEARTBEAT.md
+BOOT.md
+
+# Personal memory directory
+memory/
 
 # local tooling
 .serena/
