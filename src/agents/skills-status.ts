@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { OpenClawConfig } from "../config/config.js";
+import type { RichSkillDescription, SkillSecurityScan } from "./skills/skill-analyzer.js";
 import { CONFIG_DIR } from "../utils.js";
 import {
   hasBinary,
@@ -15,6 +16,7 @@ import {
   type SkillInstallSpec,
   type SkillsInstallPreferences,
 } from "./skills.js";
+import { analyzeSkillFile } from "./skills/skill-analyzer.js";
 
 export type SkillStatusConfigCheck = {
   path: string;
@@ -59,6 +61,9 @@ export type SkillStatusEntry = {
   };
   configChecks: SkillStatusConfigCheck[];
   install: SkillInstallOption[];
+  // Rich UI fields (not used in CLI)
+  richDescription?: RichSkillDescription;
+  securityScan?: SkillSecurityScan;
 };
 
 export type SkillStatusReport = {

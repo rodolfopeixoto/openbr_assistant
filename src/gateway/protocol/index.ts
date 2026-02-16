@@ -190,6 +190,7 @@ import {
   type WizardStep,
   WizardStepSchema,
 } from "./schema.js";
+import { SkillsAnalyzeParamsSchema } from "./schema/agents-models-skills.js";
 
 const ajv = new (AjvPkg as unknown as new (opts?: object) => import("ajv").default)({
   allErrors: true,
@@ -269,6 +270,7 @@ export const validateSkillsBinsParams = ajv.compile<SkillsBinsParams>(SkillsBins
 export const validateSkillsInstallParams =
   ajv.compile<SkillsInstallParams>(SkillsInstallParamsSchema);
 export const validateSkillsUpdateParams = ajv.compile<SkillsUpdateParams>(SkillsUpdateParamsSchema);
+export const validateSkillsAnalyzeParams = ajv.compile(SkillsAnalyzeParamsSchema);
 export const validateCronListParams = ajv.compile<CronListParams>(CronListParamsSchema);
 export const validateCronStatusParams = ajv.compile<CronStatusParams>(CronStatusParamsSchema);
 export const validateCronAddParams = ajv.compile<CronAddParams>(CronAddParamsSchema);
@@ -414,6 +416,7 @@ export {
   SkillsStatusParamsSchema,
   SkillsInstallParamsSchema,
   SkillsUpdateParamsSchema,
+  SkillsAnalyzeParamsSchema,
   CronJobSchema,
   CronListParamsSchema,
   CronStatusParamsSchema,

@@ -88,6 +88,7 @@ import { renderNodes } from "./views/nodes";
 import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
+import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
 const AVATAR_HTTP_RE = /^https?:\/\//i;
@@ -133,11 +134,22 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <img src="https://mintcdn.com/clawhub/4rYvG-uuZrMK_URE/assets/pixel-lobster.svg?fit=max&auto=format&n=4rYvG-uuZrMK_URE&q=85&s=da2032e9eac3b5d9bfe7eb96ca6a8a26" alt="OpenClaw" />
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12L12 4L18 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M32 12L28 4L22 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 16C6 16 4 24 8 30C12 36 20 38 20 38C20 38 28 36 32 30C36 24 34 16 34 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M11 20C11 20 13 18 15 20C13 22 11 20 11 20Z" fill="currentColor"/>
+                <path d="M29 20C29 20 27 18 25 20C27 22 29 20 29 20Z" fill="currentColor"/>
+                <path d="M18 26L20 28L22 26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 26L14 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                <path d="M8 28L14 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                <path d="M32 26L26 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                <path d="M32 28L26 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+              </svg>
             </div>
             <div class="brand-text">
-              <div class="brand-title">OPENCLAW</div>
-              <div class="brand-sub">Gateway Dashboard</div>
+              <div class="brand-title">LYNX</div>
+              <div class="brand-sub">AI Gateway</div>
             </div>
           </div>
         </div>
@@ -351,13 +363,25 @@ export function renderApp(state: AppViewState) {
                 edits: state.skillEdits,
                 messages: state.skillMessages,
                 busyKey: state.skillsBusyKey,
+                activeFilter: state.skillsActiveFilter,
+                selectedSkill: state.skillsSelectedSkill,
+                selectedSkillTab: state.skillsSelectedSkillTab,
+                analyzingSkill: state.analyzingSkill,
+                skillAnalysis: state.skillAnalysis,
                 onFilterChange: (next) => (state.skillsFilter = next),
-                onRefresh: () => loadSkills(state, { clearMessages: true }),
+                onActiveFilterChange: (filter) => state.handleSkillsActiveFilterChange(filter),
+                onRefresh: () => {
+                  state.skillAnalysis = {};
+                  return loadSkills(state, { clearMessages: true });
+                },
                 onToggle: (key, enabled) => updateSkillEnabled(state, key, enabled),
                 onEdit: (key, value) => updateSkillEdit(state, key, value),
                 onSaveKey: (key) => saveSkillApiKey(state, key),
                 onInstall: (skillKey, name, installId) =>
                   installSkill(state, skillKey, name, installId),
+                onSelectSkill: (skillKey) => state.handleSkillsSelectSkill(skillKey),
+                onSelectSkillTab: (tab) => state.handleSkillsSelectSkillTab(tab),
+                onAnalyzeSkill: (skillKey, filePath) => state.handleAnalyzeSkill(skillKey, filePath),
               })
             : nothing
         }
@@ -453,6 +477,7 @@ export function renderApp(state: AppViewState) {
                   state.chatStreamStartedAt = null;
                   state.chatRunId = null;
                   state.chatQueue = [];
+                  state.commandsMenuOpen = false; // Reset commands menu when changing session
                   state.resetToolStream();
                   state.resetChatScroll();
                   state.applySettings({
@@ -466,6 +491,7 @@ export function renderApp(state: AppViewState) {
                 },
                 thinkingLevel: state.chatThinkingLevel,
                 showThinking,
+                showTools: state.settings.chatShowTools,
                 loading: state.chatLoading,
                 sending: state.chatSending,
                 compactionStatus: state.compactionStatus,
@@ -514,6 +540,29 @@ export function renderApp(state: AppViewState) {
                 assistantAvatar: state.assistantAvatar,
                 commandsMenuOpen: state.commandsMenuOpen,
                 onToggleCommandsMenu: () => state.handleToggleCommandsMenu(),
+                onToggleThinking: () => {
+                  state.applySettings({
+                    ...state.settings,
+                    chatShowThinking: !state.settings.chatShowThinking,
+                  });
+                },
+                onSetThinkingLevel: (level: string) => {
+                  // Update local state immediately for responsive UI
+                  state.chatThinkingLevel = level;
+                  void patchSession(state, state.sessionKey, { thinkingLevel: level })
+                    .then(() => {
+                      console.log('[Chat] Thinking level updated to:', level);
+                    })
+                    .catch((err) => {
+                      console.error('[Chat] Failed to update thinking level:', err);
+                    });
+                },
+                onToggleShowTools: () => {
+                  state.applySettings({
+                    ...state.settings,
+                    chatShowTools: !state.settings.chatShowTools,
+                  });
+                },
               })
             : nothing
         }
@@ -561,6 +610,12 @@ export function renderApp(state: AppViewState) {
                 onInsertTemplate: (template) => state.handleInsertConfigTemplate(template),
                 onInsertField: (field) => state.handleInsertConfigField(field),
               })
+            : nothing
+        }
+
+        ${
+          state.tab === "workspace"
+            ? html`<workspace-editor .client=${state.client} .connected=${state.connected}></workspace-editor>`
             : nothing
         }
 

@@ -9,8 +9,17 @@ import {
   schemaType,
   type JsonSchema,
 } from "./config-form.shared";
+import "../components/field-tooltip";
 
 const META_KEYS = new Set(["title", "description", "default", "nullable"]);
+
+// Helper to render label with tooltip
+function renderLabelWithTooltip(label: string, tooltip?: string): TemplateResult {
+  return html`
+    <span class="cfg-field__label-text">${label}</span>
+    ${tooltip ? html`<field-tooltip .content=${tooltip}></field-tooltip>` : nothing}
+  `;
+}
 
 function isAnySchema(schema: JsonSchema): boolean {
   const keys = Object.keys(schema ?? {}).filter((key) => !META_KEYS.has(key));
@@ -114,7 +123,7 @@ export function renderNode(params: {
   if (unsupported.has(key)) {
     return html`
       <div class="cfg-field cfg-field--warning">
-        <div class="cfg-field__label">${label}</div>
+        <div class="cfg-field__label">${renderLabelWithTooltip(label, help)}</div>
         <div class="cfg-field__warning">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; flex-shrink: 0;">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -152,7 +161,7 @@ export function renderNode(params: {
       const resolvedValue = value ?? schema.default;
       return html`
         <div class="cfg-field">
-          ${showLabel ? html`<label class="cfg-field__label">${label}</label>` : nothing}
+          ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
           ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
           <div class="cfg-segmented">
             ${literals.map(
@@ -211,7 +220,7 @@ export function renderNode(params: {
       const resolvedValue = value ?? schema.default;
       return html`
         <div class="cfg-field">
-          ${showLabel ? html`<label class="cfg-field__label">${label}</label>` : nothing}
+          ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
           ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
           <div class="cfg-segmented">
             ${options.map(
@@ -283,7 +292,7 @@ export function renderNode(params: {
   // Fallback
   return html`
     <div class="cfg-field cfg-field--error">
-      <div class="cfg-field__label">${label}</div>
+      <div class="cfg-field__label">${renderLabelWithTooltip(label, help)}</div>
       <div class="cfg-field__error">Unsupported type: ${type}. Use Raw mode.</div>
     </div>
   `;
@@ -312,7 +321,7 @@ function renderTextInput(params: {
 
   return html`
     <div class="cfg-field">
-      ${showLabel ? html`<label class="cfg-field__label">${label}</label>` : nothing}
+      ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
       ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
       <div class="cfg-input-wrap">
         <input
@@ -377,7 +386,7 @@ function renderNumberInput(params: {
 
   return html`
     <div class="cfg-field">
-      ${showLabel ? html`<label class="cfg-field__label">${label}</label>` : nothing}
+      ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
       ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
       <div class="cfg-number">
         <button
@@ -431,7 +440,7 @@ function renderSelect(params: {
 
   return html`
     <div class="cfg-field">
-      ${showLabel ? html`<label class="cfg-field__label">${label}</label>` : nothing}
+      ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
       ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
       <select
         class="cfg-select"
@@ -581,7 +590,7 @@ function renderArray(params: {
   if (!itemsSchema) {
     return html`
       <div class="cfg-field cfg-field--error">
-        <div class="cfg-field__label">${label}</div>
+        <div class="cfg-field__label">${renderLabelWithTooltip(label, help)}</div>
         <div class="cfg-field__error">Unsupported array schema. Use Raw mode.</div>
       </div>
     `;

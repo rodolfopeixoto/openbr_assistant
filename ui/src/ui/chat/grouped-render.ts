@@ -10,6 +10,7 @@ import {
   formatReasoningMarkdown,
 } from "./message-extract";
 import { isToolResultMessage, normalizeRoleForGrouping } from "./message-normalizer";
+import { icons } from "../icons";
 import { extractToolCards, renderToolCardSidebar } from "./tool-cards";
 
 type ImageBlock = {
@@ -28,19 +29,16 @@ function extractImages(message: unknown): ImageBlock[] {
       const b = block as Record<string, unknown>;
 
       if (b.type === "image") {
-        // Handle source object format (from sendChatMessage)
         const source = b.source as Record<string, unknown> | undefined;
         if (source?.type === "base64" && typeof source.data === "string") {
           const data = source.data as string;
           const mediaType = (source.media_type as string) || "image/png";
-          // If data is already a data URL, use it directly
           const url = data.startsWith("data:") ? data : `data:${mediaType};base64,${data}`;
           images.push({ url });
         } else if (typeof b.url === "string") {
           images.push({ url: b.url });
         }
       } else if (b.type === "image_url") {
-        // OpenAI format
         const imageUrl = b.image_url as Record<string, unknown> | undefined;
         if (typeof imageUrl?.url === "string") {
           images.push({ url: imageUrl.url });
@@ -55,8 +53,8 @@ function extractImages(message: unknown): ImageBlock[] {
 export function renderReadingIndicatorGroup(assistant?: AssistantIdentity) {
   return html`
     <div class="chat-group assistant">
-      ${renderAvatar("assistant", assistant)}
       <div class="chat-group-messages">
+        ${renderAvatar("assistant", assistant)}
         <div class="chat-bubble chat-reading-indicator" aria-hidden="true">
           <span class="chat-reading-indicator__dots">
             <span></span><span></span><span></span>
@@ -81,20 +79,22 @@ export function renderStreamingGroup(
 
   return html`
     <div class="chat-group assistant">
-      ${renderAvatar("assistant", assistant)}
       <div class="chat-group-messages">
-        ${renderGroupedMessage(
-          {
-            role: "assistant",
-            content: [{ type: "text", text }],
-            timestamp: startedAt,
-          },
-          { isStreaming: true, showReasoning: false },
-          onOpenSidebar,
-        )}
-        <div class="chat-group-footer">
-          <span class="chat-sender-name">${name}</span>
-          <span class="chat-group-timestamp">${timestamp}</span>
+        ${renderAvatar("assistant", assistant)}
+        <div class="chat-message__content">
+          <div class="chat-group-footer">
+            <span class="chat-sender-name">${name}</span>
+            <span class="chat-group-timestamp">${timestamp}</span>
+          </div>
+          ${renderGroupedMessage(
+            {
+              role: "assistant",
+              content: [{ type: "text", text }],
+              timestamp: startedAt,
+            },
+            { isStreaming: true, showReasoning: false, showTools: false },
+            onOpenSidebar,
+          )}
         </div>
       </div>
     </div>
@@ -106,6 +106,7 @@ export function renderMessageGroup(
   opts: {
     onOpenSidebar?: (content: string) => void;
     showReasoning: boolean;
+    showTools: boolean;
     assistantName?: string;
     assistantAvatar?: string | null;
   },
@@ -118,33 +119,35 @@ export function renderMessageGroup(
       : normalizedRole === "assistant"
         ? assistantName
         : normalizedRole;
-  const roleClass =
-    normalizedRole === "user" ? "user" : normalizedRole === "assistant" ? "assistant" : "other";
+  const assistantIdentity = {
+    name: assistantName,
+    avatar: opts.assistantAvatar ?? null,
+  };
   const timestamp = new Date(group.timestamp).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
 
   return html`
-    <div class="chat-group ${roleClass}">
-      ${renderAvatar(group.role, {
-        name: assistantName,
-        avatar: opts.assistantAvatar ?? null,
-      })}
+    <div class="chat-group ${normalizedRole}">
       <div class="chat-group-messages">
-        ${group.messages.map((item, index) =>
-          renderGroupedMessage(
-            item.message,
-            {
-              isStreaming: group.isStreaming && index === group.messages.length - 1,
-              showReasoning: opts.showReasoning,
-            },
-            opts.onOpenSidebar,
-          ),
-        )}
-        <div class="chat-group-footer">
-          <span class="chat-sender-name">${who}</span>
-          <span class="chat-group-timestamp">${timestamp}</span>
+        ${renderAvatar(group.role, assistantIdentity)}
+        <div class="chat-message__content">
+          <div class="chat-group-footer">
+            <span class="chat-sender-name">${who}</span>
+            <span class="chat-group-timestamp">${timestamp}</span>
+          </div>
+          ${group.messages.map((item, index) =>
+            renderGroupedMessage(
+              item.message,
+              {
+                isStreaming: group.isStreaming && index === group.messages.length - 1,
+                showReasoning: opts.showReasoning,
+                showTools: opts.showTools,
+              },
+              opts.onOpenSidebar,
+            ),
+          )}
         </div>
       </div>
     </div>
@@ -157,38 +160,26 @@ function renderAvatar(role: string, assistant?: Pick<AssistantIdentity, "name" |
   const assistantAvatar = assistant?.avatar?.trim() || "";
   const initial =
     normalized === "user"
-      ? "U"
+      ? "Y"
       : normalized === "assistant"
         ? assistantName.charAt(0).toUpperCase() || "A"
         : normalized === "tool"
           ? "⚙"
           : "?";
-  const className =
-    normalized === "user"
-      ? "user"
-      : normalized === "assistant"
-        ? "assistant"
-        : normalized === "tool"
-          ? "tool"
-          : "other";
 
   if (assistantAvatar && normalized === "assistant") {
     if (isAvatarUrl(assistantAvatar)) {
-      return html`<img
-        class="chat-avatar ${className}"
-        src="${assistantAvatar}"
-        alt="${assistantName}"
-      />`;
+      return html`<img class="chat-avatar ${normalized}" src="${assistantAvatar}" alt="${assistantName}" />`;
     }
-    return html`<div class="chat-avatar ${className}">${assistantAvatar}</div>`;
+    return html`<div class="chat-avatar ${normalized}">${assistantAvatar}</div>`;
   }
 
-  return html`<div class="chat-avatar ${className}">${initial}</div>`;
+  return html`<div class="chat-avatar ${normalized}">${initial}</div>`;
 }
 
 function isAvatarUrl(value: string): boolean {
   return (
-    /^https?:\/\//i.test(value) || /^data:image\//i.test(value) || /^\//.test(value) // Relative paths from avatar endpoint
+    /^https?:\/\//i.test(value) || /^data:image\//i.test(value) || /^\//.test(value)
   );
 }
 
@@ -213,7 +204,7 @@ function renderMessageImages(images: ImageBlock[]) {
 
 function renderGroupedMessage(
   message: unknown,
-  opts: { isStreaming: boolean; showReasoning: boolean },
+  opts: { isStreaming: boolean; showReasoning: boolean; showTools: boolean },
   onOpenSidebar?: (content: string) => void,
 ) {
   const m = message as Record<string, unknown>;
@@ -242,34 +233,47 @@ function renderGroupedMessage(
     "chat-bubble",
     canCopyMarkdown ? "has-copy" : "",
     opts.isStreaming ? "streaming" : "",
-    "fade-in",
   ]
     .filter(Boolean)
     .join(" ");
 
+  // If it's only tool results with no text
   if (!markdown && hasToolCards && isToolResult) {
-    return html`${toolCards.map((card) => renderToolCardSidebar(card, onOpenSidebar))}`;
+    if (opts.showTools) {
+      return html`${toolCards.map((card) => renderToolCardSidebar(card, onOpenSidebar))}`;
+    }
+    // Show minimal indicator when tools are hidden
+    return html`${renderToolIndicator(toolCards.length)}`;
   }
 
+  // If nothing to render, return nothing
   if (!markdown && !hasToolCards && !hasImages) return nothing;
 
   return html`
     <div class="${bubbleClasses}">
       ${canCopyMarkdown ? renderCopyAsMarkdownButton(markdown!) : nothing}
       ${renderMessageImages(images)}
-      ${
-        reasoningMarkdown
-          ? html`<div class="chat-thinking">${unsafeHTML(
-              toSanitizedMarkdownHtml(reasoningMarkdown),
-            )}</div>`
-          : nothing
-      }
-      ${
-        markdown
-          ? html`<div class="chat-text">${unsafeHTML(toSanitizedMarkdownHtml(markdown))}</div>`
-          : nothing
-      }
-      ${toolCards.map((card) => renderToolCardSidebar(card, onOpenSidebar))}
+      ${reasoningMarkdown
+        ? html`<div class="chat-thinking">
+            <div class="chat-thinking__header">Thinking</div>
+            <div class="chat-thinking__content">${unsafeHTML(toSanitizedMarkdownHtml(reasoningMarkdown))}</div>
+          </div>`
+        : nothing}
+      ${markdown
+        ? html`<div class="chat-text">${unsafeHTML(toSanitizedMarkdownHtml(markdown))}</div>`
+        : nothing}
+      ${opts.showTools
+        ? toolCards.map((card) => renderToolCardSidebar(card, onOpenSidebar))
+        : hasToolCards ? renderToolIndicator(toolCards.length) : nothing}
+    </div>
+  `;
+}
+
+function renderToolIndicator(count: number) {
+  return html`
+    <div class="chat-tool-indicator">
+      <span class="chat-tool-indicator__icon">${icons.wrench}</span>
+      <span class="chat-tool-indicator__text">${count} tool${count > 1 ? 's' : ''} used</span>
     </div>
   `;
 }

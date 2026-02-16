@@ -74,6 +74,8 @@ import { resolveInjectedAssistantIdentity } from "./assistant-identity";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity";
 import { loadSettings, type UiSettings } from "./storage";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types";
+import type { SkillMessage } from "./controllers/skills";
+import { analyzeSkill as analyzeSkillInternal } from "./controllers/skills";
 
 declare global {
   interface Window {
@@ -219,6 +221,11 @@ export class OpenClawApp extends LitElement {
   @state() skillEdits: Record<string, string> = {};
   @state() skillsBusyKey: string | null = null;
   @state() skillMessages: Record<string, SkillMessage> = {};
+  @state() skillsActiveFilter: "all" | "active" | "needs-setup" | "disabled" = "all";
+  @state() skillsSelectedSkill: string | null = null;
+  @state() skillsSelectedSkillTab: import("./views/skills").SkillDetailTab = "overview";
+  @state() analyzingSkill: string | null = null;
+  @state() skillAnalysis: Record<string, { securityScan?: import("./types").SkillSecurityScan; richDescription?: import("./types").RichSkillDescription }> = {};
 
   @state() debugLoading = false;
   @state() debugStatus: StatusSummary | null = null;
@@ -603,6 +610,26 @@ export class OpenClawApp extends LitElement {
     } catch (err) {
       this.complianceError = String(err);
     }
+  }
+
+  handleSkillsActiveFilterChange(filter: "all" | "active" | "needs-setup" | "disabled") {
+    this.skillsActiveFilter = filter;
+  }
+
+  handleSkillsSelectSkill(skillKey: string | null) {
+    this.skillsSelectedSkill = skillKey;
+  }
+
+  handleSkillsSelectSkillTab(tab: import("./views/skills").SkillDetailTab) {
+    this.skillsSelectedSkillTab = tab;
+  }
+
+  async handleAnalyzeSkill(skillKey: string, filePath: string) {
+    await analyzeSkillInternal(
+      this as unknown as Parameters<typeof analyzeSkillInternal>[0],
+      skillKey,
+      filePath
+    );
   }
 
   render() {

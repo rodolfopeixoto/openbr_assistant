@@ -474,6 +474,44 @@ export type SkillInstallOption = {
   bins: string[];
 };
 
+export type SkillSecurityScan = {
+  score: number;
+  level: "safe" | "low" | "medium" | "high" | "critical";
+  lastScan: string;
+  issues: {
+    type: string;
+    severity: "critical" | "high" | "medium" | "low" | "info";
+    message: string;
+    line?: number;
+    column?: number;
+    context?: string;
+  }[];
+  permissions: {
+    filesystem: boolean;
+    network: boolean;
+    execution: boolean;
+    env: boolean;
+    elevated: boolean;
+  };
+  checks: {
+    hasHttpsDownloads: boolean;
+    hasSignedBinaries: boolean;
+    usesTrustedPackageManager: boolean;
+    hasDangerousCommands: boolean;
+    requiresRoot: boolean;
+  };
+};
+
+export type RichSkillDescription = {
+  short: string;
+  full: string;
+  whatIs: string;
+  capabilities: string[];
+  examples: string[];
+  requirements: string[];
+  securityNotes: string[];
+};
+
 export type SkillStatusEntry = {
   name: string;
   description: string;
@@ -490,18 +528,23 @@ export type SkillStatusEntry = {
   eligible: boolean;
   requirements: {
     bins: string[];
+    anyBins?: string[];
     env: string[];
     config: string[];
     os: string[];
   };
   missing: {
     bins: string[];
+    anyBins?: string[];
     env: string[];
     config: string[];
     os: string[];
   };
   configChecks: SkillsStatusConfigCheck[];
   install: SkillInstallOption[];
+  // Rich UI fields (not used in CLI)
+  richDescription?: RichSkillDescription;
+  securityScan?: SkillSecurityScan;
 };
 
 export type SkillStatusReport = {
