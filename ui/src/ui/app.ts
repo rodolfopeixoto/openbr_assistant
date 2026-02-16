@@ -542,102 +542,40 @@ export class OpenClawApp extends LitElement {
   async handleComplianceRefresh() {
     this.complianceLoading = true;
     this.complianceError = null;
-    
+
     try {
-      if (this.client) {
-        const status = await this.client.request("compliance.status", {});
-        this.complianceStatus = status as import("./types").ComplianceStatus;
-        
-        const reports = await this.client.request("compliance.reports.list", {});
-        this.complianceReports = (reports as { reports: import("./types").ComplianceReport[] }).reports || [];
-      } else {
-        // Mock data for development
-        this.complianceStatus = {
-          overallStatus: "at-risk",
-          violationsCount: 3,
-          lastScanAt: new Date().toISOString(),
-          nextAuditAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          frameworks: {
-            gdpr: { status: "compliant", score: 94, lastAudit: new Date().toISOString() },
-            lgpd: { status: "compliant", score: 92, lastAudit: new Date().toISOString() },
-            soc2: { status: "at-risk", score: 78, lastAudit: new Date().toISOString() },
-            hipaa: { status: "non-compliant", score: 45, lastAudit: new Date().toISOString() }
-          },
-          recentViolations: [
-            {
-              id: "v1",
-              framework: "hipaa",
-              severity: "high",
-              status: "open",
-              title: "PHI Data Not Encrypted at Rest",
-              description: "Patient health information stored in session logs is not encrypted.",
-              resource: "sessions/user-123.json",
-              detectedAt: new Date().toISOString()
-            },
-            {
-              id: "v2",
-              framework: "soc2",
-              severity: "medium",
-              status: "open",
-              title: "Missing Access Control Audit Logs",
-              description: "Admin access changes are not being logged for SOC 2 compliance.",
-              detectedAt: new Date(Date.now() - 86400000).toISOString()
-            },
-            {
-              id: "v3",
-              framework: "soc2",
-              severity: "low",
-              status: "acknowledged",
-              title: "Password Policy Below Requirements",
-              description: "Current password policy does not meet SOC 2 complexity requirements.",
-              detectedAt: new Date(Date.now() - 172800000).toISOString()
-            }
-          ]
-        };
-        this.complianceReports = [];
-      }
+      const status = await this.client?.request("compliance.status", {});
+      this.complianceStatus = status as import("./types").ComplianceStatus;
+
+      const reports = await this.client?.request("compliance.reports.list", {});
+      this.complianceReports = (reports as { reports: import("./types").ComplianceReport[] }).reports || [];
     } catch (err) {
       this.complianceError = String(err);
     } finally {
       this.complianceLoading = false;
     }
   }
-  
+
   async handleComplianceGenerateReport(framework: import("./types").ComplianceFramework) {
     this.complianceLoading = true;
-    
+
     try {
-      if (this.client) {
-        await this.client.request("compliance.report.generate", { framework });
-        await this.handleComplianceRefresh();
-      } else {
-        // Mock report generation
-        const newReport: import("./types").ComplianceReport = {
-          id: `report-${Date.now()}`,
-          framework,
-          generatedAt: new Date().toISOString(),
-          status: "at-risk",
-          score: Math.floor(Math.random() * 30) + 70,
-          violationsCount: Math.floor(Math.random() * 5),
-          summary: `Automated ${framework.toUpperCase()} compliance report`,
-          details: {}
-        };
-        this.complianceReports = [newReport, ...this.complianceReports];
-      }
+      await this.client?.request("compliance.report.generate", { framework });
+      await this.handleComplianceRefresh();
     } catch (err) {
       this.complianceError = String(err);
     } finally {
       this.complianceLoading = false;
     }
   }
-  
+
   async handleComplianceExportData() {
     const data = {
       status: this.complianceStatus,
       reports: this.complianceReports,
       exportedAt: new Date().toISOString()
     };
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -648,26 +586,22 @@ export class OpenClawApp extends LitElement {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-  
+
   async handleComplianceViolationAcknowledge(id: string) {
-    if (this.complianceStatus) {
-      const violation = this.complianceStatus.recentViolations.find(v => v.id === id);
-      if (violation) {
-        violation.status = "acknowledged";
-        this.complianceStatus = { ...this.complianceStatus };
-      }
+    try {
+      await this.client?.request("compliance.violation.acknowledge", { id });
+      await this.handleComplianceRefresh();
+    } catch (err) {
+      this.complianceError = String(err);
     }
   }
-  
+
   async handleComplianceViolationResolve(id: string) {
-    if (this.complianceStatus) {
-      const violation = this.complianceStatus.recentViolations.find(v => v.id === id);
-      if (violation) {
-        violation.status = "resolved";
-        violation.resolvedAt = new Date().toISOString();
-        this.complianceStatus.violationsCount = Math.max(0, this.complianceStatus.violationsCount - 1);
-        this.complianceStatus = { ...this.complianceStatus };
-      }
+    try {
+      await this.client?.request("compliance.violation.resolve", { id });
+      await this.handleComplianceRefresh();
+    } catch (err) {
+      this.complianceError = String(err);
     }
   }
 
