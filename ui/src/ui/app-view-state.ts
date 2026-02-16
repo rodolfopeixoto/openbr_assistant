@@ -26,6 +26,7 @@ import type {
 } from "./types";
 import type { ChatAttachment, ChatQueueItem, CronFormState } from "./ui-types";
 import type { NostrProfileFormState } from "./views/channels.nostr-profile-form";
+import type { SkillDetailTab } from "./views/skills";
 
 export type AppViewState = {
   settings: UiSettings;
@@ -126,6 +127,9 @@ export type AppViewState = {
   skillEdits: Record<string, string>;
   skillMessages: Record<string, SkillMessage>;
   skillsBusyKey: string | null;
+  skillsActiveFilter: "all" | "active" | "needs-setup" | "disabled";
+  skillsSelectedSkill: string | null;
+  skillsSelectedSkillTab: SkillDetailTab;
   debugLoading: boolean;
   debugStatus: StatusSummary | null;
   debugHealth: HealthSnapshot | null;
@@ -227,4 +231,10 @@ export type AppViewState = {
   handleComplianceExportData: () => Promise<void>;
   handleComplianceViolationAcknowledge: (id: string) => Promise<void>;
   handleComplianceViolationResolve: (id: string) => Promise<void>;
+  handleSkillsActiveFilterChange: (filter: "all" | "active" | "needs-setup" | "disabled") => void;
+  handleSkillsSelectSkill: (skillKey: string | null) => void;
+  handleSkillsSelectSkillTab: (tab: import("./views/skills").SkillDetailTab) => void;
+  analyzingSkill: string | null;
+  skillAnalysis: Record<string, { securityScan?: import("./types").SkillSecurityScan; richDescription?: import("./types").RichSkillDescription }>;
+  handleAnalyzeSkill: (skillKey: string, filePath: string) => Promise<void>;
 };

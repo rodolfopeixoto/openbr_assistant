@@ -69,7 +69,9 @@ function normalizeSchemaNode(
     normalized.properties = normalizedProps;
 
     if (schema.additionalProperties === true) {
-      unsupported.add(pathLabel);
+      // Allow editing known properties even with additionalProperties: true
+      // Just don't support adding arbitrary new properties
+      normalized.additionalProperties = true;
     } else if (schema.additionalProperties === false) {
       normalized.additionalProperties = false;
     } else if (schema.additionalProperties && typeof schema.additionalProperties === "object") {

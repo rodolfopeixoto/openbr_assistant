@@ -15,6 +15,7 @@ import type {
 } from "../types";
 import type { ChannelKey, ChannelsChannelData, ChannelsProps } from "./channels.types";
 import { formatAgo } from "../format";
+import { icons } from "../icons";
 import { renderChannelConfigSection } from "./channels.config";
 import { renderDiscordCard } from "./channels.discord";
 import { renderGoogleChatCard } from "./channels.googlechat";
@@ -36,6 +37,7 @@ export function renderChannels(props: ChannelsProps) {
   const signal = (channels?.signal ?? null) as SignalStatus | null;
   const imessage = (channels?.imessage ?? null) as IMessageStatus | null;
   const nostr = (channels?.nostr ?? null) as NostrStatus | null;
+  
   const channelOrder = resolveChannelOrder(props.snapshot);
   const orderedChannels = channelOrder
     .map((key, index) => ({
@@ -48,42 +50,170 @@ export function renderChannels(props: ChannelsProps) {
       return a.order - b.order;
     });
 
-  return html`
-    <section class="grid grid-cols-2">
-      ${orderedChannels.map((channel) =>
-        renderChannel(channel.key, props, {
-          whatsapp,
-          telegram,
-          discord,
-          googlechat,
-          slack,
-          signal,
-          imessage,
-          nostr,
-          channelAccounts: props.snapshot?.channelAccounts ?? null,
-        }),
-      )}
-    </section>
+  // Calculate stats
+  const totalChannels = orderedChannels.length;
+  const enabledChannels = orderedChannels.filter(c => c.enabled).length;
+  const connectedChannels = orderedChannels.filter(c => {
+    const status = channels?.[c.key] as Record<string, unknown> | undefined;
+    return status?.connected === true;
+  }).length;
 
-    <section class="card" style="margin-top: 18px;">
-      <div class="row" style="justify-content: space-between;">
-        <div>
-          <div class="card-title">Channel health</div>
-          <div class="card-sub">Channel status snapshots from the gateway.</div>
+  return html`
+    <div class="channels-page">
+      <!-- Header -->
+      <header class="channels-header">
+        <div class="channels-header__content">
+          <h1 class="channels-header__title">
+            <span class="channels-header__icon">${icons.messageSquare}</span>
+            Channels
+          </h1>
+          <p class="channels-header__subtitle">
+            Manage messaging platform connections
+          </p>
         </div>
-        <div class="muted">${props.lastSuccessAt ? formatAgo(props.lastSuccessAt) : "n/a"}</div>
+      </header>
+
+      <!-- Stats Row -->
+      <div class="channels-stats">
+        <div class="channels-stat">
+          <span class="channels-stat__value">${totalChannels}</span>
+          <span class="channels-stat__label">Total Channels</span>
+        </div>
+        <div class="channels-stat">
+          <span class="channels-stat__value channels-stat__value--ok">${enabledChannels}</span>
+          <span class="channels-stat__label">Enabled</span>
+        </div>
+        <div class="channels-stat">
+          <span class="channels-stat__value channels-stat__value--ok">${connectedChannels}</span>
+          <span class="channels-stat__label">Connected</span>
+        </div>
       </div>
-      ${
-        props.lastError
-          ? html`<div class="callout danger" style="margin-top: 12px;">
-            ${props.lastError}
-          </div>`
-          : nothing
-      }
-      <pre class="code-block" style="margin-top: 12px;">
-${props.snapshot ? JSON.stringify(props.snapshot, null, 2) : "No snapshot yet."}
-      </pre>
-    </section>
+
+      <!-- Channels Grid -->
+      <section class="channels-grid">
+        ${orderedChannels.map((channel) =>
+          renderChannel(channel.key, props, {
+            whatsapp,
+            telegram,
+            discord,
+            googlechat,
+            slack,
+            signal,
+            imessage,
+            nostr,
+            channelAccounts: props.snapshot?.channelAccounts ?? null,
+          }),
+        )}
+      </section>
+
+      <!-- Health Section -->
+      <section class="channels-health">
+        <div class="channels-health__header">
+          <h2 class="channels-health__title">Channel Health</h2>
+          <div class="channels-health__meta">
+            <span class="channels-health__time">
+              ${props.lastSuccessAt ? `Updated ${formatAgo(props.lastSuccessAt)}` : "Not updated yet"}
+            </span>
+            <button 
+              class="channels-health__refresh"
+              @click=${props.onRefresh}
+              title="Refresh channels"
+            >
+              ${icons.refreshCw}
+            </button>
+          </div>
+        </div>
+        
+        <div class="channels-health__body">
+          ${props.lastError
+            ? html`
+              <div class="callout danger" style="margin-bottom: 16px;">
+                ${props.lastError}
+              </div>
+            `
+            : nothing
+          }
+          
+          ${props.snapshot ? renderHealthMetrics(props.snapshot) : nothing}
+          
+          ${renderJsonPreview(props)}
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function renderHealthMetrics(snapshot: ChannelsStatusSnapshot) {
+  const channels = snapshot.channels as Record<string, unknown> | null;
+  
+  // Count channels by status
+  const metrics = {
+    configured: 0,
+    running: 0,
+    connected: 0,
+    errors: 0,
+  };
+  
+  Object.values(channels || {}).forEach((ch: unknown) => {
+    const status = ch as Record<string, unknown>;
+    if (status?.configured) metrics.configured++;
+    if (status?.running) metrics.running++;
+    if (status?.connected) metrics.connected++;
+    if (status?.lastError) metrics.errors++;
+  });
+
+  return html`
+    <div class="health-metrics">
+      <div class="health-metric">
+        <div class="health-metric__icon">${icons.checkCircle}</div>
+        <div class="health-metric__content">
+          <div class="health-metric__label">Configured</div>
+          <div class="health-metric__value health-metric__value--ok">${metrics.configured}</div>
+        </div>
+      </div>
+      <div class="health-metric">
+        <div class="health-metric__icon">${icons.playCircle}</div>
+        <div class="health-metric__content">
+          <div class="health-metric__label">Running</div>
+          <div class="health-metric__value">${metrics.running}</div>
+        </div>
+      </div>
+      <div class="health-metric">
+        <div class="health-metric__icon">${icons.wifi}</div>
+        <div class="health-metric__content">
+          <div class="health-metric__label">Connected</div>
+          <div class="health-metric__value health-metric__value--ok">${metrics.connected}</div>
+        </div>
+      </div>
+      ${metrics.errors > 0 ? html`
+        <div class="health-metric">
+          <div class="health-metric__icon" style="color: var(--danger)">${icons.alertTriangle}</div>
+          <div class="health-metric__content">
+            <div class="health-metric__label">Errors</div>
+            <div class="health-metric__value health-metric__value--error">${metrics.errors}</div>
+          </div>
+        </div>
+      ` : nothing}
+    </div>
+  `;
+}
+
+function renderJsonPreview(props: ChannelsProps) {
+  return html`
+    <div class="health-json">
+      <div class="health-json__header">
+        <span class="health-json__title">Raw Snapshot</span>
+        <button class="health-json__toggle" @click=${() => {
+          const el = document.querySelector('.health-json__content');
+          if (el) el.classList.toggle('hidden');
+        }}>
+          ${icons.eye} Toggle
+        </button>
+      </div>
+      <div class="health-json__content">
+        <pre>${props.snapshot ? JSON.stringify(props.snapshot, null, 2) : "No snapshot available."}</pre>
+      </div>
+    </div>
   `;
 }
 
@@ -122,7 +252,7 @@ function renderChannel(key: ChannelKey, props: ChannelsProps, data: ChannelsChan
     case "googlechat":
       return renderGoogleChatCard({
         props,
-        googlechat: data.googlechat,
+        googleChat: data.googlechat,
         accountCountLabel,
       });
     case "slack":
@@ -189,46 +319,80 @@ function renderGenericChannelCard(
   const accounts = channelAccounts[key] ?? [];
   const accountCountLabel = renderChannelAccountCount(key, channelAccounts);
 
-  return html`
-    <div class="card">
-      <div class="card-title">${label}</div>
-      <div class="card-sub">Channel status and configuration.</div>
-      ${accountCountLabel}
+  // Determine card state
+  let cardClass = "channel-card";
+  if (connected) cardClass += " channel-card--enabled";
+  else if (lastError) cardClass += " channel-card--error";
+  else if (!configured) cardClass += " channel-card--disabled";
 
-      ${
-        accounts.length > 0
+  // Determine status dot
+  let statusDotClass = "channel-card__status-dot--disconnected";
+  let statusText = "Disconnected";
+  if (connected) {
+    statusDotClass = "channel-card__status-dot--connected";
+    statusText = "Connected";
+  } else if (lastError) {
+    statusDotClass = "channel-card__status-dot--error";
+    statusText = "Error";
+  }
+
+  return html`
+    <div class="${cardClass}">
+      <div class="channel-card__header">
+        <div class="channel-card__icon">📡</div>
+        <div class="channel-card__info">
+          <h3 class="channel-card__name">
+            ${label}
+            ${accountCountLabel}
+          </h3>
+          <div class="channel-card__status">
+            <span class="channel-card__status-dot ${statusDotClass}"></span>
+            <span class="channel-card__status-text">${statusText}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="channel-card__body">
+        <p class="channel-card__description">Channel status and configuration.</p>
+        
+        <div class="channel-card__stats">
+          <div class="channel-card__stat">
+            <span class="channel-card__stat-label">Configured</span>
+            <span class="channel-card__stat-value ${configured ? 'channel-card__stat-value--ok' : ''}">
+              ${configured == null ? "n/a" : configured ? "Yes" : "No"}
+            </span>
+          </div>
+          <div class="channel-card__stat">
+            <span class="channel-card__stat-label">Running</span>
+            <span class="channel-card__stat-value ${running ? 'channel-card__stat-value--ok' : ''}">
+              ${running == null ? "n/a" : running ? "Yes" : "No"}
+            </span>
+          </div>
+        </div>
+
+        ${accounts.length > 0
           ? html`
-            <div class="account-card-list">
+            <div class="account-card-list" style="margin-top: 12px;">
               ${accounts.map((account) => renderGenericAccount(account))}
             </div>
           `
-          : html`
-            <div class="status-list" style="margin-top: 16px;">
-              <div>
-                <span class="label">Configured</span>
-                <span>${configured == null ? "n/a" : configured ? "Yes" : "No"}</span>
-              </div>
-              <div>
-                <span class="label">Running</span>
-                <span>${running == null ? "n/a" : running ? "Yes" : "No"}</span>
-              </div>
-              <div>
-                <span class="label">Connected</span>
-                <span>${connected == null ? "n/a" : connected ? "Yes" : "No"}</span>
-              </div>
+          : nothing
+        }
+
+        ${lastError
+          ? html`
+            <div class="channel-card__error" style="margin-top: 12px;">
+              <span class="channel-card__error-icon">${icons.alertCircle}</span>
+              <span class="channel-card__error-text">${lastError}</span>
             </div>
           `
-      }
-
-      ${
-        lastError
-          ? html`<div class="callout danger" style="margin-top: 12px;">
-            ${lastError}
-          </div>`
           : nothing
-      }
+        }
+      </div>
 
-      ${renderChannelConfigSection({ channelId: key, props })}
+      <div class="channel-card__footer">
+        ${renderChannelConfigSection({ channelId: key, props })}
+      </div>
     </div>
   `;
 }

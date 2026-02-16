@@ -278,7 +278,7 @@ function getSectionIcon(key: string) {
   return sectionIcons[key as keyof typeof sectionIcons] ?? sectionIcons.default;
 }
 
-function matchesSearch(key: string, schema: JsonSchema, query: string): boolean {
+function matchesSearch(key: string, schema: JsonSchema, value: unknown, query: string): boolean {
   if (!query) return true;
   const q = query.toLowerCase();
   const meta = SECTION_META[key];
@@ -292,7 +292,38 @@ function matchesSearch(key: string, schema: JsonSchema, query: string): boolean 
     if (meta.description.toLowerCase().includes(q)) return true;
   }
 
-  return schemaMatches(schema, q);
+  // Check schema
+  if (schemaMatches(schema, q)) return true;
+
+  // Check current value
+  if (valueMatches(value, q)) return true;
+
+  return false;
+}
+
+function valueMatches(value: unknown, query: string): boolean {
+  if (value === null || value === undefined) return false;
+  
+  if (typeof value === "string") {
+    return value.toLowerCase().includes(query);
+  }
+  
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value).toLowerCase().includes(query);
+  }
+  
+  if (Array.isArray(value)) {
+    return value.some((item) => valueMatches(item, query));
+  }
+  
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    return Object.entries(obj).some(
+      ([key, val]) => key.toLowerCase().includes(query) || valueMatches(val, query)
+    );
+  }
+  
+  return false;
 }
 
 function schemaMatches(schema: JsonSchema, query: string): boolean {
@@ -356,7 +387,7 @@ export function renderConfigForm(props: ConfigFormProps) {
 
   const filteredEntries = entries.filter(([key, node]) => {
     if (activeSection && key !== activeSection) return false;
-    if (searchQuery && !matchesSearch(key, node, searchQuery)) return false;
+    if (searchQuery && !matchesSearch(key, node, value[key], searchQuery)) return false;
     return true;
   });
 

@@ -1,5 +1,6 @@
 import type { Tab } from "./navigation";
 import { connectGateway } from "./app-gateway";
+import { loadChatHistory } from "./controllers/chat";
 import {
   startLogsPolling,
   startNodesPolling,
@@ -21,6 +22,8 @@ import {
 type LifecycleHost = {
   basePath: string;
   tab: Tab;
+  connected: boolean;
+  client: unknown;
   chatHasAutoScrolled: boolean;
   chatLoading: boolean;
   chatMessages: unknown[];
@@ -65,6 +68,18 @@ export function handleDisconnected(host: LifecycleHost) {
 }
 
 export function handleUpdated(host: LifecycleHost, changed: Map<PropertyKey, unknown>) {
+  // Load chat history when switching to chat tab if not already loaded
+  if (
+    host.tab === "chat" &&
+    changed.has("tab") &&
+    host.connected &&
+    host.client &&
+    host.chatMessages.length === 0 &&
+    !host.chatLoading
+  ) {
+    void loadChatHistory(host as unknown as Parameters<typeof loadChatHistory>[0]);
+  }
+  
   if (
     host.tab === "chat" &&
     (changed.has("chatMessages") ||
