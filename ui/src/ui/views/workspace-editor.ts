@@ -717,6 +717,14 @@ export class WorkspaceEditor extends LitElement {
     }
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.draftDebounceTimer) {
+      clearTimeout(this.draftDebounceTimer);
+      this.draftDebounceTimer = null;
+    }
+  }
+
   updated(changed: Map<PropertyKey, unknown>) {
     if (changed.has('connected') && this.connected && this.client) {
       if (this.files.length === 0 && !this.loading) {
@@ -826,9 +834,12 @@ export class WorkspaceEditor extends LitElement {
     if (this.draftDebounceTimer) {
       clearTimeout(this.draftDebounceTimer);
     }
+    // Capture current file to avoid race condition if user switches files
+    const currentFile = this.selectedFile;
     this.draftDebounceTimer = window.setTimeout(() => {
-      if (this.selectedFile) {
-        this.saveDraft(this.selectedFile, value);
+      // Use current fileContent instead of captured value to get latest edits
+      if (currentFile && this.fileContent !== undefined) {
+        this.saveDraft(currentFile, this.fileContent);
       }
     }, 2000);
   }
@@ -849,6 +860,12 @@ export class WorkspaceEditor extends LitElement {
 
   async handleSave() {
     if (!this.client || !this.selectedFile) return;
+
+    // Cancel any pending draft save to prevent race conditions
+    if (this.draftDebounceTimer) {
+      clearTimeout(this.draftDebounceTimer);
+      this.draftDebounceTimer = null;
+    }
 
     this.saving = true;
     try {
@@ -872,6 +889,12 @@ export class WorkspaceEditor extends LitElement {
 
     if (!confirm("Discard unsaved changes?")) {
       return;
+    }
+
+    // Cancel any pending draft save
+    if (this.draftDebounceTimer) {
+      clearTimeout(this.draftDebounceTimer);
+      this.draftDebounceTimer = null;
     }
 
     try {
