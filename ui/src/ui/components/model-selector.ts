@@ -29,6 +29,9 @@ export class ModelSelector extends LitElement {
       display: block;
       position: relative;
       font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+      /* Ensure component is visible */
+      min-height: 40px;
+      min-width: 200px;
     }
 
     .dropdown-trigger {
@@ -44,6 +47,9 @@ export class ModelSelector extends LitElement {
       color: var(--text, #fff);
       transition: all 0.2s ease;
       min-width: 200px;
+      /* Debug: make sure it's visible */
+      visibility: visible;
+      opacity: 1;
     }
 
     .dropdown-trigger:hover {
@@ -357,6 +363,8 @@ export class ModelSelector extends LitElement {
 
   render() {
     const { provider, model } = this.getSelectedModelInfo();
+    
+    console.log('[ModelSelector] Rendering with provider:', provider?.id, 'model:', model?.id);
 
     return html`
       <div class="backdrop ${this.isOpen ? "open" : ""}" @click=${this.closeDropdown}></div>
