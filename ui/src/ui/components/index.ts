@@ -8,6 +8,10 @@
 export { ModelSelector } from "./model-selector.js";
 export type { ModelProvider, Model } from "./model-selector.js";
 
-// Future components can be exported here
-// export { ProviderCard } from "./provider-card.js";
-// export { ConfigWizard } from "./config-wizard.js";
+// Provider Card Component
+export { ProviderCard } from "./provider-card.js";
+export type { ProviderCardData } from "./provider-card.js";
+
+// Provider Configuration Wizard
+export { ProviderConfigWizard } from "./provider-config-wizard.js";
+export type { WizardFormData, WizardProviderInfo, WizardStep } from "./provider-config-wizard.js";
