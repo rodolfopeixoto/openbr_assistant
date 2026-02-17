@@ -71,6 +71,61 @@ const DEFAULT_PENDING_MAX_OUTPUT = clampNumber(
 const DEFAULT_PATH =
   process.env.PATH ?? "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
 const DEFAULT_NOTIFY_TAIL_CHARS = 400;
+
+// Security: Blocklist of environment variables that could alter execution flow
+// or inject code when running on non-sandboxed hosts (Gateway/Node).
+// These variables can be used for library injection, runtime manipulation,
+// or to execute arbitrary code.
+const DANGEROUS_HOST_ENV_VARS = new Set([
+  "LD_PRELOAD",
+  "LD_LIBRARY_PATH",
+  "LD_AUDIT",
+  "LD_DEBUG",
+  "LD_DYNAMIC_WEAK",
+  "LD_PROFILE",
+  "DYLD_INSERT_LIBRARIES",
+  "DYLD_LIBRARY_PATH",
+  "DYLD_FRAMEWORK_PATH",
+  "DYLD_FALLBACK_LIBRARY_PATH",
+  "DYLD_FALLBACK_FRAMEWORK_PATH",
+  "DYLD_ROOT_PATH",
+  "NODE_OPTIONS",
+  "NODE_PATH",
+  "PYTHONPATH",
+  "PYTHONHOME",
+  "RUBYLIB",
+  "PERL5LIB",
+  "BASH_ENV",
+  "ENV",
+  "GCONV_PATH",
+  "IFS",
+  "SSLKEYLOGFILE",
+]);
+const DANGEROUS_HOST_ENV_PREFIXES = ["DYLD_", "LD_"];
+
+// Centralized sanitization helper.
+// Throws an error if dangerous variables are detected.
+// Validates environment variables before passing to host execution.
+function validateHostEnv(env: Record<string, string>): void {
+  for (const key of Object.keys(env)) {
+    const upperKey = key.toUpperCase();
+
+    // 1. Block known dangerous prefixes (LD_, DYLD_) - Fail Closed
+    if (DANGEROUS_HOST_ENV_PREFIXES.some((prefix) => upperKey.startsWith(prefix))) {
+      throw new Error(
+        `Security Violation: Environment variable '${key}' is forbidden during host execution. ` +
+          `Variables starting with 'LD_' or 'DYLD_' can be used for library injection.`,
+      );
+    }
+
+    // 2. Block known dangerous variables
+    if (DANGEROUS_HOST_ENV_VARS.has(upperKey)) {
+      throw new Error(
+        `Security Violation: Environment variable '${key}' is forbidden during host execution.`,
+      );
+    }
+  }
+}
 const DEFAULT_APPROVAL_TIMEOUT_MS = 120_000;
 const DEFAULT_APPROVAL_REQUEST_TIMEOUT_MS = 130_000;
 const DEFAULT_APPROVAL_RUNNING_NOTICE_MS = 10_000;
@@ -917,6 +972,13 @@ export function createExecTool(
 
       const baseEnv = coerceEnv(process.env);
       const mergedEnv = params.env ? { ...baseEnv, ...params.env } : baseEnv;
+
+      // Security: Validate environment variables for host execution (non-sandboxed)
+      // This prevents library injection and code execution attacks via env vars
+      if (!sandbox && params.env && (host === "gateway" || host === "node")) {
+        validateHostEnv(params.env);
+      }
+
       const env = sandbox
         ? buildSandboxEnv({
             defaultPath: DEFAULT_PATH,
