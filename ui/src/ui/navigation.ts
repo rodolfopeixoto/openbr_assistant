@@ -7,7 +7,7 @@ export const TAB_GROUPS = [
     tabs: ["overview", "channels", "instances", "sessions", "cron"],
   },
   { label: "Agent", tabs: ["skills", "nodes"] },
-  { label: "Settings", tabs: ["config", "workspace", "compliance", "debug", "logs"] },
+  { label: "Settings", tabs: ["models", "config", "workspace", "compliance", "debug", "logs"] },
 ] as const;
 
 export type Tab =
@@ -19,6 +19,7 @@ export type Tab =
   | "skills"
   | "nodes"
   | "chat"
+  | "models"
   | "config"
   | "workspace"
   | "compliance"
@@ -34,6 +35,7 @@ const TAB_PATHS: Record<Tab, string> = {
   skills: "/skills",
   nodes: "/nodes",
   chat: "/chat",
+  models: "/models",
   config: "/config",
   workspace: "/workspace",
   compliance: "/compliance",
@@ -120,6 +122,8 @@ export function iconForTab(tab: Tab): IconName {
       return "zap";
     case "nodes":
       return "monitor";
+    case "models":
+      return "brain";
     case "config":
       return "settings";
     case "workspace":
@@ -153,6 +157,8 @@ export function titleForTab(tab: Tab) {
       return "Nodes";
     case "chat":
       return "Chat";
+    case "models":
+      return "Models";
     case "config":
       return "Config";
     case "workspace":
@@ -186,6 +192,8 @@ export function subtitleForTab(tab: Tab) {
       return "Paired devices, capabilities, and command exposure.";
     case "chat":
       return "Direct gateway chat session for quick interventions.";
+    case "models":
+      return "Configure AI model providers and manage credentials.";
     case "config":
       return "Edit ~/.openclaw/openclaw.json safely.";
     case "workspace":
