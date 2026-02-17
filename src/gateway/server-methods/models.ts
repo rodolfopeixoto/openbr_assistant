@@ -336,6 +336,88 @@ export const modelsHandlers: GatewayRequestHandlers = {
   },
 };
 
+// Default models for each provider
+const DEFAULT_MODELS: Record<
+  string,
+  Array<{ id: string; name: string; features: string[]; contextWindow?: number }>
+> = {
+  openai: [
+    {
+      id: "gpt-4-turbo",
+      name: "GPT-4 Turbo",
+      features: ["vision", "tools", "json"],
+      contextWindow: 128000,
+    },
+    {
+      id: "gpt-4-vision-preview",
+      name: "GPT-4 Vision",
+      features: ["vision", "tools"],
+      contextWindow: 128000,
+    },
+    {
+      id: "gpt-3.5-turbo",
+      name: "GPT-3.5 Turbo",
+      features: ["tools", "json"],
+      contextWindow: 16385,
+    },
+  ],
+  anthropic: [
+    {
+      id: "claude-3-opus-20240229",
+      name: "Claude 3 Opus",
+      features: ["vision", "tools"],
+      contextWindow: 200000,
+    },
+    {
+      id: "claude-3-sonnet-20240229",
+      name: "Claude 3 Sonnet",
+      features: ["vision", "tools"],
+      contextWindow: 200000,
+    },
+    {
+      id: "claude-3-haiku-20240307",
+      name: "Claude 3 Haiku",
+      features: ["vision"],
+      contextWindow: 200000,
+    },
+  ],
+  google: [
+    { id: "gemini-pro", name: "Gemini Pro", features: ["vision", "tools"], contextWindow: 128000 },
+  ],
+  kimi: [{ id: "kimi-k2", name: "Kimi K2", features: ["vision"], contextWindow: 128000 }],
+  glm: [{ id: "glm-5", name: "GLM-5", features: ["tools"], contextWindow: 128000 }],
+  qwen: [
+    { id: "qwen-max", name: "Qwen Max", features: ["vision", "tools"], contextWindow: 128000 },
+  ],
+  groq: [
+    {
+      id: "llama-3.1-405b",
+      name: "Llama 3.1 405B",
+      features: ["vision", "tools"],
+      contextWindow: 128000,
+    },
+  ],
+  cerebras: [
+    {
+      id: "cerebras-llama-3.1-70b",
+      name: "Llama 3.1 70B",
+      features: ["tools"],
+      contextWindow: 128000,
+    },
+  ],
+  xai: [
+    { id: "grok-beta", name: "Grok Beta", features: ["vision", "tools"], contextWindow: 128000 },
+  ],
+  openrouter: [
+    {
+      id: "openai/gpt-4-turbo",
+      name: "GPT-4 Turbo (OpenRouter)",
+      features: ["vision", "tools", "json"],
+      contextWindow: 128000,
+    },
+  ],
+};
+
 // Helper function to build configured providers list
 function buildConfiguredProvidersList(store: AuthProfileStore) {
   const providers = [];
@@ -359,7 +441,7 @@ function buildConfiguredProvidersList(store: AuthProfileStore) {
       name: config.name,
       profileId,
       status: hasValidCredential ? "configured" : "unconfigured",
-      models: [], // Will be populated by frontend
+      models: DEFAULT_MODELS[providerId] || [],
     });
   }
 
