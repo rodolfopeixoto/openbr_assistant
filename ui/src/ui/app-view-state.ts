@@ -52,6 +52,7 @@ export type AppViewState = {
   chatToolMessages: unknown[];
   chatStream: string | null;
   chatRunId: string | null;
+  chatStreamStartedAt: number | null;
   chatAvatarUrl: string | null;
   chatThinkingLevel: string | null;
   chatQueue: ChatQueueItem[];
@@ -237,4 +238,34 @@ export type AppViewState = {
   analyzingSkill: string | null;
   skillAnalysis: Record<string, { securityScan?: import("./types").SkillSecurityScan; richDescription?: import("./types").RichSkillDescription }>;
   handleAnalyzeSkill: (skillKey: string, filePath: string) => Promise<void>;
+  handleSendChat: (messageOverride?: string, opts?: { restoreDraft?: boolean }) => Promise<void>;
+  handleAbortChat: () => Promise<void>;
+  removeQueuedMessage: (id: string) => void;
+  handleChatScroll: (event: Event) => void;
+  resetToolStream: () => void;
+  resetChatScroll: () => void;
+  exportLogs: (lines: string[], label: string) => void;
+  handleLogsScroll: (event: Event) => void;
+  handleOpenSidebar: (content: string) => void;
+  handleCloseSidebar: () => void;
+  handleSplitRatioChange: (ratio: number) => void;
+  // ModelSelector state
+  selectedProvider: string | null;
+  selectedModel: string | null;
+  modelLoading: boolean;
+  configuredProviders: import("./components/model-selector.js").ModelProvider[] | null;
+  providersLoading: boolean;
+  loadCurrentModel: () => Promise<void>;
+  loadConfiguredProviders: () => Promise<void>;
+  // Models page state
+  modelsLoading: boolean;
+  modelsError: string | null;
+  modelsProviders: import("./components/provider-card.js").ProviderCardData[] | null;
+  modelsSearchQuery: string;
+  configuredProfileIds: string[];
+  modelsShowAddForm: string | null;
+  handleModelsRefresh: () => Promise<void>;
+  handleModelsTest: (profileId: string, credential: unknown) => Promise<void>;
+  handleModelsSave: (profileId: string, credential: unknown, email?: string) => Promise<void>;
+  handleModelsRemove: (profileId: string) => Promise<void>;
 };

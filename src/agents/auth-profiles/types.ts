@@ -49,6 +49,13 @@ export type ProfileUsageStats = {
   lastFailureAt?: number;
 };
 
+/** Information about a selected model for persistence */
+export type SelectedModelInfo = {
+  provider: string;
+  model: string;
+  selectedAt: number;
+};
+
 export type AuthProfileStore = {
   version: number;
   profiles: Record<string, AuthProfileCredential>;
@@ -61,6 +68,8 @@ export type AuthProfileStore = {
   lastGood?: Record<string, string>;
   /** Usage statistics per profile for round-robin rotation */
   usageStats?: Record<string, ProfileUsageStats>;
+  /** Persisted model selections per session */
+  selectedModels?: Record<string, SelectedModelInfo>;
 };
 
 export type AuthProfileIdRepairResult = {

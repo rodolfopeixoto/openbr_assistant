@@ -266,6 +266,13 @@ export class OpenClawApp extends LitElement {
   @state() modelsProviders: import("./components/provider-card").ProviderCardData[] = [];
   @state() modelsSearchQuery = "";
 
+  // ModelSelector state
+  @state() selectedProvider: string | null = null;
+  @state() selectedModel: string | null = null;
+  @state() modelLoading = false;
+  @state() configuredProviders: import("./components/model-selector").ModelProvider[] | null = null;
+  @state() providersLoading = false;
+
   // Provider Config Wizard state
   @state() wizardOpen = false;
   @state() wizardProviderId = "";
@@ -624,207 +631,132 @@ export class OpenClawApp extends LitElement {
     }
   }
 
-  // ==================== MODELS HANDLERS ====================
+  // ModelSelector methods
+  async loadCurrentModel() {
+    if (!this.client || !this.sessionKey) {
+      return;
+    }
+    this.modelLoading = true;
+    try {
+      const response = await this.client.request("models.current", {
+        sessionKey: this.sessionKey,
+      }) as { ok?: boolean; payload?: { provider?: string; model?: string } };
+      if (response?.ok && response?.payload) {
+        this.selectedProvider = response.payload.provider || null;
+        this.selectedModel = response.payload.model || null;
+      }
+    } catch (error) {
+      console.warn("[App] Failed to load current model:", error);
+    } finally {
+      this.modelLoading = false;
+    }
+  }
 
+  async loadConfiguredProviders() {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.providersLoading = true;
+    try {
+      const response = await this.client.request("models.configured", {}) as {
+        ok?: boolean;
+        payload?: { providers?: import("./components/model-selector.js").ModelProvider[] };
+      };
+      if (response?.ok && response?.payload?.providers) {
+        this.configuredProviders = response.payload.providers;
+      } else {
+        this.configuredProviders = [];
+      }
+    } catch (error) {
+      console.warn("[App] Failed to load configured providers:", error);
+      this.configuredProviders = [];
+    } finally {
+      this.providersLoading = false;
+    }
+  }
+
+  // Models page handlers
   async handleModelsRefresh() {
+    if (!this.client || !this.connected) {
+      return;
+    }
     this.modelsLoading = true;
     this.modelsError = null;
-
     try {
-      // Load auth profiles from auth.list endpoint
-      const authProfiles = (await this.client?.request("auth.list", {})) as {
-        profiles: Array<{ id: string; provider: string; type: string }>;
+      const response = await this.client.request("models.configured", {}) as {
+        ok?: boolean;
+        payload?: { providers?: import("./components/provider-card.js").ProviderCardData[] };
       };
-
-      // Get default providers from models.providers endpoint
-      const modelProviders = (await this.client?.request("models.providers", {})) as {
-        providers: Array<{
-          id: string;
-          name: string;
-          status: string;
-          models: Array<{ id: string; name: string }>;
-        }>;
-      };
-
-      // Build provider cards with configuration status
-      const configuredProviderIds = new Set(
-        (authProfiles?.profiles || []).map((p) => p.provider)
-      );
-      const providerProfiles: Record<string, Array<{ id: string; type: string }>> = {};
-      (authProfiles?.profiles || []).forEach((p) => {
-        if (!providerProfiles[p.provider]) {
-          providerProfiles[p.provider] = [];
-        }
-        providerProfiles[p.provider].push({ id: p.id, type: p.type });
-      });
-
-      this.modelsProviders = (modelProviders?.providers || []).map((provider) => {
-        const isConfigured = configuredProviderIds.has(provider.id);
-        const profiles = providerProfiles[provider.id] || [];
-        const hasError = false; // TODO: Check for errors
-
-        return {
-          id: provider.id,
-          name: provider.name,
-          status: hasError ? "error" : isConfigured ? "configured" : "unconfigured",
-          credentialType: profiles[0]?.type as "api_key" | "oauth" | "token" | undefined,
-          credentialCount: profiles.length,
-          modelsCount: provider.models?.length || 0,
-          lastError: undefined,
-        };
-      });
-    } catch (err) {
-      this.modelsError = String(err);
+      if (response?.ok && response?.payload?.providers) {
+        this.modelsProviders = response.payload.providers;
+      } else {
+        this.modelsProviders = [];
+      }
+    } catch (error) {
+      console.warn("[App] Failed to load models providers:", error);
+      this.modelsError = String(error);
+      this.modelsProviders = [];
     } finally {
       this.modelsLoading = false;
     }
   }
 
-  handleModelsConfigure(providerId: string) {
-    // Open wizard for provider configuration
-    const provider = this.modelsProviders.find((p) => p.id === providerId);
-    if (provider) {
-      this.wizardProviderId = providerId;
-      this.wizardProviderName = provider.name;
-      this.wizardOpen = true;
-      this.wizardIsSaving = false;
+  async handleModelsTest(profileId: string, credential: unknown) {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    try {
+      const response = await this.client.request("auth.test", {
+        profileId,
+        credential,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Test failed");
+      }
+    } catch (error) {
+      console.warn("[App] Failed to test credential:", error);
+      throw error;
     }
   }
 
-  handleModelsManage(providerId: string) {
-    // For now, also open the wizard to edit/reconfigure
-    // In the future, this could open a management panel
-    this.handleModelsConfigure(providerId);
-  }
-
-  handleWizardClose() {
-    this.wizardOpen = false;
-    this.wizardProviderId = "";
-    this.wizardProviderName = "";
-    this.wizardIsSaving = false;
-  }
-
-  async handleWizardSave(event: CustomEvent) {
-    const { providerId, profileName, credential, testConnection } = event.detail;
-    this.wizardIsSaving = true;
-
+  async handleModelsSave(profileId: string, credential: unknown, email?: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
     try {
-      // Call auth.add endpoint to save the credential
-      const result = (await this.client?.request("auth.add", {
-        profileId: `${providerId}:${profileName}`,
+      const response = await this.client.request("auth.add", {
+        profileId,
         credential,
-        testConnection,
-      })) as { success: boolean; error?: string };
-
-      if (!result?.success) {
-        // Notify wizard of error
-        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-        if (wizard) {
-          wizard.handleSaveError(result?.error || "Failed to save credential");
-        }
-        return;
+        email,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Save failed");
       }
-
-      // Notify wizard of success
-      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-      if (wizard) {
-        wizard.handleSaveSuccess();
-      }
-
       // Refresh the providers list
       await this.handleModelsRefresh();
-    } catch (err) {
-      const error = String(err);
-      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-      if (wizard) {
-        wizard.handleSaveError(error);
-      }
-    } finally {
-      this.wizardIsSaving = false;
+    } catch (error) {
+      console.warn("[App] Failed to save credential:", error);
+      throw error;
     }
   }
 
-  handleModelsSearchChange(query: string) {
-    this.modelsSearchQuery = query;
-  }
-
-  async handleOAuthStart(event: CustomEvent) {
-    const { providerId } = event.detail;
-    
+  async handleModelsRemove(profileId: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
     try {
-      // Start OAuth flow via backend
-      const result = (await this.client?.request("auth.oauth.start", {
-        providerId,
-      })) as { authUrl: string; state: string; verifier: string };
-
-      if (result?.authUrl) {
-        // Notify wizard of OAuth URL
-        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-        if (wizard) {
-          wizard.handleOAuthUrl(result.authUrl, result.state, result.verifier);
-        }
-
-        // Store OAuth state for callback handling
-        (window as unknown as Record<string, unknown>).oauthCallback = async (code: string, state: string) => {
-          await this.handleOAuthCallback(providerId, code, state, result.verifier);
-        };
+      const response = await this.client.request("auth.remove", {
+        profileId,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Remove failed");
       }
-    } catch (err) {
-      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-      if (wizard) {
-        wizard.handleSaveError(String(err));
-      }
+      // Refresh the providers list
+      await this.handleModelsRefresh();
+    } catch (error) {
+      console.warn("[App] Failed to remove credential:", error);
+      throw error;
     }
-  }
-
-  async handleOAuthCallback(providerId: string, code: string, state: string, verifier: string) {
-    try {
-      // Exchange code for tokens
-      const result = (await this.client?.request("auth.oauth.callback", {
-        providerId,
-        code,
-        state,
-        verifier,
-      })) as { success: boolean; profileId: string; email?: string };
-
-      if (result?.success) {
-        // Notify wizard of success
-        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-        if (wizard) {
-          wizard.handleSaveSuccess();
-        }
-
-        // Refresh providers list
-        await this.handleModelsRefresh();
-      } else {
-        throw new Error("OAuth callback failed");
-      }
-    } catch (err) {
-      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
-      if (wizard) {
-        wizard.handleSaveError(String(err));
-      }
-    }
-  }
-
-  handleSkillsActiveFilterChange(filter: "all" | "active" | "needs-setup" | "disabled") {
-    this.skillsActiveFilter = filter;
-  }
-
-  handleSkillsSelectSkill(skillKey: string | null) {
-    this.skillsSelectedSkill = skillKey;
-  }
-
-  handleSkillsSelectSkillTab(tab: import("./views/skills").SkillDetailTab) {
-    this.skillsSelectedSkillTab = tab;
-  }
-
-  async handleAnalyzeSkill(skillKey: string, filePath: string) {
-    await analyzeSkillInternal(
-      this as unknown as Parameters<typeof analyzeSkillInternal>[0],
-      skillKey,
-      filePath
-    );
   }
 
   render() {

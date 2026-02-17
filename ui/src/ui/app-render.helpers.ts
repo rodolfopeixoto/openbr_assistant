@@ -1,16 +1,16 @@
 import { html } from "lit";
 import { repeat } from "lit/directives/repeat.js";
-import type { AppViewState } from "./app-view-state";
-import type { ThemeMode } from "./theme";
-import type { ThemeTransitionContext } from "./theme-transition";
-import type { SessionsListResult } from "./types";
-import { refreshChat } from "./app-chat";
-import { syncUrlWithSessionKey } from "./app-settings";
-import { loadChatHistory } from "./controllers/chat";
-import { icons } from "./icons";
-import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation";
+import type { AppViewState } from "./app-view-state.ts";
+import type { ThemeTransitionContext } from "./theme-transition.ts";
+import type { ThemeMode } from "./theme.ts";
+import type { SessionsListResult } from "./types.ts";
+import { refreshChat } from "./app-chat.ts";
+import { syncUrlWithSessionKey } from "./app-settings.ts";
+import { OpenClawApp } from "./app.ts";
+import { ChatState, loadChatHistory } from "./controllers/chat.ts";
 import "./components/model-selector.js";
-import type { ModelProvider } from "./components/model-selector.js";
+import { icons } from "./icons.ts";
+import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation.ts";
 
 export function renderTab(state: AppViewState, tab: Tab) {
   const href = pathForTab(tab, state.basePath);
@@ -40,41 +40,6 @@ export function renderTab(state: AppViewState, tab: Tab) {
   `;
 }
 
-// Default providers for ModelSelector
-const DEFAULT_PROVIDERS: ModelProvider[] = [
-  {
-    id: "openai",
-    name: "OpenAI",
-    icon: "🤖",
-    status: "configured",
-    models: [
-      { id: "gpt-4-turbo", name: "GPT-4 Turbo", features: ["vision", "tools", "json"], costPer1kTokens: { input: 10, output: 30 }, contextWindow: 128000 },
-      { id: "gpt-4-vision", name: "GPT-4 Vision", features: ["vision", "tools"], costPer1kTokens: { input: 10, output: 30 }, contextWindow: 128000 },
-      { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo", features: ["tools", "json"], costPer1kTokens: { input: 0.5, output: 1.5 }, contextWindow: 16385 },
-    ],
-  },
-  {
-    id: "anthropic",
-    name: "Anthropic",
-    icon: "🧠",
-    status: "configured",
-    models: [
-      { id: "claude-3-opus", name: "Claude 3 Opus", features: ["vision", "tools"], costPer1kTokens: { input: 15, output: 75 }, contextWindow: 200000 },
-      { id: "claude-3-sonnet", name: "Claude 3 Sonnet", features: ["vision", "tools"], costPer1kTokens: { input: 3, output: 15 }, contextWindow: 200000 },
-      { id: "claude-3-haiku", name: "Claude 3 Haiku", features: ["vision"], costPer1kTokens: { input: 0.25, output: 1.25 }, contextWindow: 200000 },
-    ],
-  },
-  {
-    id: "google",
-    name: "Google",
-    icon: "🔍",
-    status: "configured",
-    models: [
-      { id: "gemini-pro", name: "Gemini Pro", features: ["vision", "tools"], costPer1kTokens: { input: 0.5, output: 1.5 }, contextWindow: 128000 },
-    ],
-  },
-];
-
 export function renderChatControls(state: AppViewState) {
   const mainSessionKey = resolveMainSessionKey(state.hello, state.sessionsResult);
   const sessionOptions = resolveSessionOptions(
@@ -87,9 +52,6 @@ export function renderChatControls(state: AppViewState) {
   const showThinking = state.onboarding ? false : state.settings.chatShowThinking;
   const focusActive = state.onboarding ? true : state.settings.chatFocusMode;
   
-  // Model selection state (should be loaded from backend in production)
-  const selectedProvider = (state as any).selectedProvider || "openai";
-  const selectedModel = (state as any).selectedModel || "gpt-4-turbo";
   // Refresh icon
   const refreshIcon = html`
     <svg
@@ -190,17 +152,18 @@ export function renderChatControls(state: AppViewState) {
       >
         ${focusIcon}
       </button>
-      
+
       <model-selector
-        .providers=${DEFAULT_PROVIDERS}
-        .selectedProvider=${selectedProvider}
-        .selectedModel=${selectedModel}
+        .providers=${state.configuredProviders ?? []}
+        .selectedProvider=${state.selectedProvider}
+        .selectedModel=${state.selectedModel}
+        .loading=${state.providersLoading}
         @model-selected=${(e: CustomEvent) => {
           const { providerId, modelId } = e.detail;
-          // Store in state (using any cast since we need to add these properties to AppViewState)
-          (state as any).selectedProvider = providerId;
-          (state as any).selectedModel = modelId;
-          // Save to backend
+          // Update local state
+          state.selectedProvider = providerId;
+          state.selectedModel = modelId;
+          // Persist to backend
           if (state.client) {
             void state.client.request("models.select", {
               sessionKey: state.sessionKey,
@@ -209,16 +172,9 @@ export function renderChatControls(state: AppViewState) {
             });
           }
         }}
-        @configure-provider=${(e: CustomEvent) => {
-          const { providerId } = e.detail;
-          console.log("Configure provider:", providerId);
-          // Navigate to settings or open configuration modal
-          alert(`Configure ${providerId} - This would open the configuration wizard`);
-        }}
-        @manage-providers=${() => {
-          console.log("Manage providers");
-          // Navigate to providers management page
-          alert("Manage providers - This would navigate to the providers settings");
+        @configure-providers=${() => {
+          // Navigate to models tab for provider configuration
+          state.setTab("models");
         }}
       ></model-selector>
     </div>
