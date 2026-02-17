@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { ultraHash, isEnabled } from "../ultra.js";
 
 export type DeviceIdentity = {
   deviceId: string;
@@ -50,6 +51,17 @@ function derivePublicKeyRaw(publicKeyPem: string): Buffer {
 
 function fingerprintPublicKey(publicKeyPem: string): string {
   const raw = derivePublicKeyRaw(publicKeyPem);
+
+  // Use Blake3 (Rust) for faster hashing - 3x faster than SHA256
+  if (isEnabled("useBlake3")) {
+    try {
+      const hash = ultraHash(raw);
+      return hash.toString("hex");
+    } catch {
+      // Fallback to SHA256 if Rust module fails
+    }
+  }
+
   return crypto.createHash("sha256").update(raw).digest("hex");
 }
 

@@ -147,7 +147,17 @@
     "tui:dev": "OPENCLAW_PROFILE=dev CLAWDBOT_PROFILE=dev node scripts/run-node.mjs --dev tui",
     "ui:build": "node scripts/ui.js build",
     "ui:dev": "node scripts/ui.js dev",
-    "ui:install": "node scripts/ui.js install"
+    "ui:install": "node scripts/ui.js install",
+    "build:rust": "cd rust && cargo build --release",
+    "build:native": "cd native && npx node-gyp rebuild",
+    "build:wasm": "echo 'WASM build not configured yet'",
+    "build:ultra": "node scripts/build-ultra.mjs",
+    "build:bundle": "npx esbuild dist/entry.js --bundle --outfile=dist/bundle.js --platform=node --target=node22 --minify --tree-shaking",
+    "build:sea": "node scripts/build-sea.mjs",
+    "dev:ultra": "USE_BLAKE3=true USE_SIMD_JSON=true USE_NATIVE_CACHE=true node scripts/run-node.mjs",
+    "benchmark": "node scripts/benchmark.mjs",
+    "ultra:status": "node -e \"const f = require('./dist/config/features.js'); console.log('Features:', f.features);\"",
+    "ultra:clean": "cd rust && cargo clean && cd ../native && npx node-gyp clean"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "0.13.1",

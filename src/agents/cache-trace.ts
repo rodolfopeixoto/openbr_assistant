@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { OpenClawConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
+import { fastHash, isEnabled } from "../ultra.js";
 import { resolveUserPath } from "../utils.js";
 import { parseBooleanValue } from "../utils/boolean.js";
 
@@ -161,6 +162,17 @@ function stableStringify(value: unknown): string {
 
 function digest(value: unknown): string {
   const serialized = stableStringify(value);
+
+  // Use XXH3 (Rust) for non-cryptographic hashing - 10x faster than SHA256
+  if (isEnabled("useXxh3")) {
+    try {
+      const hashValue = fastHash(Buffer.from(serialized));
+      return hashValue.toString(16).padStart(16, "0");
+    } catch {
+      // Fallback to SHA256 if Rust module fails
+    }
+  }
+
   return crypto.createHash("sha256").update(serialized).digest("hex");
 }
 
