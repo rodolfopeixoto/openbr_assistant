@@ -4,7 +4,7 @@
  */
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { features, isEnabled } from "./config/features.js";
@@ -14,6 +14,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Lazy-loaded native modules
 let rustModule: any = null;
 let nativeModule: any = null;
+let koffi: any = null;
+
+/**
+ * Load koffi dynamically
+ */
+async function loadKoffi() {
+  if (!koffi) {
+    try {
+      const koffiMod = await import("koffi");
+      koffi = koffiMod.default || koffiMod;
+    } catch (e) {
+      // koffi not available
+    }
+  }
+  return koffi;
+}
 
 /**
  * Initialize ultra performance modules
@@ -21,24 +37,36 @@ let nativeModule: any = null;
 export async function initUltra(): Promise<void> {
   console.log("🚀 Initializing OpenClaw Ultra Performance...\n");
 
-  // Load Rust module
-  if (isEnabled("useBlake3") || isEnabled("useSimdJson") || isEnabled("useNativeCache")) {
+  const koffiLib = await loadKoffi();
+
+  // Load Rust module via koffi
+  if (
+    koffiLib &&
+    (isEnabled("useBlake3") || isEnabled("useSimdJson") || isEnabled("useNativeCache"))
+  ) {
     try {
       const rustPath = join(__dirname, "../rust/target/release/libopenclaw_core.dylib");
-      rustModule = await import(rustPath);
-      rustModule.init_core?.();
-      console.log("✓ Rust core loaded");
+      if (existsSync(rustPath)) {
+        rustModule = koffiLib.load(rustPath);
+        console.log("✓ Rust core loaded");
+      } else {
+        console.warn("⚠️  Rust library not found at:", rustPath);
+      }
     } catch (e) {
       console.warn("⚠️  Rust module not available, using fallbacks");
     }
   }
 
-  // Load C++ native module
+  // Load C++ native module via require
   if (isEnabled("useNativeBuffers") || isEnabled("useSimdOps")) {
     try {
       const nativePath = join(__dirname, "../native/build/Release/openclaw_native.node");
-      nativeModule = await import(nativePath);
-      console.log("✓ Native addons loaded");
+      if (existsSync(nativePath)) {
+        nativeModule = require(nativePath);
+        console.log("✓ Native addons loaded");
+      } else {
+        console.warn("⚠️  Native module not found at:", nativePath);
+      }
     } catch (e) {
       console.warn("⚠️  Native module not available, using fallbacks");
     }

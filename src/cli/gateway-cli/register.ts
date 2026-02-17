@@ -135,6 +135,51 @@ export function registerGatewayCli(program: Command) {
   );
 
   gateway
+    .command("setup")
+    .description("Auto-configure gateway with a secure token")
+    .action(async () => {
+      const { randomUUID } = await import("node:crypto");
+      const { existsSync, readFileSync, writeFileSync, mkdirSync } = await import("node:fs");
+      const { homedir } = await import("node:os");
+      const { join } = await import("node:path");
+
+      const configDir = join(homedir(), ".openbr");
+      const configPath = join(configDir, "config.json");
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let config: Record<string, any> = {};
+      if (existsSync(configPath)) {
+        try {
+          config = JSON.parse(readFileSync(configPath, "utf8"));
+        } catch {}
+      }
+
+      const token = `auto-${randomUUID()}-${Date.now()}`;
+
+      config.gateway = config.gateway || {};
+      config.gateway.auth = config.gateway.auth || {};
+      config.gateway.auth.token = token;
+      config.gateway.enabled = true;
+      config.gateway.port = config.gateway.port || 18789;
+
+      if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+      }
+
+      writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+      const url = `http://localhost:${config.gateway.port}/?token=${token}`;
+
+      console.log("✅ Gateway auto-configurado!");
+      console.log(`🔐 Token: ${token.substring(0, 20)}...`);
+      console.log(`📁 Config: ${configPath}`);
+      console.log(`\n🚀 Para iniciar:`);
+      console.log(`   openbr gateway run`);
+      console.log(`\n🌐 Acesse:`);
+      console.log(`   ${url}`);
+    });
+
+  gateway
     .command("status")
     .description("Show gateway service status + probe the Gateway")
     .option("--url <url>", "Gateway WebSocket URL (defaults to config/remote/local)")

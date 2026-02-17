@@ -3,6 +3,7 @@
     {
       "target_name": "openclaw_native",
       "sources": [
+        "main.cc",
         "buffer-ops.cc",
         "simd-ops.cc"
       ],

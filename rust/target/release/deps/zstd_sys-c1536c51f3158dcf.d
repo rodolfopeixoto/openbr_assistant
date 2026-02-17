@@ -1,0 +1,9 @@
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/zstd_sys-c1536c51f3158dcf.d: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zstd.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zdict.rs
+
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/libzstd_sys-c1536c51f3158dcf.rlib: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zstd.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zdict.rs
+
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/libzstd_sys-c1536c51f3158dcf.rmeta: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zstd.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zdict.rs
+
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/lib.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zstd.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.0.16+zstd.1.5.7/src/bindings_zdict.rs:
