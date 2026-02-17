@@ -260,6 +260,18 @@ export class OpenClawApp extends LitElement {
   @state() complianceSelectedFramework: import("./types").ComplianceFramework | "all" = "all";
   @state() complianceActiveTab: "overview" | "reports" | "violations" | "settings" = "overview";
 
+  // Models state
+  @state() modelsLoading = false;
+  @state() modelsError: string | null = null;
+  @state() modelsProviders: import("./components/provider-card").ProviderCardData[] = [];
+  @state() modelsSearchQuery = "";
+
+  // Provider Config Wizard state
+  @state() wizardOpen = false;
+  @state() wizardProviderId = "";
+  @state() wizardProviderName = "";
+  @state() wizardIsSaving = false;
+
   client: GatewayBrowserClient | null = null;
   private chatScrollFrame: number | null = null;
   private chatScrollTimeout: number | null = null;
@@ -609,6 +621,189 @@ export class OpenClawApp extends LitElement {
       await this.handleComplianceRefresh();
     } catch (err) {
       this.complianceError = String(err);
+    }
+  }
+
+  // ==================== MODELS HANDLERS ====================
+
+  async handleModelsRefresh() {
+    this.modelsLoading = true;
+    this.modelsError = null;
+
+    try {
+      // Load auth profiles from auth.list endpoint
+      const authProfiles = (await this.client?.request("auth.list", {})) as {
+        profiles: Array<{ id: string; provider: string; type: string }>;
+      };
+
+      // Get default providers from models.providers endpoint
+      const modelProviders = (await this.client?.request("models.providers", {})) as {
+        providers: Array<{
+          id: string;
+          name: string;
+          status: string;
+          models: Array<{ id: string; name: string }>;
+        }>;
+      };
+
+      // Build provider cards with configuration status
+      const configuredProviderIds = new Set(
+        (authProfiles?.profiles || []).map((p) => p.provider)
+      );
+      const providerProfiles: Record<string, Array<{ id: string; type: string }>> = {};
+      (authProfiles?.profiles || []).forEach((p) => {
+        if (!providerProfiles[p.provider]) {
+          providerProfiles[p.provider] = [];
+        }
+        providerProfiles[p.provider].push({ id: p.id, type: p.type });
+      });
+
+      this.modelsProviders = (modelProviders?.providers || []).map((provider) => {
+        const isConfigured = configuredProviderIds.has(provider.id);
+        const profiles = providerProfiles[provider.id] || [];
+        const hasError = false; // TODO: Check for errors
+
+        return {
+          id: provider.id,
+          name: provider.name,
+          status: hasError ? "error" : isConfigured ? "configured" : "unconfigured",
+          credentialType: profiles[0]?.type as "api_key" | "oauth" | "token" | undefined,
+          credentialCount: profiles.length,
+          modelsCount: provider.models?.length || 0,
+          lastError: undefined,
+        };
+      });
+    } catch (err) {
+      this.modelsError = String(err);
+    } finally {
+      this.modelsLoading = false;
+    }
+  }
+
+  handleModelsConfigure(providerId: string) {
+    // Open wizard for provider configuration
+    const provider = this.modelsProviders.find((p) => p.id === providerId);
+    if (provider) {
+      this.wizardProviderId = providerId;
+      this.wizardProviderName = provider.name;
+      this.wizardOpen = true;
+      this.wizardIsSaving = false;
+    }
+  }
+
+  handleModelsManage(providerId: string) {
+    // For now, also open the wizard to edit/reconfigure
+    // In the future, this could open a management panel
+    this.handleModelsConfigure(providerId);
+  }
+
+  handleWizardClose() {
+    this.wizardOpen = false;
+    this.wizardProviderId = "";
+    this.wizardProviderName = "";
+    this.wizardIsSaving = false;
+  }
+
+  async handleWizardSave(event: CustomEvent) {
+    const { providerId, profileName, credential, testConnection } = event.detail;
+    this.wizardIsSaving = true;
+
+    try {
+      // Call auth.add endpoint to save the credential
+      const result = (await this.client?.request("auth.add", {
+        profileId: `${providerId}:${profileName}`,
+        credential,
+        testConnection,
+      })) as { success: boolean; error?: string };
+
+      if (!result?.success) {
+        // Notify wizard of error
+        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+        if (wizard) {
+          wizard.handleSaveError(result?.error || "Failed to save credential");
+        }
+        return;
+      }
+
+      // Notify wizard of success
+      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+      if (wizard) {
+        wizard.handleSaveSuccess();
+      }
+
+      // Refresh the providers list
+      await this.handleModelsRefresh();
+    } catch (err) {
+      const error = String(err);
+      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+      if (wizard) {
+        wizard.handleSaveError(error);
+      }
+    } finally {
+      this.wizardIsSaving = false;
+    }
+  }
+
+  handleModelsSearchChange(query: string) {
+    this.modelsSearchQuery = query;
+  }
+
+  async handleOAuthStart(event: CustomEvent) {
+    const { providerId } = event.detail;
+    
+    try {
+      // Start OAuth flow via backend
+      const result = (await this.client?.request("auth.oauth.start", {
+        providerId,
+      })) as { authUrl: string; state: string; verifier: string };
+
+      if (result?.authUrl) {
+        // Notify wizard of OAuth URL
+        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+        if (wizard) {
+          wizard.handleOAuthUrl(result.authUrl, result.state, result.verifier);
+        }
+
+        // Store OAuth state for callback handling
+        (window as unknown as Record<string, unknown>).oauthCallback = async (code: string, state: string) => {
+          await this.handleOAuthCallback(providerId, code, state, result.verifier);
+        };
+      }
+    } catch (err) {
+      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+      if (wizard) {
+        wizard.handleSaveError(String(err));
+      }
+    }
+  }
+
+  async handleOAuthCallback(providerId: string, code: string, state: string, verifier: string) {
+    try {
+      // Exchange code for tokens
+      const result = (await this.client?.request("auth.oauth.callback", {
+        providerId,
+        code,
+        state,
+        verifier,
+      })) as { success: boolean; profileId: string; email?: string };
+
+      if (result?.success) {
+        // Notify wizard of success
+        const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+        if (wizard) {
+          wizard.handleSaveSuccess();
+        }
+
+        // Refresh providers list
+        await this.handleModelsRefresh();
+      } else {
+        throw new Error("OAuth callback failed");
+      }
+    } catch (err) {
+      const wizard = this.querySelector("provider-config-wizard") as import("./components/provider-config-wizard").ProviderConfigWizard;
+      if (wizard) {
+        wizard.handleSaveError(String(err));
+      }
     }
   }
 

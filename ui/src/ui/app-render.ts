@@ -84,6 +84,7 @@ import { renderExecApprovalPrompt } from "./views/exec-approval";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation";
 import { renderInstances } from "./views/instances";
 import { renderLogs } from "./views/logs";
+import { renderModels } from "./views/models";
 import { renderNodes } from "./views/nodes";
 import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
@@ -640,6 +641,22 @@ export function renderApp(state: AppViewState) {
         }
 
         ${
+          state.tab === "models"
+            ? renderModels({
+                loading: state.modelsLoading,
+                error: state.modelsError,
+                providers: state.modelsProviders,
+                searchQuery: state.modelsSearchQuery,
+              }, {
+                onRefresh: () => state.handleModelsRefresh(),
+                onConfigure: (providerId) => state.handleModelsConfigure(providerId),
+                onManage: (providerId) => state.handleModelsManage(providerId),
+                onSearchChange: (query) => state.handleModelsSearchChange(query),
+              })
+            : nothing
+        }
+
+        ${
           state.tab === "debug"
             ? renderDebug({
                 loading: state.debugLoading,
@@ -685,6 +702,18 @@ export function renderApp(state: AppViewState) {
       </main>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
+      
+      <!-- Provider Configuration Wizard -->
+      ${state.wizardOpen ? html`
+        <provider-config-wizard
+          .open=${state.wizardOpen}
+          .providerId=${state.wizardProviderId}
+          .providerName=${state.wizardProviderName}
+          @close=${() => state.handleWizardClose()}
+          @save=${(e: CustomEvent) => state.handleWizardSave(e)}
+          @oauth-start=${(e: CustomEvent) => state.handleOAuthStart(e)}
+        ></provider-config-wizard>
+      ` : null}
     </div>
   `;
 }
