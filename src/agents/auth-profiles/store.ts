@@ -87,13 +87,19 @@ function coerceAuthStore(raw: unknown): AuthProfileStore | null {
       continue;
     }
     const typed = value as Partial<AuthProfileCredential>;
-    if (typed.type !== "api_key" && typed.type !== "oauth" && typed.type !== "token") {
+    // Support both 'type' (legacy) and 'mode' (current config format) fields
+    const credentialType = typed.type ?? (typed as unknown as Record<string, string>).mode;
+    if (credentialType !== "api_key" && credentialType !== "oauth" && credentialType !== "token") {
       continue;
     }
     if (!typed.provider) {
       continue;
     }
-    normalized[key] = typed as AuthProfileCredential;
+    // Normalize to 'type' field for internal use
+    normalized[key] = {
+      ...typed,
+      type: credentialType as "api_key" | "oauth" | "token",
+    } as AuthProfileCredential;
   }
   const order =
     record.order && typeof record.order === "object"

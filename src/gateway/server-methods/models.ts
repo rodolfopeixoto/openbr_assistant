@@ -21,6 +21,8 @@ const PROVIDER_CONFIGS: Record<string, { name: string; requiresCredential: boole
   cerebras: { name: "Cerebras", requiresCredential: true },
   xai: { name: "XAI", requiresCredential: true },
   openrouter: { name: "OpenRouter", requiresCredential: true },
+  "google-antigravity": { name: "Google Antigravity", requiresCredential: true },
+  "openai-codex": { name: "OpenAI Codex", requiresCredential: true },
 };
 
 export interface ModelInfo {
@@ -412,6 +414,28 @@ const DEFAULT_MODELS: Record<
     {
       id: "openai/gpt-4-turbo",
       name: "GPT-4 Turbo (OpenRouter)",
+      features: ["vision", "tools", "json"],
+      contextWindow: 128000,
+    },
+  ],
+  "google-antigravity": [
+    {
+      id: "gemini-3-pro-high",
+      name: "Gemini 3 Pro High",
+      features: ["vision", "tools"],
+      contextWindow: 128000,
+    },
+  ],
+  "openai-codex": [
+    {
+      id: "gpt-5.1-codex-mini",
+      name: "GPT-5.1 Codex Mini",
+      features: ["vision", "tools", "json"],
+      contextWindow: 128000,
+    },
+    {
+      id: "gpt-5.1",
+      name: "GPT-5.1",
       features: ["vision", "tools", "json"],
       contextWindow: 128000,
     },
