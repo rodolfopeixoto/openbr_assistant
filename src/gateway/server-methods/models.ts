@@ -1,3 +1,4 @@
+import type { AuthProfileStore } from "../../agents/auth-profiles/types.js";
 import type { GatewayRequestHandlers } from "./types.js";
 import {
   ErrorCodes,
@@ -5,6 +6,22 @@ import {
   formatValidationErrors,
   validateModelsListParams,
 } from "../protocol/index.js";
+
+// In-memory cache for current model selections (sessionKey -> {provider, model})
+const currentModelCache = new Map<string, { provider: string; model: string }>();
+
+// Provider configurations for building dynamic provider list
+const PROVIDER_CONFIGS: Record<string, { name: string; requiresCredential: boolean }> = {
+  openai: { name: "OpenAI", requiresCredential: true },
+  anthropic: { name: "Anthropic", requiresCredential: true },
+  google: { name: "Google", requiresCredential: true },
+  kimi: { name: "Kimi", requiresCredential: true },
+  minimax: { name: "Minimax", requiresCredential: true },
+  groq: { name: "Groq", requiresCredential: true },
+  cerebras: { name: "Cerebras", requiresCredential: true },
+  xai: { name: "XAI", requiresCredential: true },
+  openrouter: { name: "OpenRouter", requiresCredential: true },
+};
 
 export interface ModelInfo {
   id: string;
@@ -29,8 +46,8 @@ export interface ModelProvider {
   models: ModelInfo[];
 }
 
-// Default providers configuration
-const DEFAULT_PROVIDERS: ModelProvider[] = [
+// Default providers configuration (for reference)
+const _DEFAULT_PROVIDERS: ModelProvider[] = [
   {
     id: "openai",
     name: "OpenAI",
@@ -184,8 +201,8 @@ const DEFAULT_PROVIDERS: ModelProvider[] = [
   },
 ];
 
-// In-memory storage for session model selections
-const sessionModelSelections = new Map<string, { provider: string; model: string }>();
+// In-memory storage for session model selections (legacy - use currentModelCache instead)
+const _sessionModelSelections = new Map<string, { provider: string; model: string }>();
 
 export const modelsHandlers: GatewayRequestHandlers = {
   "models.list": async ({ params, respond, context }) => {
@@ -208,182 +225,143 @@ export const modelsHandlers: GatewayRequestHandlers = {
     }
   },
 
-  "models.providers": async ({ respond }) => {
+  // NEW: Get configured providers (only those with credentials)
+  "models.configured": async ({ respond }) => {
     try {
-      // Check actual auth configuration from auth-profiles.json
-      const configuredProviders = new Map<string, number>(); // provider -> credential count
-      const providerTypes = new Map<string, string>(); // provider -> credential type
-
-      // Load auth profiles to check which providers are configured
-      try {
-        const { ensureAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
-        const authStore = ensureAuthProfileStore();
-
-        // Collect all providers that have credentials
-        for (const [profileId, credential] of Object.entries(authStore.profiles)) {
-          const provider = profileId.split(":")[0];
-          if (provider) {
-            configuredProviders.set(provider, (configuredProviders.get(provider) || 0) + 1);
-            // Store the type of the first credential we see for this provider
-            if (!providerTypes.has(provider)) {
-              providerTypes.set(provider, credential.type);
-            }
-          }
-        }
-      } catch {
-        // If auth store fails, continue with empty set
-      }
-
-      // Start with default providers
-      const providers = DEFAULT_PROVIDERS.map((provider) => ({
-        ...provider,
-        status: configuredProviders.has(provider.id)
-          ? ("configured" as const)
-          : ("unconfigured" as const),
-      }));
-
-      // Add providers that are configured but not in default list
-      const defaultProviderIds = new Set(DEFAULT_PROVIDERS.map((p) => p.id));
-      for (const [providerId, _count] of configuredProviders.entries()) {
-        if (!defaultProviderIds.has(providerId)) {
-          // Format provider name (e.g., "openai-codex" -> "OpenAI Codex")
-          const formattedName = providerId
-            .split("-")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-
-          providers.push({
-            id: providerId,
-            name: formattedName,
-            icon: "🔧",
-            status: "configured" as const,
-            baseUrl: undefined,
-            models: [], // Unknown models for custom providers
-          });
-        }
-      }
-
-      respond(true, { providers });
-    } catch (error) {
-      respond(
-        false,
-        undefined,
-        errorShape(ErrorCodes.UNAVAILABLE, `failed to load model providers: ${error}`),
-      );
+      const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const store = loadAuthProfileStore();
+      const configuredProviders = buildConfiguredProvidersList(store);
+      respond(true, { providers: configuredProviders }, undefined);
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
     }
   },
 
-  "models.select": async ({ params, respond }) => {
+  // NEW: Get current model selection
+  "models.current": async ({ params, respond }) => {
+    const { sessionKey } = params as { sessionKey?: string };
+
+    if (!sessionKey) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "sessionKey is required"));
+      return;
+    }
+
     try {
-      const { sessionKey, providerId, modelId } = params as {
-        sessionKey: string;
-        providerId: string;
-        modelId: string;
-      };
-
-      if (!sessionKey || !providerId || !modelId) {
-        respond(
-          false,
-          undefined,
-          errorShape(ErrorCodes.INVALID_REQUEST, "missing required parameters"),
-        );
+      // Check in-memory cache first
+      const cached = currentModelCache.get(sessionKey);
+      if (cached) {
+        respond(true, { provider: cached.provider, model: cached.model }, undefined);
         return;
       }
 
-      // Validate that the provider and model exist
-      const provider = DEFAULT_PROVIDERS.find((p) => p.id === providerId);
-      if (!provider) {
-        respond(
-          false,
-          undefined,
-          errorShape(ErrorCodes.INVALID_REQUEST, `unknown provider: ${providerId}`),
-        );
+      // Check auth store (persistent)
+      const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const store = loadAuthProfileStore();
+      const persisted = store.selectedModels?.[sessionKey];
+
+      if (persisted) {
+        currentModelCache.set(sessionKey, {
+          provider: persisted.provider,
+          model: persisted.model,
+        });
+        respond(true, { provider: persisted.provider, model: persisted.model }, undefined);
         return;
       }
 
-      const model = provider.models.find((m) => m.id === modelId);
-      if (!model) {
-        respond(
-          false,
-          undefined,
-          errorShape(
-            ErrorCodes.INVALID_REQUEST,
-            `unknown model: ${modelId} for provider ${providerId}`,
-          ),
-        );
-        return;
+      // Return null if no selection found
+      respond(true, { provider: null, model: null }, undefined);
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
+    }
+  },
+
+  // NEW: Select a model
+  "models.select": async ({ params, respond }) => {
+    const { sessionKey, providerId, modelId } = params as {
+      sessionKey?: string;
+      providerId?: string;
+      modelId?: string;
+    };
+
+    if (!sessionKey || !providerId || !modelId) {
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.INVALID_REQUEST, "sessionKey, providerId, and modelId are required"),
+      );
+      return;
+    }
+
+    try {
+      // Update in-memory cache
+      currentModelCache.set(sessionKey, { provider: providerId, model: modelId });
+
+      // Persist to auth store
+      const { updateAuthProfileStoreWithLock } =
+        await import("../../agents/auth-profiles/store.js");
+      const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const store = loadAuthProfileStore();
+
+      // Add selectedModels if doesn't exist
+      if (!store.selectedModels) {
+        store.selectedModels = {};
       }
 
-      // Check if provider is configured
-      if (provider.status === "unconfigured") {
-        respond(
-          false,
-          undefined,
-          errorShape(
-            ErrorCodes.INVALID_REQUEST,
-            `provider ${providerId} is not configured. Please configure API key first.`,
-          ),
-        );
-        return;
-      }
-
-      // Store the selection
-      sessionModelSelections.set(sessionKey, { provider: providerId, model: modelId });
-
-      respond(true, {
-        success: true,
-        sessionKey,
+      // Update the store
+      store.selectedModels[sessionKey] = {
         provider: providerId,
         model: modelId,
+        selectedAt: Date.now(),
+      };
+
+      // Persist with lock
+      await updateAuthProfileStoreWithLock({
+        updater: (_store: AuthProfileStore) => {
+          if (!_store.selectedModels) {
+            _store.selectedModels = {};
+          }
+          _store.selectedModels[sessionKey] = {
+            provider: providerId,
+            model: modelId,
+            selectedAt: Date.now(),
+          };
+          return true; // Should save
+        },
       });
-    } catch (error) {
-      respond(
-        false,
-        undefined,
-        errorShape(ErrorCodes.UNAVAILABLE, `failed to select model: ${error}`),
-      );
-    }
-  },
 
-  "models.current": async ({ params, respond }) => {
-    try {
-      const { sessionKey } = params as { sessionKey: string };
-
-      if (!sessionKey) {
-        respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "missing sessionKey"));
-        return;
-      }
-
-      const selection = sessionModelSelections.get(sessionKey);
-
-      if (!selection) {
-        // Return default model (OpenAI GPT-4 Turbo)
-        respond(true, {
-          sessionKey,
-          provider: "openai",
-          model: "gpt-4-turbo",
-          isDefault: true,
-        });
-        return;
-      }
-
-      respond(true, {
-        sessionKey,
-        provider: selection.provider,
-        model: selection.model,
-        isDefault: false,
-      });
-    } catch (error) {
-      respond(
-        false,
-        undefined,
-        errorShape(ErrorCodes.UNAVAILABLE, `failed to get current model: ${error}`),
-      );
+      respond(true, { provider: providerId, model: modelId }, undefined);
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
     }
   },
 };
 
-// Helper function to get the selected model for a session
-export function getSessionModel(sessionKey: string): { provider: string; model: string } {
-  return sessionModelSelections.get(sessionKey) || { provider: "openai", model: "gpt-4-turbo" };
+// Helper function to build configured providers list
+function buildConfiguredProvidersList(store: AuthProfileStore) {
+  const providers = [];
+
+  for (const [profileId, credential] of Object.entries(store.profiles)) {
+    const providerId = credential.provider;
+    const config = PROVIDER_CONFIGS[providerId];
+
+    if (!config) {
+      continue;
+    }
+
+    // Determine credential status
+    const hasValidCredential =
+      credential.type === "oauth" ||
+      (credential.type === "api_key" && credential.key) ||
+      (credential.type === "token" && credential.token);
+
+    providers.push({
+      id: providerId,
+      name: config.name,
+      profileId,
+      status: hasValidCredential ? "configured" : "unconfigured",
+      models: [], // Will be populated by frontend
+    });
+  }
+
+  return providers;
 }

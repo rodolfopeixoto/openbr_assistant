@@ -1,4 +1,5 @@
 import "./styles.css";
+// Import components to ensure registration
 import "./ui/components/model-selector.js";
 import "./ui/components/provider-card.js";
 import "./ui/components/provider-config-wizard.js";
