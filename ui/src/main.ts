@@ -1,5 +1,7 @@
 import "./styles.css";
 import "./ui/components/model-selector.js";
+import "./ui/components/provider-card.js";
+import "./ui/components/provider-config-wizard.js";
 import "./ui/app.ts";
 
 // Cache busting - these values are injected at build time
