@@ -664,6 +664,22 @@ export class OpenClawApp extends LitElement {
       };
       if (response?.ok && response?.payload?.providers) {
         this.configuredProviders = response.payload.providers;
+        
+        // Fallback: if no selection and providers exist, select the first one
+        if ((!this.selectedProvider || !this.selectedModel) && this.configuredProviders.length > 0) {
+          const firstProvider = this.configuredProviders[0];
+          if (firstProvider.models && firstProvider.models.length > 0) {
+            this.selectedProvider = firstProvider.id;
+            this.selectedModel = firstProvider.models[0].id;
+            console.log(`[App] Auto-selected model: ${this.selectedProvider}/${this.selectedModel}`);
+            // Persist the selection
+            await this.client.request("models.select", {
+              sessionKey: this.sessionKey,
+              providerId: this.selectedProvider,
+              modelId: this.selectedModel,
+            });
+          }
+        }
       } else {
         this.configuredProviders = [];
       }

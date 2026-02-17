@@ -136,6 +136,9 @@ export function connectGateway(host: GatewayHost) {
       void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);
       // Load chat history on initial connection
       void loadChatHistory(host as unknown as OpenClawApp);
+      // Load configured providers and current model selection
+      void (host as unknown as { loadConfiguredProviders: () => Promise<void> }).loadConfiguredProviders();
+      void (host as unknown as { loadCurrentModel: () => Promise<void> }).loadCurrentModel();
     },
     onClose: ({ code, reason }) => {
       host.connected = false;
