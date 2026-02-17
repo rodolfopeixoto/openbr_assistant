@@ -1,0 +1,69 @@
+[package]
+name = "openclaw-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["OpenClaw Team"]
+description = "High-performance core library for OpenClaw"
+license = "MIT"
+repository = "https://github.com/openclaw/openclaw"
+
+[dependencies]
+# Hash/Crypto - ultra fast
+blake3 = "1.5"
+xxhash-rust = { version = "0.8", features = ["xxh3", "xxh64"] }
+
+# JSON Parsing with SIMD
+simd-json = { version = "0.13", features = ["serde_impl"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Compression
+zstd = "0.13"
+lz4 = "1.24"
+
+# Parallelism
+rayon = "1.8"
+crossbeam = "0.8"
+
+# Async runtime
+tokio = { version = "1.35", features = ["rt-multi-thread", "sync", "time"] }
+
+# Image processing (alternative to sharp)
+image = { version = "0.24", default-features = false, features = [
+    "png", "jpeg", "gif", "webp", "bmp"
+] }
+
+# PDF processing
+pdf-extract = "0.7"
+
+# Data structures
+hashbrown = "0.14"
+lru = "0.12"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# N-API bindings for Node.js
+napi = { version = "2.14", default-features = false, features = ["napi8"] }
+napi-derive = "2.14"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1
