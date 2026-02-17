@@ -1,0 +1,9 @@
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/crossbeam_queue-93149eb7d856aa8d.d: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/array_queue.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/libcrossbeam_queue-93149eb7d856aa8d.rlib: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/array_queue.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/libcrossbeam_queue-93149eb7d856aa8d.rmeta: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/array_queue.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/lib.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/array_queue.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/crossbeam-queue-0.3.12/src/seg_queue.rs:

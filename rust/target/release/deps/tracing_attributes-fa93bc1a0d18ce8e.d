@@ -1,0 +1,7 @@
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/tracing_attributes-fa93bc1a0d18ce8e.d: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/attr.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/expand.rs
+
+/Users/ropeixoto/Project/experiments/openbr_assistant/rust/target/release/deps/libtracing_attributes-fa93bc1a0d18ce8e.dylib: /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/lib.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/attr.rs /Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/expand.rs
+
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/lib.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/attr.rs:
+/Users/ropeixoto/.asdf/installs/rust/1.93.1/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-attributes-0.1.31/src/expand.rs:

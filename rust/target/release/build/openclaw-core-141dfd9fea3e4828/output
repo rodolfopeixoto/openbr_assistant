@@ -1,0 +1,3 @@
+cargo:rustc-link-arg=-undefined
+cargo:rustc-link-arg=dynamic_lookup
+cargo:rustc-link-arg=-Wl,-no_fixup_chains
