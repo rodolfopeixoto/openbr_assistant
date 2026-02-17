@@ -210,9 +210,60 @@ export const modelsHandlers: GatewayRequestHandlers = {
 
   "models.providers": async ({ respond }) => {
     try {
-      // In the future, this will check actual API key configuration
-      // For now, return default providers with status based on config
-      respond(true, { providers: DEFAULT_PROVIDERS });
+      // Check actual auth configuration from auth-profiles.json
+      const configuredProviders = new Map<string, number>(); // provider -> credential count
+      const providerTypes = new Map<string, string>(); // provider -> credential type
+
+      // Load auth profiles to check which providers are configured
+      try {
+        const { ensureAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+        const authStore = ensureAuthProfileStore();
+
+        // Collect all providers that have credentials
+        for (const [profileId, credential] of Object.entries(authStore.profiles)) {
+          const provider = profileId.split(":")[0];
+          if (provider) {
+            configuredProviders.set(provider, (configuredProviders.get(provider) || 0) + 1);
+            // Store the type of the first credential we see for this provider
+            if (!providerTypes.has(provider)) {
+              providerTypes.set(provider, credential.type);
+            }
+          }
+        }
+      } catch {
+        // If auth store fails, continue with empty set
+      }
+
+      // Start with default providers
+      const providers = DEFAULT_PROVIDERS.map((provider) => ({
+        ...provider,
+        status: configuredProviders.has(provider.id)
+          ? ("configured" as const)
+          : ("unconfigured" as const),
+      }));
+
+      // Add providers that are configured but not in default list
+      const defaultProviderIds = new Set(DEFAULT_PROVIDERS.map((p) => p.id));
+      for (const [providerId, _count] of configuredProviders.entries()) {
+        if (!defaultProviderIds.has(providerId)) {
+          // Format provider name (e.g., "openai-codex" -> "OpenAI Codex")
+          const formattedName = providerId
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+
+          providers.push({
+            id: providerId,
+            name: formattedName,
+            icon: "🔧",
+            status: "configured" as const,
+            baseUrl: undefined,
+            models: [], // Unknown models for custom providers
+          });
+        }
+      }
+
+      respond(true, { providers });
     } catch (error) {
       respond(
         false,
