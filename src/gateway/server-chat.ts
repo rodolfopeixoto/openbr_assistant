@@ -179,6 +179,9 @@ export function createAgentEventHandler({
     error?: unknown,
   ) => {
     const text = chatRunState.buffers.get(clientRunId)?.trim() ?? "";
+    console.log(
+      `[DEBUG emitChatFinal] clientRunId: ${clientRunId}, jobState: ${jobState}, text: "${text.substring(0, 100)}"`,
+    );
     chatRunState.buffers.delete(clientRunId);
     chatRunState.deltaSentAt.delete(clientRunId);
     if (jobState === "done") {
@@ -195,6 +198,7 @@ export function createAgentEventHandler({
             }
           : undefined,
       };
+      console.log(`[DEBUG emitChatFinal] Broadcasting final payload:`, JSON.stringify(payload));
       // Suppress webchat broadcast for heartbeat runs when showOk is false
       if (!shouldSuppressHeartbeatBroadcast(clientRunId)) {
         broadcast("chat", payload);
@@ -272,6 +276,9 @@ export function createAgentEventHandler({
       if (!isAborted && evt.stream === "assistant" && typeof evt.data?.text === "string") {
         emitChatDelta(sessionKey, clientRunId, evt.seq, evt.data.text);
       } else if (!isAborted && (lifecyclePhase === "end" || lifecyclePhase === "error")) {
+        console.log(
+          `[DEBUG server-chat] lifecyclePhase: ${lifecyclePhase}, sessionKey: ${sessionKey}, clientRunId: ${clientRunId}, hasBuffer: ${chatRunState.buffers.has(clientRunId)}`,
+        );
         if (chatLink) {
           const finished = chatRunState.registry.shift(evt.runId);
           if (!finished) {
