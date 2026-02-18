@@ -443,6 +443,16 @@ export const OpenClawSchema = z
           })
           .strict()
           .optional(),
+        cors: z
+          .object({
+            allowedOrigins: z.array(z.string()).optional(),
+            allowedMethods: z.array(z.string()).optional(),
+            allowedHeaders: z.array(z.string()).optional(),
+            allowCredentials: z.boolean().optional(),
+            maxAge: z.number().int().nonnegative().optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
