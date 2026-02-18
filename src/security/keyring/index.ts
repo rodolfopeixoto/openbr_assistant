@@ -5,7 +5,7 @@ export { type KeyringAdapter } from "./adapter.js";
 export { MacOSKeychainAdapter, unlockKeychain } from "./macos.js";
 
 // Fallback adapter that stores in memory (not persistent)
-class MemoryKeyringAdapter implements KeyringAdapter {
+export class MemoryKeyringAdapter implements KeyringAdapter {
   private storage = new Map<string, string>();
 
   async isAvailable(): Promise<boolean> {
@@ -53,7 +53,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-class FileKeyringAdapter implements KeyringAdapter {
+export class FileKeyringAdapter implements KeyringAdapter {
   private baseDir: string;
 
   constructor(baseDir?: string) {
@@ -167,6 +167,9 @@ class FileKeyringAdapter implements KeyringAdapter {
   }
 }
 
+// Detect if we're in a test environment
+const isTestEnvironment = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+
 // Smart adapter that tries keychain first, then falls back to file
 export class SmartKeyringAdapter implements KeyringAdapter {
   private primary: KeyringAdapter;
@@ -174,6 +177,13 @@ export class SmartKeyringAdapter implements KeyringAdapter {
   private usingFallback = false;
 
   constructor() {
+    // In test environment, use memory adapter to avoid keychain popups
+    if (isTestEnvironment) {
+      this.primary = new MemoryKeyringAdapter();
+      this.fallback = new FileKeyringAdapter();
+      return;
+    }
+
     // Try to use platform-native keyring
     if (process.platform === "darwin") {
       this.primary = new MacOSKeychainAdapter();
