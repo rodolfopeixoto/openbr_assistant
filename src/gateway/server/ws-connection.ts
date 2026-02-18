@@ -4,14 +4,17 @@ import type { createSubsystemLogger } from "../../logging/subsystem.js";
 import type { ResolvedGatewayAuth } from "../auth.js";
 import type { GatewayRequestContext, GatewayRequestHandlers } from "../server-methods/types.js";
 import type { GatewayWsClient } from "./ws-types.js";
+import { loadConfig } from "../../config/config.js";
 import { resolveCanvasHostUrl } from "../../infra/canvas-host-url.js";
 import { listSystemPresence, upsertPresence } from "../../infra/system-presence.js";
 import { isWebchatClient } from "../../utils/message-channel.js";
-import { isLoopbackAddress } from "../net.js";
+import { isLoopbackAddress, resolveGatewayClientIp } from "../net.js";
 import { getHandshakeTimeoutMs } from "../server-constants.js";
 import { formatError } from "../server-utils.js";
 import { logWs } from "../ws-log.js";
+import { truncateCloseReason } from "./close-reason.js";
 import { getHealthVersion, getPresenceVersion, incrementPresenceVersion } from "./health-state.js";
+import { WebSocketAuth } from "./ws-auth.js";
 import { attachGatewayWsMessageHandler } from "./ws-connection/message-handler.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
@@ -39,6 +42,9 @@ export function attachGatewayWsConnectionHandler(params: {
     },
   ) => void;
   buildRequestContext: () => GatewayRequestContext;
+  allowedOrigins?: string[];
+  enableChallengeAuth?: boolean;
+  enableRateLimiting?: boolean;
 }) {
   const {
     wss,
@@ -56,7 +62,12 @@ export function attachGatewayWsConnectionHandler(params: {
     extraHandlers,
     broadcast,
     buildRequestContext,
+    allowedOrigins,
+    enableChallengeAuth = true,
+    enableRateLimiting = true,
   } = params;
+
+  const wsAuth = new WebSocketAuth();
 
   wss.on("connection", (socket, upgradeReq) => {
     let client: GatewayWsClient | null = null;
@@ -85,6 +96,31 @@ export function attachGatewayWsConnectionHandler(params: {
     });
 
     logWs("in", "open", { connId, remoteAddr });
+
+    // Rate limiting check
+    if (enableRateLimiting) {
+      const configSnapshot = loadConfig();
+      const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+      const clientIp = resolveGatewayClientIp({ remoteAddr, forwardedFor, realIp, trustedProxies });
+      const effectiveIp = clientIp ?? remoteAddr ?? "unknown";
+
+      if (!wsAuth.checkRateLimit(effectiveIp)) {
+        logWsControl.warn(`rate limit exceeded conn=${connId} remote=${effectiveIp}`);
+        socket.close(1008, truncateCloseReason("rate limit exceeded"));
+        return;
+      }
+    }
+
+    // Origin validation
+    if (allowedOrigins && allowedOrigins.length > 0) {
+      if (!wsAuth.validateOrigin(upgradeReq, allowedOrigins)) {
+        logWsControl.warn(
+          `origin validation failed conn=${connId} remote=${remoteAddr ?? "?"} origin=${requestOrigin ?? "n/a"}`,
+        );
+        socket.close(1008, truncateCloseReason("origin not allowed"));
+        return;
+      }
+    }
     let handshakeState: "pending" | "connected" | "failed" = "pending";
     let closeCause: string | undefined;
     let closeMeta: Record<string, unknown> = {};
@@ -117,12 +153,28 @@ export function attachGatewayWsConnectionHandler(params: {
       }
     };
 
-    const connectNonce = randomUUID();
-    send({
-      type: "event",
-      event: "connect.challenge",
-      payload: { nonce: connectNonce, ts: Date.now() },
-    });
+    // Generate enhanced challenge-response challenge
+    let challengeId: string | undefined;
+    let connectNonce: string;
+
+    if (enableChallengeAuth) {
+      const challengeJson = wsAuth.generateChallenge();
+      const challengeData = JSON.parse(challengeJson) as { id: string; nonce: string };
+      challengeId = challengeData.id;
+      connectNonce = challengeData.nonce;
+      send({
+        type: "event",
+        event: "connect.challenge",
+        payload: { id: challengeData.id, nonce: challengeData.nonce, ts: Date.now() },
+      });
+    } else {
+      connectNonce = randomUUID();
+      send({
+        type: "event",
+        event: "connect.challenge",
+        payload: { nonce: connectNonce, ts: Date.now() },
+      });
+    }
 
     const close = (code = 1000, reason?: string) => {
       if (closed) {
@@ -239,6 +291,9 @@ export function attachGatewayWsConnectionHandler(params: {
       requestUserAgent,
       canvasHostUrl,
       connectNonce,
+      challengeId,
+      wsAuth,
+      enableChallengeAuth,
       resolvedAuth,
       gatewayMethods,
       events,
