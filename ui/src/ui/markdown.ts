@@ -2,6 +2,32 @@ import DOMPurify from "dompurify";
 import { marked, type Tokens } from "marked";
 import { truncateText } from "./format";
 
+// Helper to safely parse inline tokens with fallback
+function safeParseInline(parser: any, tokens: Tokens.Generic[]): string {
+  try {
+    if (parser?.parseInline) {
+      return parser.parseInline(tokens);
+    }
+    // Fallback: manually render tokens
+    return tokens.map(token => {
+      if (token.type === 'text') return escapeHtml(token.text || '');
+      if (token.type === 'codespan') return `<code>${escapeHtml(token.text || '')}</code>`;
+      if (token.type === 'strong') return `<strong>${safeParseInline(parser, token.tokens || [])}</strong>`;
+      if (token.type === 'em') return `<em>${safeParseInline(parser, token.tokens || [])}</em>`;
+      if (token.type === 'del') return `<del>${safeParseInline(parser, token.tokens || [])}</del>`;
+      if (token.type === 'link') {
+        const href = escapeHtml(token.href || '');
+        const text = safeParseInline(parser, token.tokens || []);
+        return `<a href="${href}" target="_blank" rel="noreferrer noopener">${text}</a>`;
+      }
+      return escapeHtml(token.text || '');
+    }).join('');
+  } catch (err) {
+    console.warn('[Markdown] Error in safeParseInline:', err);
+    return tokens.map(t => escapeHtml(t.text || '')).join('');
+  }
+}
+
 // Configure marked with custom tokenizer for code blocks
 marked.use({
   renderer: {
@@ -50,7 +76,7 @@ marked.use({
         if (!tokens || tokens.length === 0) {
           return '<p></p>';
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         return `<p>${text}</p>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing paragraph token:', err);
@@ -64,7 +90,7 @@ marked.use({
           const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
           return `<a href="${escapeHtml(href)}"${titleAttr} target="_blank" rel="noreferrer noopener">${escapeHtml(href)}</a>`;
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
         return `<a href="${escapeHtml(href)}"${titleAttr} target="_blank" rel="noreferrer noopener">${text}</a>`;
       } catch (err) {
@@ -79,7 +105,7 @@ marked.use({
         if (!tokens || tokens.length === 0) {
           return `<h${depth}></h${depth}>`;
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         return `<h${depth}>${text}</h${depth}>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing heading token:', err);
@@ -94,7 +120,7 @@ marked.use({
             if (!item.tokens || item.tokens.length === 0) {
               return '<li></li>';
             }
-            const text = this.parser.parseInline(item.tokens);
+            const text = safeParseInline(this.parser, item.tokens);
             return `<li>${text}</li>`;
           } catch (err) {
             console.warn('[Markdown] Error parsing list item:', err);
@@ -115,7 +141,8 @@ marked.use({
         if (!tokens || tokens.length === 0) {
           return '<blockquote></blockquote>';
         }
-        const text = this.parser.parse(tokens);
+        // blockquote uses parse (not parseInline) for block content
+        const text = this.parser?.parse ? this.parser.parse(tokens) : safeParseInline(this.parser, tokens);
         return `<blockquote>${text}</blockquote>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing blockquote token:', err);
@@ -130,7 +157,7 @@ marked.use({
             if (!cell.tokens || cell.tokens.length === 0) {
               return '<th></th>';
             }
-            const text = this.parser.parseInline(cell.tokens);
+            const text = safeParseInline(this.parser, cell.tokens);
             return `<th>${text}</th>`;
           } catch (err) {
             console.warn('[Markdown] Error parsing table header cell:', err);
@@ -144,7 +171,7 @@ marked.use({
               if (!cell.tokens || cell.tokens.length === 0) {
                 return '<td></td>';
               }
-              const text = this.parser.parseInline(cell.tokens);
+              const text = safeParseInline(this.parser, cell.tokens);
               return `<td>${text}</td>`;
             } catch (err) {
               console.warn('[Markdown] Error parsing table cell:', err);
@@ -170,34 +197,34 @@ marked.use({
         if (!tokens || tokens.length === 0) {
           return '<strong></strong>';
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         return `<strong>${text}</strong>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing strong token:', err);
         return '<strong></strong>';
       }
     },
-    
+
     em({ tokens }: Tokens.Em): string {
       try {
         // Safely handle empty or undefined tokens
         if (!tokens || tokens.length === 0) {
           return '<em></em>';
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         return `<em>${text}</em>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing em token:', err);
         return '<em></em>';
       }
     },
-    
+
     del({ tokens }: Tokens.Del): string {
       try {
         if (!tokens || tokens.length === 0) {
           return '<del></del>';
         }
-        const text = this.parser.parseInline(tokens);
+        const text = safeParseInline(this.parser, tokens);
         return `<del>${text}</del>`;
       } catch (err) {
         console.warn('[Markdown] Error parsing del token:', err);
