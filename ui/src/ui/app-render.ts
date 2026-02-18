@@ -249,6 +249,8 @@ export function renderApp(state: AppViewState) {
                 },
                 onConnect: () => state.connect(),
                 onRefresh: () => state.loadOverview(),
+                restarting: state.restarting,
+                onRestart: () => state.handleRestart(),
               })
             : nothing
         }
