@@ -1,14 +1,7 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
-import { promisify } from "node:util";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  AudioValidator,
-  AudioValidationRateLimiter,
-  AudioValidationConfig,
-} from "./audio-validator.js";
-
-const execFileAsync = promisify(execFile);
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { AudioValidator, AudioValidationRateLimiter } from "./audio-validator.js";
 
 // Mock fs and child_process
 vi.mock("node:fs/promises", () => ({
@@ -18,12 +11,27 @@ vi.mock("node:fs/promises", () => ({
   },
 }));
 
+// Mock child_process - execFile will be promisified
 vi.mock("node:child_process", () => ({
   execFile: vi.fn(),
 }));
 
+// Mock promisify to return the function as-is (so we can mock it easily)
 vi.mock("node:util", () => ({
-  promisify: vi.fn((fn) => fn),
+  promisify: vi.fn((fn) => {
+    // Return a function that returns a Promise
+    return (...args: any[]) => {
+      return new Promise((resolve, reject) => {
+        fn(
+          ...args,
+          (err: any, stdout: any, stderr: any) => {
+            if (err) reject(err);
+            else resolve({ stdout, stderr });
+          },
+        );
+      });
+    };
+  }),
 }));
 
 describe("AudioValidator", () => {
@@ -49,18 +57,26 @@ describe("AudioValidator", () => {
       const mockStat = { size: 10 * 1024 * 1024 }; // 10MB
       vi.mocked(fs.stat).mockResolvedValue(mockStat as any);
 
-      // Mock file signature check
+      // Mock file signature check - MP3 signature
+      const mockBuffer = Buffer.alloc(16);
+      mockBuffer[0] = 0xff;
+      mockBuffer[1] = 0xfb;
+
       const mockFile = {
-        read: vi.fn().mockResolvedValue({}),
+        read: vi.fn().mockImplementation((buf, offset, length) => {
+          mockBuffer.copy(buf, offset, 0, length);
+          return Promise.resolve({ bytesRead: length });
+        }),
         close: vi.fn().mockResolvedValue(undefined),
       };
       vi.mocked(fs.open).mockResolvedValue(mockFile as any);
 
-      // Mock ffprobe response
+      // Mock ffprobe response using callback signature
       vi.mocked(execFile).mockImplementation((cmd, args, cb) => {
-        if (cb) {
-          cb(null, {
-            stdout: JSON.stringify({
+        if (typeof cb === "function") {
+          cb(
+            null,
+            JSON.stringify({
               format: {
                 duration: "60",
                 format_name: "mp3",
@@ -73,10 +89,10 @@ describe("AudioValidator", () => {
                 },
               ],
             }),
-            stderr: "",
-          });
+            "",
+          );
         }
-        return {} as any;
+        return undefined as any;
       });
 
       const result = await validator.validate("/test/audio.mp3");
@@ -95,7 +111,7 @@ describe("AudioValidator", () => {
       mockBuffer.write("INVALID", 0);
 
       const mockFile = {
-        read: vi.fn().mockImplementation((buf, offset, length, position) => {
+        read: vi.fn().mockImplementation((buf, offset, length) => {
           mockBuffer.copy(buf, offset, 0, length);
           return Promise.resolve({ bytesRead: length });
         }),
@@ -117,7 +133,7 @@ describe("AudioValidator", () => {
       mockBuffer.write("OggS", 0);
 
       const mockFile = {
-        read: vi.fn().mockImplementation((buf, offset, length, position) => {
+        read: vi.fn().mockImplementation((buf, offset, length) => {
           mockBuffer.copy(buf, offset, 0, length);
           return Promise.resolve({ bytesRead: length });
         }),
@@ -126,9 +142,10 @@ describe("AudioValidator", () => {
       vi.mocked(fs.open).mockResolvedValue(mockFile as any);
 
       vi.mocked(execFile).mockImplementation((cmd, args, cb) => {
-        if (cb) {
-          cb(null, {
-            stdout: JSON.stringify({
+        if (typeof cb === "function") {
+          cb(
+            null,
+            JSON.stringify({
               format: {
                 duration: "30",
                 format_name: "ogg",
@@ -141,10 +158,10 @@ describe("AudioValidator", () => {
                 },
               ],
             }),
-            stderr: "",
-          });
+            "",
+          );
         }
-        return {} as any;
+        return undefined as any;
       });
 
       const result = await validator.validate("/test/audio.ogg");
@@ -162,7 +179,7 @@ describe("AudioValidator", () => {
       mockBuffer.write("OggS", 0);
 
       const mockFile = {
-        read: vi.fn().mockImplementation((buf, offset, length, position) => {
+        read: vi.fn().mockImplementation((buf, offset, length) => {
           mockBuffer.copy(buf, offset, 0, length);
           return Promise.resolve({ bytesRead: length });
         }),
@@ -172,9 +189,10 @@ describe("AudioValidator", () => {
 
       // Return duration exceeding 10 minutes
       vi.mocked(execFile).mockImplementation((cmd, args, cb) => {
-        if (cb) {
-          cb(null, {
-            stdout: JSON.stringify({
+        if (typeof cb === "function") {
+          cb(
+            null,
+            JSON.stringify({
               format: {
                 duration: "720", // 12 minutes
                 format_name: "ogg",
@@ -187,10 +205,10 @@ describe("AudioValidator", () => {
                 },
               ],
             }),
-            stderr: "",
-          });
+            "",
+          );
         }
-        return {} as any;
+        return undefined as any;
       });
 
       const result = await validator.validate("/test/long-audio.ogg");
@@ -209,7 +227,7 @@ describe("AudioValidator", () => {
       mockBuffer.write("OggS", 0);
 
       const mockFile = {
-        read: vi.fn().mockImplementation((buf, offset, length, position) => {
+        read: vi.fn().mockImplementation((buf, offset, length) => {
           mockBuffer.copy(buf, offset, 0, length);
           return Promise.resolve({ bytesRead: length });
         }),
@@ -218,9 +236,10 @@ describe("AudioValidator", () => {
       vi.mocked(fs.open).mockResolvedValue(mockFile as any);
 
       vi.mocked(execFile).mockImplementation((cmd, args, cb) => {
-        if (cb) {
-          cb(null, {
-            stdout: JSON.stringify({
+        if (typeof cb === "function") {
+          cb(
+            null,
+            JSON.stringify({
               format: {
                 duration: "30",
                 format_name: "flac", // Not in allowed list
@@ -233,10 +252,10 @@ describe("AudioValidator", () => {
                 },
               ],
             }),
-            stderr: "",
-          });
+            "",
+          );
         }
-        return {} as any;
+        return undefined as any;
       });
 
       const result = await validator.validate("/test/audio.flac");
@@ -274,7 +293,7 @@ describe("AudioValidator", () => {
       mockBuffer.write("WAVE", 8);
 
       const mockFile = {
-        read: vi.fn().mockImplementation((buf, offset, length, position) => {
+        read: vi.fn().mockImplementation((buf, offset, length) => {
           mockBuffer.copy(buf, offset, 0, length);
           return Promise.resolve({ bytesRead: length });
         }),
@@ -283,9 +302,10 @@ describe("AudioValidator", () => {
       vi.mocked(fs.open).mockResolvedValue(mockFile as any);
 
       vi.mocked(execFile).mockImplementation((cmd, args, cb) => {
-        if (cb) {
-          cb(null, {
-            stdout: JSON.stringify({
+        if (typeof cb === "function") {
+          cb(
+            null,
+            JSON.stringify({
               format: {
                 duration: "30",
                 format_name: "wav",
@@ -298,10 +318,10 @@ describe("AudioValidator", () => {
                 },
               ],
             }),
-            stderr: "",
-          });
+            "",
+          );
         }
-        return {} as any;
+        return undefined as any;
       });
 
       const result = await customValidator.validate("/test/audio.wav");
