@@ -48,6 +48,7 @@ export const ConnectParamsSchema = Type.Object(
           signature: NonEmptyString,
           signedAt: Type.Integer({ minimum: 0 }),
           nonce: Type.Optional(NonEmptyString),
+          challengeResponse: Type.Optional(NonEmptyString),
         },
         { additionalProperties: false },
       ),

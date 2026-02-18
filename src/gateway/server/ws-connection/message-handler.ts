@@ -4,6 +4,7 @@ import os from "node:os";
 import type { createSubsystemLogger } from "../../../logging/subsystem.js";
 import type { ResolvedGatewayAuth } from "../../auth.js";
 import type { GatewayRequestContext, GatewayRequestHandlers } from "../../server-methods/types.js";
+import type { WebSocketAuth } from "../ws-auth.js";
 import type { GatewayWsClient } from "../ws-types.js";
 import { loadConfig } from "../../../config/config.js";
 import {
@@ -141,6 +142,9 @@ export function attachGatewayWsMessageHandler(params: {
   requestUserAgent?: string;
   canvasHostUrl?: string;
   connectNonce: string;
+  challengeId?: string;
+  wsAuth?: WebSocketAuth;
+  enableChallengeAuth?: boolean;
   resolvedAuth: ResolvedGatewayAuth;
   gatewayMethods: string[];
   events: string[];
@@ -171,6 +175,9 @@ export function attachGatewayWsMessageHandler(params: {
     requestUserAgent,
     canvasHostUrl,
     connectNonce,
+    challengeId,
+    wsAuth,
+    enableChallengeAuth = true,
     resolvedAuth,
     gatewayMethods,
     events,
@@ -490,6 +497,45 @@ export function attachGatewayWsMessageHandler(params: {
             close(1008, "device nonce mismatch");
             return;
           }
+
+          // Enhanced challenge-response validation
+          if (enableChallengeAuth && challengeId && wsAuth) {
+            const challengeResponse = device.challengeResponse;
+            if (!challengeResponse) {
+              setHandshakeState("failed");
+              setCloseCause("device-auth-invalid", {
+                reason: "challenge-response-missing",
+                client: connectParams.client.id,
+                deviceId: device.id,
+              });
+              send({
+                type: "res",
+                id: frame.id,
+                ok: false,
+                error: errorShape(ErrorCodes.INVALID_REQUEST, "challenge response required"),
+              });
+              close(1008, "challenge response required");
+              return;
+            }
+
+            if (!wsAuth.validateChallenge(challengeId, challengeResponse)) {
+              setHandshakeState("failed");
+              setCloseCause("device-auth-invalid", {
+                reason: "challenge-response-invalid",
+                client: connectParams.client.id,
+                deviceId: device.id,
+              });
+              send({
+                type: "res",
+                id: frame.id,
+                ok: false,
+                error: errorShape(ErrorCodes.INVALID_REQUEST, "challenge response invalid"),
+              });
+              close(1008, "challenge response invalid");
+              return;
+            }
+          }
+
           const payload = buildDeviceAuthPayload({
             deviceId: device.id,
             clientId: connectParams.client.id,

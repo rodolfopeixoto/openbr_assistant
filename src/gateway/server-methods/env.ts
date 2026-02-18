@@ -2,6 +2,7 @@ import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:
 import { readFile, writeFile, access, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { GatewayRequestHandlers } from "./types.js";
+import { SecurityError } from "../../errors/security-error.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 
 // Environment variables storage
@@ -153,6 +154,28 @@ function addAuditEntry(
   }
 }
 
+function resolveEncryptionSecret(): string {
+  const encryptionSecret = process.env.OPENCLAW_ENV_ENCRYPTION_KEY || process.env.SESSION_SECRET;
+
+  if (!encryptionSecret) {
+    throw new SecurityError(
+      "OPENCLAW_ENV_ENCRYPTION_KEY or SESSION_SECRET must be configured. " +
+        "Generate a secure key with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+      "ENCRYPTION_KEY_MISSING",
+      { docsUrl: "https://docs.openclaw.ai/security/encryption-keys" },
+    );
+  }
+
+  if (encryptionSecret.length < 32) {
+    throw new SecurityError(
+      "Encryption key too weak. Must be at least 32 characters.",
+      "ENCRYPTION_KEY_WEAK",
+    );
+  }
+
+  return encryptionSecret;
+}
+
 export const envHandlers: GatewayRequestHandlers = {
   // List all environment variables (without sensitive values)
   "env.list": async ({ params, respond }) => {
@@ -298,10 +321,7 @@ export const envHandlers: GatewayRequestHandlers = {
       let storedValue = value;
 
       if (shouldEncrypt) {
-        const encryptionSecret =
-          process.env.OPENCLAW_ENV_ENCRYPTION_KEY ||
-          process.env.SESSION_SECRET ||
-          "default-secret-change-in-production";
+        const encryptionSecret = resolveEncryptionSecret();
         const encrypted = encryptValue(value, encryptionSecret);
         storedValue = encrypted.encrypted;
       }
@@ -413,10 +433,7 @@ export async function getDecryptedEnvVar(key: string): Promise<string | null> {
       return entry.value;
     }
 
-    const encryptionSecret =
-      process.env.OPENCLAW_ENV_ENCRYPTION_KEY ||
-      process.env.SESSION_SECRET ||
-      "default-secret-change-in-production";
+    const encryptionSecret = resolveEncryptionSecret();
     return decryptValue(entry.value, encryptionSecret);
   } catch (err) {
     console.error("[Env] Error decrypting env var:", err);

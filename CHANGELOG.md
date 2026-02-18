@@ -1327,3 +1327,40 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Discord: avoid duplicate replies when OpenAI emits repeated `message_end` events.
 - Commands: unify /status (inline) and command auth across providers; group bypass for authorized control commands; remove Discord /clawd slash handler.
 - CLI: run `openclaw agent` via the Gateway by default; use `--local` to force embedded mode.
+
+## [2.0.0] - 2025-02-18
+
+### 🔒 Security Hardening Release
+
+13 novas features de segurança implementadas:
+
+#### Core Security
+- **SEC-001**: Remove Default Secret - Validação obrigatória de chaves de criptografia
+- **SEC-002**: Argon2id Migration - Migração de PBKDF2 para Argon2id
+- **SEC-003**: Keyring Implementation - Suporte a keychain do sistema
+
+#### API & Web Security  
+- **SEC-004**: CORS Implementation - Proteção CORS configurável
+- **SEC-005**: CSRF Protection - Tokens CSRF para proteção web
+- **SEC-006**: WebSocket Security - Validação de origin e challenge-response
+
+#### Infrastructure
+- **SEC-007**: Rate Limiting - Limitação de requisições com X-RateLimit headers
+- **SEC-008**: Security Headers - CSP, HSTS, X-Frame-Options, etc
+- **SEC-009**: Audio Validation - Validação de magic bytes e ffprobe
+
+#### Application Security
+- **SEC-010**: UI Access Control - Controle de acesso à UI
+- **SEC-011**: LLM Security Controls - Detecção de prompt injection
+- **SEC-012**: Audit Logging - Logging estruturado de eventos de segurança
+- **SEC-013**: API Security - Proteção contra XSS, SQL injection, path traversal
+
+### ✅ Testes
+- 140+ novos testes de segurança
+- Cobertura de testes significativamente aumentada
+- Todos os testes passando
+
+### 📝 Documentação
+- Guia de troubleshooting do keychain
+- Documentação completa do time de segurança
+- Scripts de setup e diagnóstico
