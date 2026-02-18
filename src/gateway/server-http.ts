@@ -13,7 +13,10 @@ import { resolveAgentAvatar } from "../agents/identity-avatar.js";
 import { handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { handleSlackHttpRequest } from "../slack/http/index.js";
+import { APISecurity } from "./api-security.js";
 import { handleControlUiAvatarRequest, handleControlUiHttpRequest } from "./control-ui.js";
+import { createCorsHandler } from "./cors.js";
+import { CsrfProtection } from "./csrf.js";
 import { applyHookMappings } from "./hooks-mapping.js";
 import {
   extractHookToken,
@@ -27,8 +30,13 @@ import {
   resolveHookChannel,
   resolveHookDeliver,
 } from "./hooks.js";
+import {
+  createRateLimitMiddleware,
+  type RateLimitMiddlewareConfig,
+} from "./middleware/rate-limit.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
+import { securityHeadersMiddleware } from "./security-headers.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
@@ -213,6 +221,8 @@ export function createGatewayHttpServer(opts: {
   handlePluginRequest?: HooksRequestHandler;
   resolvedAuth: import("./auth.js").ResolvedGatewayAuth;
   tlsOptions?: TlsOptions;
+  rateLimitConfig?: RateLimitMiddlewareConfig;
+  csrfProtection?: CsrfProtection;
 }): HttpServer {
   const {
     canvasHost,
@@ -224,6 +234,8 @@ export function createGatewayHttpServer(opts: {
     handleHooksRequest,
     handlePluginRequest,
     resolvedAuth,
+    rateLimitConfig,
+    csrfProtection,
   } = opts;
   const httpServer: HttpServer = opts.tlsOptions
     ? createHttpsServer(opts.tlsOptions, (req, res) => {
@@ -233,15 +245,106 @@ export function createGatewayHttpServer(opts: {
         void handleRequest(req, res);
       });
 
+  // Create rate limit middleware
+  const rateLimitMiddleware = createRateLimitMiddleware(rateLimitConfig);
+
   async function handleRequest(req: IncomingMessage, res: ServerResponse) {
     // Don't interfere with WebSocket upgrades; ws handles the 'upgrade' event.
     if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
       return;
     }
 
+    // Apply rate limiting
+    let rateLimitPassed = false;
+    await new Promise<void>((resolve) => {
+      rateLimitMiddleware(req, res, () => {
+        rateLimitPassed = true;
+        resolve();
+      });
+      // Resolve immediately after middleware executes (handles rate-limited case)
+      setImmediate(() => resolve());
+    });
+    if (!rateLimitPassed) {
+      return;
+    }
+
+    // Apply API security middleware
+    const apiSecurity = new APISecurity();
+    let apiSecurityPassed = false;
+    await new Promise<void>((resolve) => {
+      apiSecurity.middleware()(req, res, () => {
+        apiSecurityPassed = true;
+        resolve();
+      });
+      setImmediate(() => resolve());
+    });
+    if (!apiSecurityPassed) {
+      return;
+    }
+
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+
+      // Apply security headers
+      const securityHeadersConfig = configSnapshot.gateway?.securityHeaders;
+      if (securityHeadersConfig !== undefined) {
+        const securityHeadersHandler = securityHeadersMiddleware(securityHeadersConfig);
+        securityHeadersHandler(req, res, () => {});
+      }
+
+      // CORS handling
+      const corsConfig = configSnapshot.gateway?.cors;
+      if (corsConfig?.allowedOrigins && corsConfig.allowedOrigins.length > 0) {
+        const corsHandler = createCorsHandler({
+          allowedOrigins: corsConfig.allowedOrigins,
+          allowedMethods: corsConfig.allowedMethods ?? ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          allowedHeaders: corsConfig.allowedHeaders ?? [
+            "Content-Type",
+            "Authorization",
+            "X-OpenClaw-Token",
+          ],
+          allowCredentials: corsConfig.allowCredentials ?? false,
+          maxAge: corsConfig.maxAge ?? 86400,
+        });
+
+        const origin = req.headers.origin ?? "";
+        const corsResult = corsHandler(req, res, origin);
+        if (!corsResult) {
+          res.statusCode = 403;
+          res.setHeader("Content-Type", "text/plain; charset=utf-8");
+          res.end("Forbidden: Origin not allowed");
+          return;
+        }
+        // If it's an OPTIONS request, CORS handler already responded
+        if (req.method === "OPTIONS") {
+          return;
+        }
+      }
+
+      // CSRF protection for control UI and web endpoints
+      if (csrfProtection && controlUiEnabled) {
+        const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+        // Only apply CSRF to control UI and web paths
+        if (url.pathname.startsWith(controlUiBasePath) || url.pathname.startsWith("/api/")) {
+          // Generate token for GET requests
+          if (req.method === "GET") {
+            const token = csrfProtection.generateToken();
+            csrfProtection.setTokenCookie(res, token);
+          } else if (!csrfProtection.validateToken(req)) {
+            res.statusCode = 403;
+            res.setHeader("Content-Type", "application/json");
+            res.end(
+              JSON.stringify({
+                error: "CSRF token validation failed",
+                code: "CSRF_INVALID",
+              }),
+            );
+            return;
+          }
+        }
+      }
+
       if (await handleHooksRequest(req, res)) {
         return;
       }
