@@ -375,6 +375,26 @@ export const OpenClawSchema = z
             caPath: z.string().optional(),
           })
           .optional(),
+        csrf: z
+          .object({
+            enabled: z.boolean().optional(),
+            cookieName: z.string().optional(),
+            headerName: z.string().optional(),
+            tokenLength: z.number().int().positive().optional(),
+            cookieOptions: z
+              .object({
+                httpOnly: z.boolean().optional(),
+                secure: z.boolean().optional(),
+                sameSite: z
+                  .union([z.literal("strict"), z.literal("lax"), z.literal("none")])
+                  .optional(),
+                maxAge: z.number().int().positive().optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict()
+          .optional(),
         http: z
           .object({
             endpoints: z
