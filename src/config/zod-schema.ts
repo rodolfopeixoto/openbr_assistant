@@ -461,6 +461,20 @@ export const OpenClawSchema = z
           })
           .strict()
           .optional(),
+        securityHeaders: z
+          .object({
+            contentSecurityPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            xFrameOptions: z
+              .union([z.literal("DENY"), z.literal("SAMEORIGIN"), z.literal(false)])
+              .optional(),
+            xContentTypeOptions: z.boolean().optional(),
+            xXssProtection: z.boolean().optional(),
+            referrerPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            permissionsPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            strictTransportSecurity: z.union([z.string(), z.literal(false)]).optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
