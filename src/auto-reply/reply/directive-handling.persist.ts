@@ -6,6 +6,7 @@ import {
   resolveDefaultAgentId,
   resolveSessionAgentId,
 } from "../../agents/agent-scope.js";
+import { loadAuthProfileStore } from "../../agents/auth-profiles/store.js";
 import { lookupContextTokens } from "../../agents/context.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import {
@@ -227,11 +228,37 @@ export async function persistInlineDirectives(params: {
   };
 }
 
-export function resolveDefaultModel(params: { cfg: OpenClawConfig; agentId?: string }): {
+export function resolveDefaultModel(params: {
+  cfg: OpenClawConfig;
+  agentId?: string;
+  sessionKey?: string;
+}): {
   defaultProvider: string;
   defaultModel: string;
   aliasIndex: ModelAliasIndex;
 } {
+  // Check if user has selected a model for this session
+  if (params.sessionKey) {
+    try {
+      const store = loadAuthProfileStore();
+      const selected = store.selectedModels?.[params.sessionKey];
+      if (selected?.provider && selected?.model) {
+        // Build alias index with the selected provider as default
+        const aliasIndex = buildModelAliasIndex({
+          cfg: params.cfg,
+          defaultProvider: selected.provider,
+        });
+        return {
+          defaultProvider: selected.provider,
+          defaultModel: selected.model,
+          aliasIndex,
+        };
+      }
+    } catch {
+      // Fallback to config default if auth store fails
+    }
+  }
+
   const mainModel = resolveDefaultModelForAgent({
     cfg: params.cfg,
     agentId: params.agentId,

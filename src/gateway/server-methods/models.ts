@@ -227,12 +227,30 @@ export const modelsHandlers: GatewayRequestHandlers = {
     }
   },
 
+  // Get all available providers (configured and unconfigured)
+  "models.providers": async ({ respond }) => {
+    try {
+      const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const { loadConfig } = await import("../../config/config.js");
+      const store = loadAuthProfileStore();
+      const cfg = loadConfig();
+
+      // Build list of all available providers with their configuration status
+      const providers = buildAllProvidersList(store, cfg);
+      respond(true, { providers }, undefined);
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
+    }
+  },
+
   // NEW: Get configured providers (only those with credentials)
   "models.configured": async ({ respond }) => {
     try {
       const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const { loadConfig } = await import("../../config/config.js");
       const store = loadAuthProfileStore();
-      const configuredProviders = buildConfiguredProvidersList(store);
+      const cfg = loadConfig();
+      const configuredProviders = buildConfiguredProvidersList(store, cfg);
       respond(true, { providers: configuredProviders }, undefined);
     } catch (err) {
       respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
@@ -442,11 +460,188 @@ const DEFAULT_MODELS: Record<
   ],
 };
 
-// Helper function to build configured providers list
-function buildConfiguredProvidersList(store: AuthProfileStore) {
-  const providers = [];
+// Provider icons mapping (matching UI expectations)
+const PROVIDER_ICONS: Record<string, string> = {
+  openai: "O",
+  anthropic: "A",
+  google: "G",
+  kimi: "K",
+  glm: "GL",
+  qwen: "Q",
+  minimax: "M",
+  groq: "Gr",
+  cerebras: "C",
+  xai: "X",
+  openrouter: "OR",
+  "google-antigravity": "G",
+  "openai-codex": "O",
+};
 
-  for (const [profileId, credential] of Object.entries(store.profiles)) {
+// Helper function to build ALL providers list (configured + available to configure)
+function buildAllProvidersList(
+  store: AuthProfileStore,
+  cfg?: { auth?: { profiles?: Record<string, { provider?: string; mode?: string }> } },
+) {
+  const providers: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    status: "configured" | "unconfigured";
+    models: Array<{ id: string; name: string; features: string[]; contextWindow?: number }>;
+  }> = [];
+  const addedProviders = new Set<string>();
+
+  // First, add all providers from PROVIDER_CONFIGS (available providers)
+  for (const [providerId, config] of Object.entries(PROVIDER_CONFIGS)) {
+    // Check if this provider is configured
+    let isConfigured = false;
+
+    // Check auth profiles from config
+    if (cfg?.auth?.profiles) {
+      for (const [, profile] of Object.entries(cfg.auth.profiles)) {
+        if (profile.provider === providerId) {
+          isConfigured =
+            profile.mode === "oauth" || profile.mode === "api_key" || profile.mode === "token";
+          break;
+        }
+      }
+    }
+
+    // Check auth store profiles
+    if (!isConfigured) {
+      for (const [, credential] of Object.entries(store.profiles)) {
+        if (credential.provider === providerId) {
+          const hasValidCredential =
+            credential.type === "oauth" ||
+            (credential.type === "api_key" && (credential as { key?: string }).key) ||
+            (credential.type === "token" && (credential as { token?: string }).token);
+          if (hasValidCredential) {
+            isConfigured = true;
+            break;
+          }
+        }
+      }
+    }
+
+    providers.push({
+      id: providerId,
+      name: config.name,
+      icon: PROVIDER_ICONS[providerId] || providerId.charAt(0).toUpperCase(),
+      status: isConfigured ? "configured" : "unconfigured",
+      models: DEFAULT_MODELS[providerId] || [],
+    });
+    addedProviders.add(providerId);
+  }
+
+  // Add any custom providers from auth that are not in PROVIDER_CONFIGS
+  if (cfg?.auth?.profiles) {
+    for (const [, profile] of Object.entries(cfg.auth.profiles)) {
+      if (!profile.provider || addedProviders.has(profile.provider)) {
+        continue;
+      }
+
+      const providerId = profile.provider;
+      const hasValidCredential =
+        profile.mode === "oauth" || profile.mode === "api_key" || profile.mode === "token";
+
+      // Format provider name (e.g., "openai-codex" -> "OpenAI Codex")
+      const formattedName = providerId
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+      providers.push({
+        id: providerId,
+        name: formattedName,
+        icon: PROVIDER_ICONS[providerId] || providerId.charAt(0).toUpperCase(),
+        status: hasValidCredential ? "configured" : "unconfigured",
+        models: DEFAULT_MODELS[providerId] || [],
+      });
+      addedProviders.add(providerId);
+    }
+  }
+
+  // Add any custom providers from auth store
+  for (const [, credential] of Object.entries(store.profiles)) {
+    if (!credential.provider || addedProviders.has(credential.provider)) {
+      continue;
+    }
+
+    const providerId = credential.provider;
+    const hasValidCredential =
+      credential.type === "oauth" ||
+      (credential.type === "api_key" && (credential as { key?: string }).key) ||
+      (credential.type === "token" && (credential as { token?: string }).token);
+
+    // Format provider name
+    const formattedName = providerId
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
+    providers.push({
+      id: providerId,
+      name: formattedName,
+      icon: PROVIDER_ICONS[providerId] || providerId.charAt(0).toUpperCase(),
+      status: hasValidCredential ? "configured" : "unconfigured",
+      models: DEFAULT_MODELS[providerId] || [],
+    });
+    addedProviders.add(providerId);
+  }
+
+  return providers;
+}
+
+// Helper function to build configured providers list
+function buildConfiguredProvidersList(
+  store: AuthProfileStore,
+  cfg?: { auth?: { profiles?: Record<string, { provider?: string; mode?: string }> } },
+) {
+  const providers: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    status: "configured" | "unconfigured";
+    models: Array<{ id: string; name: string; features: string[]; contextWindow?: number }>;
+  }> = [];
+  const addedProviders = new Set<string>();
+
+  // First, check auth profiles from config (clawdbot.json auth.profiles)
+  if (cfg?.auth?.profiles) {
+    for (const [, profile] of Object.entries(cfg.auth.profiles)) {
+      if (!profile.provider) {
+        continue;
+      }
+
+      const providerId = profile.provider;
+      const config = PROVIDER_CONFIGS[providerId];
+
+      if (!config) {
+        continue;
+      }
+
+      // Avoid duplicates
+      if (addedProviders.has(providerId)) {
+        continue;
+      }
+      addedProviders.add(providerId);
+
+      // Determine credential status based on mode
+      const hasValidCredential =
+        profile.mode === "oauth" || profile.mode === "api_key" || profile.mode === "token";
+
+      providers.push({
+        id: providerId,
+        name: config.name,
+        icon: PROVIDER_ICONS[providerId] || providerId.charAt(0).toUpperCase(),
+        status: hasValidCredential ? "configured" : "unconfigured",
+        models: DEFAULT_MODELS[providerId] || [],
+      });
+    }
+  }
+
+  // Then, check auth store profiles
+  for (const [, credential] of Object.entries(store.profiles)) {
     const providerId = credential.provider;
     const config = PROVIDER_CONFIGS[providerId];
 
@@ -454,16 +649,22 @@ function buildConfiguredProvidersList(store: AuthProfileStore) {
       continue;
     }
 
+    // Avoid duplicates
+    if (addedProviders.has(providerId)) {
+      continue;
+    }
+    addedProviders.add(providerId);
+
     // Determine credential status
     const hasValidCredential =
       credential.type === "oauth" ||
-      (credential.type === "api_key" && credential.key) ||
-      (credential.type === "token" && credential.token);
+      (credential.type === "api_key" && (credential as { key?: string }).key) ||
+      (credential.type === "token" && (credential as { token?: string }).token);
 
     providers.push({
       id: providerId,
       name: config.name,
-      profileId,
+      icon: PROVIDER_ICONS[providerId] || providerId.charAt(0).toUpperCase(),
       status: hasValidCredential ? "configured" : "unconfigured",
       models: DEFAULT_MODELS[providerId] || [],
     });

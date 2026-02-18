@@ -132,6 +132,13 @@ function coerceAuthStore(raw: unknown): AuthProfileStore | null {
       record.usageStats && typeof record.usageStats === "object"
         ? (record.usageStats as Record<string, ProfileUsageStats>)
         : undefined,
+    selectedModels:
+      record.selectedModels && typeof record.selectedModels === "object"
+        ? (record.selectedModels as Record<
+            string,
+            { provider: string; model: string; selectedAt: number }
+          >)
+        : undefined,
   };
 }
 
@@ -159,7 +166,8 @@ function mergeAuthProfileStores(
     Object.keys(override.profiles).length === 0 &&
     !override.order &&
     !override.lastGood &&
-    !override.usageStats
+    !override.usageStats &&
+    !override.selectedModels
   ) {
     return base;
   }
@@ -169,6 +177,7 @@ function mergeAuthProfileStores(
     order: mergeRecord(base.order, override.order),
     lastGood: mergeRecord(base.lastGood, override.lastGood),
     usageStats: mergeRecord(base.usageStats, override.usageStats),
+    selectedModels: mergeRecord(base.selectedModels, override.selectedModels),
   };
 }
 
@@ -379,6 +388,7 @@ export function saveAuthProfileStore(store: AuthProfileStore, agentDir?: string)
     order: store.order ?? undefined,
     lastGood: store.lastGood ?? undefined,
     usageStats: store.usageStats ?? undefined,
+    selectedModels: store.selectedModels ?? undefined,
   } satisfies AuthProfileStore;
   saveJsonFile(authPath, payload);
 }

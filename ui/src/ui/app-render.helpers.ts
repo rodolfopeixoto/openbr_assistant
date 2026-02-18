@@ -41,6 +41,7 @@ export function renderTab(state: AppViewState, tab: Tab) {
 }
 
 export function renderChatControls(state: AppViewState) {
+  console.log("[DEBUG renderChatControls] configuredProviders:", state.configuredProviders?.length);
   const mainSessionKey = resolveMainSessionKey(state.hello, state.sessionsResult);
   const sessionOptions = resolveSessionOptions(
     state.sessionKey,
@@ -159,16 +160,23 @@ export function renderChatControls(state: AppViewState) {
         .selectedModel=${state.selectedModel}
         .loading=${state.providersLoading}
         @model-selected=${(e: CustomEvent) => {
+          console.log("[DEBUG] model-selected event:", e.detail);
           const { providerId, modelId } = e.detail;
           // Update local state
           state.selectedProvider = providerId;
           state.selectedModel = modelId;
+          console.log("[DEBUG] Updated state:", providerId, modelId);
           // Persist to backend
           if (state.client) {
+            console.log("[DEBUG] Calling models.select...");
             void state.client.request("models.select", {
               sessionKey: state.sessionKey,
               providerId,
               modelId,
+            }).then(() => {
+              console.log("[DEBUG] models.select success");
+            }).catch((err: unknown) => {
+              console.error("[DEBUG] models.select error:", err);
             });
           }
         }}

@@ -182,6 +182,7 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
   }
 
   if (evt.event === "chat") {
+    console.log("[DEBUG UI] Received chat event:", evt.payload);
     const payload = evt.payload as ChatEventPayload | undefined;
     if (payload?.sessionKey) {
       setLastActiveSessionKey(
@@ -203,7 +204,6 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
         }
       }
     }
-    if (state === "final") void loadChatHistory(host as unknown as OpenClawApp);
     return;
   }
 
