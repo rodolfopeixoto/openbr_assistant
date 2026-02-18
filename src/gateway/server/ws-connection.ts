@@ -12,6 +12,7 @@ import { getHandshakeTimeoutMs } from "../server-constants.js";
 import { formatError } from "../server-utils.js";
 import { logWs } from "../ws-log.js";
 import { getHealthVersion, getPresenceVersion, incrementPresenceVersion } from "./health-state.js";
+import { WebSocketAuth } from "./ws-auth.js";
 import { attachGatewayWsMessageHandler } from "./ws-connection/message-handler.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
