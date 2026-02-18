@@ -1,5 +1,6 @@
+import * as os from "node:os";
+import * as path from "node:path";
 import type { OpenClawConfig } from "../config/config.js";
-import { resolveConfigPath } from "../config/paths.js";
 import { AUDIT_EVENTS } from "./audit-events.js";
 import { setAuditLogger } from "./audit-init.js";
 import { AuditLogger, type AuditLoggerConfig } from "./audit-logger.js";
@@ -7,6 +8,17 @@ import { AuditLogger, type AuditLoggerConfig } from "./audit-logger.js";
 export interface AuditInitResult {
   logger: AuditLogger;
   enabled: boolean;
+}
+
+function resolveAuditLogDir(configPath?: string): string {
+  if (!configPath) {
+    return path.join(os.homedir(), ".openclaw", "logs", "audit");
+  }
+  // Expand ~ to home directory
+  if (configPath.startsWith("~/")) {
+    return path.join(os.homedir(), configPath.slice(2));
+  }
+  return configPath;
 }
 
 export function initializeAuditLogging(config: OpenClawConfig): AuditInitResult {
@@ -19,9 +31,7 @@ export function initializeAuditLogging(config: OpenClawConfig): AuditInitResult 
   const loggerConfig: Partial<AuditLoggerConfig> = {
     bufferSize: auditConfig?.bufferSize ?? 1000,
     flushInterval: auditConfig?.flushInterval ?? 5000,
-    logDir: auditConfig?.logDir
-      ? resolveConfigPath(auditConfig.logDir)
-      : resolveConfigPath("~/.openclaw/logs/audit"),
+    logDir: resolveAuditLogDir(auditConfig?.logDir),
     encrypt: auditConfig?.encrypt ?? false,
   };
 
