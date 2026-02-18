@@ -14,6 +14,7 @@ import { handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { handleSlackHttpRequest } from "../slack/http/index.js";
 import { handleControlUiAvatarRequest, handleControlUiHttpRequest } from "./control-ui.js";
+import { CsrfProtection } from "./csrf.js";
 import { applyHookMappings } from "./hooks-mapping.js";
 import {
   extractHookToken,
@@ -213,6 +214,7 @@ export function createGatewayHttpServer(opts: {
   handlePluginRequest?: HooksRequestHandler;
   resolvedAuth: import("./auth.js").ResolvedGatewayAuth;
   tlsOptions?: TlsOptions;
+  csrfProtection?: CsrfProtection;
 }): HttpServer {
   const {
     canvasHost,
@@ -224,6 +226,7 @@ export function createGatewayHttpServer(opts: {
     handleHooksRequest,
     handlePluginRequest,
     resolvedAuth,
+    csrfProtection,
   } = opts;
   const httpServer: HttpServer = opts.tlsOptions
     ? createHttpsServer(opts.tlsOptions, (req, res) => {
@@ -242,6 +245,30 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+
+      // CSRF protection for control UI and web endpoints
+      if (csrfProtection && controlUiEnabled) {
+        const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+        // Only apply CSRF to control UI and web paths
+        if (url.pathname.startsWith(controlUiBasePath) || url.pathname.startsWith("/api/")) {
+          // Generate token for GET requests
+          if (req.method === "GET") {
+            const token = csrfProtection.generateToken();
+            csrfProtection.setTokenCookie(res, token);
+          } else if (!csrfProtection.validateToken(req)) {
+            res.statusCode = 403;
+            res.setHeader("Content-Type", "application/json");
+            res.end(
+              JSON.stringify({
+                error: "CSRF token validation failed",
+                code: "CSRF_INVALID",
+              }),
+            );
+            return;
+          }
+        }
+      }
+
       if (await handleHooksRequest(req, res)) {
         return;
       }
