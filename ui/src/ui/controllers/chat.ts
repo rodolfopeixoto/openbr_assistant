@@ -32,13 +32,16 @@ export async function loadChatHistory(state: ChatState) {
   state.chatLoading = true;
   state.lastError = null;
   try {
+    console.log("[DEBUG loadChatHistory] Loading chat history for sessionKey:", state.sessionKey);
     const res = (await state.client.request("chat.history", {
       sessionKey: state.sessionKey,
       limit: 200,
     })) as { messages?: unknown[]; thinkingLevel?: string | null };
+    console.log("[DEBUG loadChatHistory] Received messages count:", res.messages?.length);
     state.chatMessages = Array.isArray(res.messages) ? res.messages : [];
     state.chatThinkingLevel = res.thinkingLevel ?? null;
   } catch (err) {
+    console.error("[DEBUG loadChatHistory] Error:", err);
     state.lastError = String(err);
   } finally {
     state.chatLoading = false;
@@ -204,6 +207,12 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
       }
     }
   } else if (payload.state === "final") {
+    // Add the final message to chat history
+    if (payload.message) {
+      console.log("[DEBUG handleChatEvent] Adding message to chatMessages, current length:", state.chatMessages.length);
+      state.chatMessages = [...state.chatMessages, payload.message];
+      console.log("[DEBUG handleChatEvent] New chatMessages length:", state.chatMessages.length);
+    }
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;

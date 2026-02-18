@@ -658,12 +658,25 @@ export class OpenClawApp extends LitElement {
     }
     this.providersLoading = true;
     try {
-      const response = await this.client.request("models.configured", {}) as {
-        ok?: boolean;
-        payload?: { providers?: import("./components/model-selector.js").ModelProvider[] };
+      // First, load the current selected model for this session
+      const currentResponse = await this.client?.request("models.current", {
+        sessionKey: this.sessionKey,
+      }) as {
+        provider?: string;
+        model?: string;
       };
-      if (response?.ok && response?.payload?.providers) {
-        this.configuredProviders = response.payload.providers;
+      
+      if (currentResponse?.provider && currentResponse?.model) {
+        this.selectedProvider = currentResponse.provider;
+        this.selectedModel = currentResponse.model;
+      }
+      
+      // Then load the configured providers list
+      const response = await this.client?.request("models.configured", {}) as {
+        providers?: import("./components/model-selector.js").ModelProvider[];
+      };
+      if (response?.providers) {
+        this.configuredProviders = response.providers;
         
         // Fallback: if no selection and providers exist, select the first one
         if ((!this.selectedProvider || !this.selectedModel) && this.configuredProviders.length > 0) {
@@ -671,7 +684,6 @@ export class OpenClawApp extends LitElement {
           if (firstProvider.models && firstProvider.models.length > 0) {
             this.selectedProvider = firstProvider.id;
             this.selectedModel = firstProvider.models[0].id;
-            console.log(`[App] Auto-selected model: ${this.selectedProvider}/${this.selectedModel}`);
             // Persist the selection
             await this.client.request("models.select", {
               sessionKey: this.sessionKey,
@@ -699,13 +711,16 @@ export class OpenClawApp extends LitElement {
     this.modelsLoading = true;
     this.modelsError = null;
     try {
-      const response = await this.client.request("models.configured", {}) as {
-        ok?: boolean;
-        payload?: { providers?: import("./components/provider-card.js").ProviderCardData[] };
+      console.log("[DEBUG] Calling models.providers...");
+      const response = await this.client?.request("models.providers", {}) as {
+        providers?: import("./components/provider-card.js").ProviderCardData[];
       };
-      if (response?.ok && response?.payload?.providers) {
-        this.modelsProviders = response.payload.providers;
+      console.log("[DEBUG] models.providers response:", response);
+      if (response?.providers) {
+        console.log("[DEBUG] Got providers:", response.providers.length);
+        this.modelsProviders = response.providers;
       } else {
+        console.log("[DEBUG] No providers in response");
         this.modelsProviders = [];
       }
     } catch (error) {
