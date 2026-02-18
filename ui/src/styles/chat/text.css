@@ -122,3 +122,8 @@
   border-top: 1px solid var(--border);
   margin: 1em 0;
 }
+
+/* Bold and strong text styling */
+.chat-text :where(strong, b) {
+  font-weight: 600;
+}

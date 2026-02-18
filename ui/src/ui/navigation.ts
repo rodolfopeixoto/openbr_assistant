@@ -7,7 +7,7 @@ export const TAB_GROUPS = [
     tabs: ["overview", "channels", "instances", "sessions", "cron"],
   },
   { label: "Agent", tabs: ["skills", "nodes"] },
-  { label: "Settings", tabs: ["models", "config", "workspace", "compliance", "debug", "logs"] },
+  { label: "Settings", tabs: ["models", "config", "env", "workspace", "compliance", "debug", "logs"] },
 ] as const;
 
 export type Tab =
@@ -21,6 +21,7 @@ export type Tab =
   | "chat"
   | "models"
   | "config"
+  | "env"
   | "workspace"
   | "compliance"
   | "debug"
@@ -37,6 +38,7 @@ const TAB_PATHS: Record<Tab, string> = {
   chat: "/chat",
   models: "/models",
   config: "/config",
+  env: "/env",
   workspace: "/workspace",
   compliance: "/compliance",
   debug: "/debug",
@@ -126,6 +128,8 @@ export function iconForTab(tab: Tab): IconName {
       return "brain";
     case "config":
       return "settings";
+    case "env":
+      return "key";
     case "workspace":
       return "folder";
     case "compliance":
@@ -161,6 +165,8 @@ export function titleForTab(tab: Tab) {
       return "Models";
     case "config":
       return "Config";
+    case "env":
+      return "Environment";
     case "workspace":
       return "Workspace";
     case "compliance":
@@ -196,6 +202,8 @@ export function subtitleForTab(tab: Tab) {
       return "Configure AI model providers and manage credentials.";
     case "config":
       return "Edit ~/.openclaw/openclaw.json safely.";
+    case "env":
+      return "Manage environment variables securely with encryption.";
     case "workspace":
       return "Edit agent workspace files like SOUL.md and AGENTS.md.";
     case "compliance":
