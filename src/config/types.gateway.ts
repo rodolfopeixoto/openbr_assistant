@@ -267,10 +267,26 @@ export type GatewayConfig = {
   nodes?: GatewayNodesConfig;
   cors?: GatewayCorsConfig;
   securityHeaders?: GatewaySecurityHeadersConfig;
+  /** Audit logging configuration for security events. */
+  audit?: GatewayAuditConfig;
   /**
    * IPs of trusted reverse proxies (e.g. Traefik, nginx). When a connection
    * arrives from one of these IPs, the Gateway trusts `x-forwarded-for` (or
    * `x-real-ip`) to determine the client IP for local pairing and HTTP checks.
    */
   trustedProxies?: string[];
+};
+
+/** Audit logging configuration. */
+export type GatewayAuditConfig = {
+  /** Enable audit logging. Default: true if not specified. */
+  enabled?: boolean;
+  /** Number of events to buffer before flushing to disk. Default: 1000. */
+  bufferSize?: number;
+  /** Flush interval in milliseconds. Default: 5000. */
+  flushInterval?: number;
+  /** Directory for audit log files. Default: ~/.openclaw/logs/audit */
+  logDir?: string;
+  /** Enable encryption for audit logs. Default: false. */
+  encrypt?: boolean;
 };
