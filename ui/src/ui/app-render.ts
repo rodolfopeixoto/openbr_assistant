@@ -80,6 +80,7 @@ import { renderCompliance } from "./views/compliance";
 import { renderConfig } from "./views/config";
 import { renderCron } from "./views/cron";
 import { renderDebug } from "./views/debug";
+import { renderEnvView } from "./views/env";
 import { renderExecApprovalPrompt } from "./views/exec-approval";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation";
 import { renderInstances } from "./views/instances";
@@ -610,6 +611,35 @@ export function renderApp(state: AppViewState) {
                 onDocSearchChange: (query) => state.handleConfigDocSearchChange(query),
                 onInsertTemplate: (template) => state.handleInsertConfigTemplate(template),
                 onInsertField: (field) => state.handleInsertConfigField(field),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "env"
+            ? renderEnvView({
+                client: state.client,
+                connected: state.connected,
+                sessionKey: state.sessionKey,
+                vars: state.envVars,
+                loading: state.envLoading,
+                saving: state.envSaving,
+                error: state.envError,
+                isModalOpen: state.envModalOpen,
+                editingVar: state.envEditingVar,
+                keyInput: state.envKeyInput,
+                valueInput: state.envValueInput,
+                encryptInput: state.envEncryptInput,
+                validationError: state.envValidationError,
+                onLoad: () => state.handleEnvLoad(),
+                onModalOpen: (editVar) => state.handleEnvModalOpen(editVar),
+                onModalClose: () => state.handleEnvModalClose(),
+                onKeyInput: (value) => state.handleEnvKeyInput(value),
+                onValueInput: (value) => state.handleEnvValueInput(value),
+                onEncryptInput: (value) => state.handleEnvEncryptInput(value),
+                onValidationError: (error) => state.handleEnvValidationError(error),
+                onSave: () => state.handleEnvSave(),
+                onDelete: (key) => state.handleEnvDelete(key),
               })
             : nothing
         }

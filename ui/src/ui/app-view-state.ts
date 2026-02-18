@@ -268,4 +268,31 @@ export type AppViewState = {
   handleModelsTest: (profileId: string, credential: unknown) => Promise<void>;
   handleModelsSave: (profileId: string, credential: unknown, email?: string) => Promise<void>;
   handleModelsRemove: (profileId: string) => Promise<void>;
+  // Environment variables state
+  envVars: Array<{
+    key: string;
+    encrypted: boolean;
+    createdAt: number;
+    updatedAt: number;
+    hasValue: boolean;
+    isSensitive: boolean;
+  }>;
+  envLoading: boolean;
+  envSaving: boolean;
+  envError: string;
+  envModalOpen: boolean;
+  envEditingVar: { key: string } | null;
+  envKeyInput: string;
+  envValueInput: string;
+  envEncryptInput: boolean;
+  envValidationError: string;
+  handleEnvLoad: () => Promise<void>;
+  handleEnvModalOpen: (editVar?: { key: string }) => void;
+  handleEnvModalClose: () => void;
+  handleEnvKeyInput: (value: string) => void;
+  handleEnvValueInput: (value: string) => void;
+  handleEnvEncryptInput: (value: boolean) => void;
+  handleEnvValidationError: (error: string) => void;
+  handleEnvSave: () => Promise<void>;
+  handleEnvDelete: (key: string) => Promise<void>;
 };

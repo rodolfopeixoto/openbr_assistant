@@ -273,6 +273,25 @@ export class OpenClawApp extends LitElement {
   @state() configuredProviders: import("./components/model-selector").ModelProvider[] | null = null;
   @state() providersLoading = false;
 
+  // Environment Variables state
+  @state() envVars: Array<{
+    key: string;
+    encrypted: boolean;
+    createdAt: number;
+    updatedAt: number;
+    hasValue: boolean;
+    isSensitive: boolean;
+  }> = [];
+  @state() envLoading = false;
+  @state() envSaving = false;
+  @state() envError = "";
+  @state() envModalOpen = false;
+  @state() envEditingVar: { key: string } | null = null;
+  @state() envKeyInput = "";
+  @state() envValueInput = "";
+  @state() envEncryptInput = true;
+  @state() envValidationError = "";
+
   // Provider Config Wizard state
   @state() wizardOpen = false;
   @state() wizardProviderId = "";
@@ -787,6 +806,109 @@ export class OpenClawApp extends LitElement {
     } catch (error) {
       console.warn("[App] Failed to remove credential:", error);
       throw error;
+    }
+  }
+
+  // Environment Variables handlers
+  async handleEnvLoad() {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.envLoading = true;
+    this.envError = "";
+    try {
+      const response = await this.client.request("env.list", {
+        sessionKey: this.sessionKey,
+      }) as { vars?: Array<{ key: string; encrypted: boolean; createdAt: number; updatedAt: number; hasValue: boolean; isSensitive: boolean }> };
+      if (response?.vars) {
+        this.envVars = response.vars;
+      } else {
+        this.envVars = [];
+      }
+    } catch (error) {
+      console.warn("[App] Failed to load env vars:", error);
+      this.envError = String(error);
+      this.envVars = [];
+    } finally {
+      this.envLoading = false;
+    }
+  }
+
+  handleEnvModalOpen(editVar?: { key: string }) {
+    this.envEditingVar = editVar || null;
+    this.envKeyInput = editVar?.key || "";
+    this.envValueInput = "";
+    this.envEncryptInput = true;
+    this.envValidationError = "";
+    this.envModalOpen = true;
+  }
+
+  handleEnvModalClose() {
+    this.envModalOpen = false;
+    this.envEditingVar = null;
+    this.envKeyInput = "";
+    this.envValueInput = "";
+    this.envValidationError = "";
+  }
+
+  handleEnvKeyInput(value: string) {
+    this.envKeyInput = value;
+    this.envValidationError = "";
+  }
+
+  handleEnvValueInput(value: string) {
+    this.envValueInput = value;
+  }
+
+  handleEnvEncryptInput(value: boolean) {
+    this.envEncryptInput = value;
+  }
+
+  handleEnvValidationError(error: string) {
+    this.envValidationError = error;
+  }
+
+  async handleEnvSave() {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.envSaving = true;
+    try {
+      const response = await this.client.request("env.set", {
+        sessionKey: this.sessionKey,
+        key: this.envKeyInput,
+        value: this.envValueInput,
+        encrypt: this.envEncryptInput,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Save failed");
+      }
+      this.envModalOpen = false;
+      await this.handleEnvLoad();
+    } catch (error) {
+      console.warn("[App] Failed to save env var:", error);
+      this.envValidationError = String(error);
+    } finally {
+      this.envSaving = false;
+    }
+  }
+
+  async handleEnvDelete(key: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    try {
+      const response = await this.client.request("env.delete", {
+        sessionKey: this.sessionKey,
+        key,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Delete failed");
+      }
+      await this.handleEnvLoad();
+    } catch (error) {
+      console.warn("[App] Failed to delete env var:", error);
+      this.envError = String(error);
     }
   }
 
