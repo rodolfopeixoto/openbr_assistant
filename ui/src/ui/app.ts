@@ -292,11 +292,8 @@ export class OpenClawApp extends LitElement {
   @state() envEncryptInput = true;
   @state() envValidationError = "";
 
-  // Provider Config Wizard state
-  @state() wizardOpen = false;
-  @state() wizardProviderId = "";
-  @state() wizardProviderName = "";
-  @state() wizardIsSaving = false;
+  // Gateway restart state
+  @state() restarting = false;
 
   client: GatewayBrowserClient | null = null;
   private chatScrollFrame: number | null = null;
@@ -909,6 +906,34 @@ export class OpenClawApp extends LitElement {
     } catch (error) {
       console.warn("[App] Failed to delete env var:", error);
       this.envError = String(error);
+    }
+  }
+
+  async handleRestart() {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.restarting = true;
+    try {
+      // Use config.patch with restartDelayMs to trigger gateway restart
+      const response = await this.client.request("config.patch", {
+        raw: JSON.stringify({}),
+        baseHash: "",
+        sessionKey: this.sessionKey,
+        restartDelayMs: 5000,
+      }) as { ok?: boolean; error?: string };
+      if (!response?.ok) {
+        throw new Error(response?.error || "Restart failed");
+      }
+      // Wait a bit then refresh connection
+      setTimeout(() => {
+        this.connect();
+      }, 6000);
+    } catch (error) {
+      console.warn("[App] Failed to restart gateway:", error);
+      this.lastError = String(error);
+    } finally {
+      this.restarting = false;
     }
   }
 

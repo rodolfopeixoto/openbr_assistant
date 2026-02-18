@@ -295,4 +295,7 @@ export type AppViewState = {
   handleEnvValidationError: (error: string) => void;
   handleEnvSave: () => Promise<void>;
   handleEnvDelete: (key: string) => Promise<void>;
+  // Gateway restart
+  restarting: boolean;
+  handleRestart: () => Promise<void>;
 };
