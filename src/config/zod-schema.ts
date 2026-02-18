@@ -375,6 +375,26 @@ export const OpenClawSchema = z
             caPath: z.string().optional(),
           })
           .optional(),
+        csrf: z
+          .object({
+            enabled: z.boolean().optional(),
+            cookieName: z.string().optional(),
+            headerName: z.string().optional(),
+            tokenLength: z.number().int().positive().optional(),
+            cookieOptions: z
+              .object({
+                httpOnly: z.boolean().optional(),
+                secure: z.boolean().optional(),
+                sameSite: z
+                  .union([z.literal("strict"), z.literal("lax"), z.literal("none")])
+                  .optional(),
+                maxAge: z.number().int().positive().optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict()
+          .optional(),
         http: z
           .object({
             endpoints: z
@@ -440,6 +460,48 @@ export const OpenClawSchema = z
               .optional(),
             allowCommands: z.array(z.string()).optional(),
             denyCommands: z.array(z.string()).optional(),
+          })
+          .strict()
+          .optional(),
+        cors: z
+          .object({
+            allowedOrigins: z.array(z.string()).optional(),
+            allowedMethods: z.array(z.string()).optional(),
+            allowedHeaders: z.array(z.string()).optional(),
+            allowCredentials: z.boolean().optional(),
+            maxAge: z.number().int().nonnegative().optional(),
+          })
+          .strict()
+          .optional(),
+        rateLimit: z
+          .object({
+            enabled: z.boolean().optional(),
+            windowMs: z.number().int().positive().optional(),
+            maxRequests: z.number().int().positive().optional(),
+          })
+          .strict()
+          .optional(),
+        securityHeaders: z
+          .object({
+            contentSecurityPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            xFrameOptions: z
+              .union([z.literal("DENY"), z.literal("SAMEORIGIN"), z.literal(false)])
+              .optional(),
+            xContentTypeOptions: z.boolean().optional(),
+            xXssProtection: z.boolean().optional(),
+            referrerPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            permissionsPolicy: z.union([z.string(), z.literal(false)]).optional(),
+            strictTransportSecurity: z.union([z.string(), z.literal(false)]).optional(),
+          })
+          .strict()
+          .optional(),
+        audit: z
+          .object({
+            enabled: z.boolean().optional(),
+            bufferSize: z.number().int().positive().optional(),
+            flushInterval: z.number().int().positive().optional(),
+            logDir: z.string().optional(),
+            encrypt: z.boolean().optional(),
           })
           .strict()
           .optional(),
