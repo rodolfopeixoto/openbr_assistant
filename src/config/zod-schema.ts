@@ -443,6 +443,16 @@ export const OpenClawSchema = z
           })
           .strict()
           .optional(),
+        audit: z
+          .object({
+            enabled: z.boolean().optional(),
+            bufferSize: z.number().int().positive().optional(),
+            flushInterval: z.number().int().positive().optional(),
+            logDir: z.string().optional(),
+            encrypt: z.boolean().optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
