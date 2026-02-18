@@ -453,6 +453,14 @@ export const OpenClawSchema = z
           })
           .strict()
           .optional(),
+        rateLimit: z
+          .object({
+            enabled: z.boolean().optional(),
+            windowMs: z.number().int().positive().optional(),
+            maxRequests: z.number().int().positive().optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
