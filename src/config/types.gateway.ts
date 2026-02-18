@@ -237,6 +237,19 @@ export type GatewaySecurityHeadersConfig = {
   strictTransportSecurity?: string | false;
 };
 
+export type GatewayApiSecurityConfig = {
+  /** Enable API security middleware (default: true). */
+  enabled?: boolean;
+  /** Enable XSS sanitization (default: true). */
+  xssProtection?: boolean;
+  /** Enable SQL injection prevention (default: true). */
+  sqlInjectionProtection?: boolean;
+  /** Enable path traversal prevention (default: true). */
+  pathTraversalProtection?: boolean;
+  /** Enable strict content-type validation (default: true). */
+  strictContentType?: boolean;
+};
+
 export type GatewayConfig = {
   /** Single multiplexed port for Gateway WS + HTTP (default: 18789). */
   port?: number;
@@ -267,6 +280,8 @@ export type GatewayConfig = {
   nodes?: GatewayNodesConfig;
   cors?: GatewayCorsConfig;
   securityHeaders?: GatewaySecurityHeadersConfig;
+  /** API security configuration. */
+  apiSecurity?: GatewayApiSecurityConfig;
   /** Audit logging configuration for security events. */
   audit?: GatewayAuditConfig;
   /**
