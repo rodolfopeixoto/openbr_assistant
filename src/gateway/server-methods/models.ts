@@ -1,11 +1,14 @@
 import type { AuthProfileStore } from "../../agents/auth-profiles/types.js";
 import type { GatewayRequestHandlers } from "./types.js";
+import { updateSessionStoreEntry } from "../../config/sessions/store.js";
+import { applyModelOverrideToSessionEntry } from "../../sessions/model-overrides.js";
 import {
   ErrorCodes,
   errorShape,
   formatValidationErrors,
   validateModelsListParams,
 } from "../protocol/index.js";
+import { loadSessionEntry } from "../session-utils.js";
 
 // In-memory cache for current model selections (sessionKey -> {provider, model})
 const currentModelCache = new Map<string, { provider: string; model: string }>();
@@ -348,6 +351,22 @@ export const modelsHandlers: GatewayRequestHandlers = {
           return true; // Should save
         },
       });
+
+      // Also update session entry's providerOverride and modelOverride for consistency
+      const sessionData = loadSessionEntry(sessionKey);
+      if (sessionData.entry) {
+        await updateSessionStoreEntry({
+          storePath: sessionData.storePath,
+          sessionKey: sessionData.canonicalKey,
+          update: async (entry) => {
+            applyModelOverrideToSessionEntry({
+              entry,
+              selection: { provider: providerId, model: modelId },
+            });
+            return entry;
+          },
+        });
+      }
 
       respond(true, { provider: providerId, model: modelId }, undefined);
     } catch (err) {
