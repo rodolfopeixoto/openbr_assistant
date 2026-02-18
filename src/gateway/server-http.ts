@@ -27,6 +27,10 @@ import {
   resolveHookChannel,
   resolveHookDeliver,
 } from "./hooks.js";
+import {
+  createRateLimitMiddleware,
+  type RateLimitMiddlewareConfig,
+} from "./middleware/rate-limit.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
@@ -213,6 +217,7 @@ export function createGatewayHttpServer(opts: {
   handlePluginRequest?: HooksRequestHandler;
   resolvedAuth: import("./auth.js").ResolvedGatewayAuth;
   tlsOptions?: TlsOptions;
+  rateLimitConfig?: RateLimitMiddlewareConfig;
 }): HttpServer {
   const {
     canvasHost,
@@ -224,6 +229,7 @@ export function createGatewayHttpServer(opts: {
     handleHooksRequest,
     handlePluginRequest,
     resolvedAuth,
+    rateLimitConfig,
   } = opts;
   const httpServer: HttpServer = opts.tlsOptions
     ? createHttpsServer(opts.tlsOptions, (req, res) => {
@@ -233,9 +239,26 @@ export function createGatewayHttpServer(opts: {
         void handleRequest(req, res);
       });
 
+  // Create rate limit middleware
+  const rateLimitMiddleware = createRateLimitMiddleware(rateLimitConfig);
+
   async function handleRequest(req: IncomingMessage, res: ServerResponse) {
     // Don't interfere with WebSocket upgrades; ws handles the 'upgrade' event.
     if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
+      return;
+    }
+
+    // Apply rate limiting
+    let rateLimitPassed = false;
+    await new Promise<void>((resolve) => {
+      rateLimitMiddleware(req, res, () => {
+        rateLimitPassed = true;
+        resolve();
+      });
+      // Resolve immediately after middleware executes (handles rate-limited case)
+      setImmediate(() => resolve());
+    });
+    if (!rateLimitPassed) {
       return;
     }
 
