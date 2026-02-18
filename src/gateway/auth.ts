@@ -2,6 +2,8 @@ import type { IncomingMessage } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import type { GatewayAuthConfig, GatewayTailscaleMode } from "../config/config.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
+import { AUDIT_EVENTS } from "../security/audit-events.js";
+import { getAuditLogger } from "../security/audit-init.js";
 import { isTrustedProxyAddress, parseForwardedForClientIp, resolveGatewayClientIp } from "./net.js";
 export type ResolvedGatewayAuthMode = "token" | "password";
 
@@ -245,6 +247,8 @@ export async function authorizeGatewayConnect(params: {
   const { auth, connectAuth, req, trustedProxies } = params;
   const tailscaleWhois = params.tailscaleWhois ?? readTailscaleWhoisIdentity;
   const localDirect = isLocalDirectRequest(req, trustedProxies);
+  const clientIp = resolveRequestClientIp(req, trustedProxies);
+  const auditLogger = getAuditLogger();
 
   if (auth.allowTailscale && !localDirect) {
     const tailscaleCheck = await resolveVerifiedTailscaleUser({
@@ -252,6 +256,15 @@ export async function authorizeGatewayConnect(params: {
       tailscaleWhois,
     });
     if (tailscaleCheck.ok) {
+      auditLogger?.log({
+        level: "info",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_SUCCESS,
+        actor: { type: "user", id: tailscaleCheck.user.login, ip: clientIp },
+        resource: { type: "gateway" },
+        result: "success",
+        details: { method: "tailscale" },
+      });
       return {
         ok: true,
         method: "tailscale",
@@ -262,30 +275,118 @@ export async function authorizeGatewayConnect(params: {
 
   if (auth.mode === "token") {
     if (!auth.token) {
+      auditLogger?.log({
+        level: "error",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "token_missing_config",
+        details: { method: "token" },
+      });
       return { ok: false, reason: "token_missing_config" };
     }
     if (!connectAuth?.token) {
+      auditLogger?.log({
+        level: "warn",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "token_missing",
+        details: { method: "token" },
+      });
       return { ok: false, reason: "token_missing" };
     }
     if (!safeEqual(connectAuth.token, auth.token)) {
+      auditLogger?.log({
+        level: "warn",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "token_mismatch",
+        details: { method: "token" },
+      });
       return { ok: false, reason: "token_mismatch" };
     }
+    auditLogger?.log({
+      level: "info",
+      category: "auth",
+      action: AUDIT_EVENTS.AUTH.LOGIN_SUCCESS,
+      actor: { type: "user", ip: clientIp },
+      resource: { type: "gateway" },
+      result: "success",
+      details: { method: "token" },
+    });
     return { ok: true, method: "token" };
   }
 
   if (auth.mode === "password") {
     const password = connectAuth?.password;
     if (!auth.password) {
+      auditLogger?.log({
+        level: "error",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "password_missing_config",
+        details: { method: "password" },
+      });
       return { ok: false, reason: "password_missing_config" };
     }
     if (!password) {
+      auditLogger?.log({
+        level: "warn",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "password_missing",
+        details: { method: "password" },
+      });
       return { ok: false, reason: "password_missing" };
     }
     if (!safeEqual(password, auth.password)) {
+      auditLogger?.log({
+        level: "warn",
+        category: "auth",
+        action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+        actor: { type: "unknown", ip: clientIp },
+        resource: { type: "gateway" },
+        result: "failure",
+        reason: "password_mismatch",
+        details: { method: "password" },
+      });
       return { ok: false, reason: "password_mismatch" };
     }
+    auditLogger?.log({
+      level: "info",
+      category: "auth",
+      action: AUDIT_EVENTS.AUTH.LOGIN_SUCCESS,
+      actor: { type: "user", ip: clientIp },
+      resource: { type: "gateway" },
+      result: "success",
+      details: { method: "password" },
+    });
     return { ok: true, method: "password" };
   }
 
+  auditLogger?.log({
+    level: "warn",
+    category: "auth",
+    action: AUDIT_EVENTS.AUTH.LOGIN_FAILURE,
+    actor: { type: "unknown", ip: clientIp },
+    resource: { type: "gateway" },
+    result: "failure",
+    reason: "unauthorized",
+    details: { method: "unknown" },
+  });
   return { ok: false, reason: "unauthorized" };
 }
