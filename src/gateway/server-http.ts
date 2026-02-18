@@ -14,6 +14,7 @@ import { handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { handleSlackHttpRequest } from "../slack/http/index.js";
 import { handleControlUiAvatarRequest, handleControlUiHttpRequest } from "./control-ui.js";
+import { createCorsHandler } from "./cors.js";
 import { applyHookMappings } from "./hooks-mapping.js";
 import {
   extractHookToken,
@@ -242,6 +243,36 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+
+      // CORS handling
+      const corsConfig = configSnapshot.gateway?.cors;
+      if (corsConfig?.allowedOrigins && corsConfig.allowedOrigins.length > 0) {
+        const corsHandler = createCorsHandler({
+          allowedOrigins: corsConfig.allowedOrigins,
+          allowedMethods: corsConfig.allowedMethods ?? ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          allowedHeaders: corsConfig.allowedHeaders ?? [
+            "Content-Type",
+            "Authorization",
+            "X-OpenClaw-Token",
+          ],
+          allowCredentials: corsConfig.allowCredentials ?? false,
+          maxAge: corsConfig.maxAge ?? 86400,
+        });
+
+        const origin = req.headers.origin ?? "";
+        const corsResult = corsHandler(req, res, origin);
+        if (!corsResult) {
+          res.statusCode = 403;
+          res.setHeader("Content-Type", "text/plain; charset=utf-8");
+          res.end("Forbidden: Origin not allowed");
+          return;
+        }
+        // If it's an OPTIONS request, CORS handler already responded
+        if (req.method === "OPTIONS") {
+          return;
+        }
+      }
+
       if (await handleHooksRequest(req, res)) {
         return;
       }
