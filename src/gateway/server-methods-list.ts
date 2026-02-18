@@ -35,6 +35,11 @@ const BASE_METHODS = [
   "models.configured",
   "models.current",
   "models.select",
+  // Environment variables management
+  "env.list",
+  "env.get",
+  "env.set",
+  "env.delete",
   "agents.list",
   "skills.status",
   "skills.bins",
