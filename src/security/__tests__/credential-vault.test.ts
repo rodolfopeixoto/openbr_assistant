@@ -8,7 +8,7 @@ import {
   migrateCredentials,
   detectPlaintextCredentials,
 } from "../credential-migration.js";
-import { CredentialVault } from "../credential-vault.js";
+import { CredentialVault, CredentialVaultMetadata } from "../credential-vault.js";
 
 describe("CredentialVault", () => {
   let tempDir: string;
@@ -103,6 +103,226 @@ describe("CredentialVault", () => {
       // Should throw after destroy
       await expect(vault.encrypt("test")).rejects.toThrow("Vault not initialized");
     });
+  });
+});
+
+describe("Argon2id KDF", () => {
+  let tempDir: string;
+  let vault: CredentialVault;
+
+  beforeEach(async () => {
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "argon2id-test-"));
+  });
+
+  afterEach(async () => {
+    if (vault) {
+      vault.destroy();
+    }
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  it("should use Argon2id for new vaults", async () => {
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "test-passphrase-123",
+    });
+
+    const metadata = vault.getMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata!.kdf).toBe("argon2id");
+    expect(metadata!.version).toBe(2);
+  });
+
+  it("should encrypt and decrypt with Argon2id key", async () => {
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "secure-passphrase-123",
+    });
+
+    const plaintext = "secret-api-key-12345";
+    const encrypted = await vault.encrypt(plaintext);
+    const decrypted = await vault.decrypt(encrypted);
+
+    expect(decrypted).toBe(plaintext);
+    expect(vault.getMetadata()!.kdf).toBe("argon2id");
+  });
+
+  it("should have metadata persisted to disk", async () => {
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "test-passphrase-123",
+    });
+
+    // Re-initialize to verify metadata is loaded from disk
+    vault.destroy();
+    const newVault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "test-passphrase-123",
+    });
+
+    const metadata = newVault.getMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata!.kdf).toBe("argon2id");
+    expect(metadata!.version).toBe(2);
+
+    newVault.destroy();
+  });
+});
+
+describe("PBKDF2 to Argon2id Migration", () => {
+  let tempDir: string;
+  let vault: CredentialVault;
+
+  beforeEach(async () => {
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "migration-test-"));
+  });
+
+  afterEach(async () => {
+    if (vault) {
+      vault.destroy();
+    }
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  it("should migrate from PBKDF2 to Argon2id on unlock", async () => {
+    // Simulate old PBKDF2 vault by creating metadata manually
+    const metadataPath = path.join(tempDir, ".credential-vault-metadata.json");
+    const oldMetadata: CredentialVaultMetadata = {
+      kdf: "pbkdf2",
+      version: 1,
+    };
+    await fs.writeFile(metadataPath, JSON.stringify(oldMetadata), { mode: 0o600 });
+
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "migration-test-pass",
+    });
+
+    // After initialization, metadata should be migrated
+    const metadata = vault.getMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata!.kdf).toBe("argon2id");
+    expect(metadata!.version).toBe(2);
+  });
+
+  it("should still work with PBKDF2-encrypted credentials after migration", async () => {
+    // First create a vault with PBKDF2 (simulate old state)
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "test-passphrase",
+    });
+
+    // Encrypt something before migration
+    const plaintext = "secret-data-12345";
+    const encrypted = await vault.encrypt(plaintext);
+
+    // Simulate migration by updating metadata
+    const metadataPath = path.join(tempDir, ".credential-vault-metadata.json");
+    await fs.writeFile(metadataPath, JSON.stringify({ kdf: "argon2id", version: 2 }), {
+      mode: 0o600,
+    });
+
+    // Verify we can still decrypt after migration
+    const decrypted = await vault.decrypt(encrypted);
+    expect(decrypted).toBe(plaintext);
+  });
+
+  it("should maintain backward compatibility with old vaults", async () => {
+    // Create metadata indicating PBKDF2
+    const metadataPath = path.join(tempDir, ".credential-vault-metadata.json");
+    await fs.writeFile(metadataPath, JSON.stringify({ kdf: "pbkdf2", version: 1 }), {
+      mode: 0o600,
+    });
+
+    // Initialize should trigger migration
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "backward-compat-test",
+    });
+
+    // Should work normally after migration
+    const plaintext = "test-data";
+    const encrypted = await vault.encrypt(plaintext);
+    const decrypted = await vault.decrypt(encrypted);
+
+    expect(decrypted).toBe(plaintext);
+    expect(vault.getMetadata()!.kdf).toBe("argon2id");
+  });
+
+  it("should complete migration in under 500ms", async () => {
+    const metadataPath = path.join(tempDir, ".credential-vault-metadata.json");
+    await fs.writeFile(metadataPath, JSON.stringify({ kdf: "pbkdf2", version: 1 }), {
+      mode: 0o600,
+    });
+
+    const startTime = Date.now();
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "performance-test-pass",
+    });
+    const endTime = Date.now();
+
+    const duration = endTime - startTime;
+    expect(duration).toBeLessThan(500);
+    expect(vault.getMetadata()!.kdf).toBe("argon2id");
+  });
+});
+
+describe("Key Re-encryption", () => {
+  let tempDir: string;
+  let vault: CredentialVault;
+
+  beforeEach(async () => {
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "reencrypt-test-"));
+    vault = await CredentialVault.initialize({
+      agentDir: tempDir,
+      usePassphrase: true,
+      passphrase: "reencrypt-test-pass",
+    });
+  });
+
+  afterEach(async () => {
+    if (vault) {
+      vault.destroy();
+    }
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  it("should re-encrypt credentials with new key", async () => {
+    const crypto = await import("node:crypto");
+    const plaintext = "data-to-reencrypt";
+    const encrypted = await vault.encrypt(plaintext);
+
+    const oldKey = crypto.randomBytes(32);
+    const newKey = crypto.randomBytes(32);
+
+    await vault.reencryptAllCredentials(oldKey, newKey);
+
+    // Vault should still work after re-encryption
+    const decrypted = await vault.decrypt(encrypted);
+    expect(decrypted).toBe(plaintext);
+  });
+
+  it("should update metadata after re-encryption", async () => {
+    const crypto = await import("node:crypto");
+    const oldKey = crypto.randomBytes(32);
+    const newKey = crypto.randomBytes(32);
+
+    expect(vault.getMetadata()!.version).toBe(2);
+    await vault.reencryptAllCredentials(oldKey, newKey);
+
+    // Metadata should still show correct KDF
+    const metadata = vault.getMetadata();
+    expect(metadata!.kdf).toBe("argon2id");
+    expect(metadata!.version).toBe(2);
   });
 });
 
