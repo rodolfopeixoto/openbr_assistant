@@ -207,6 +207,19 @@ export type GatewayNodesConfig = {
   denyCommands?: string[];
 };
 
+export type GatewayCorsConfig = {
+  /** Allowed origins for CORS (e.g., "https://example.com", "*"). */
+  allowedOrigins?: string[];
+  /** Allowed HTTP methods for CORS. */
+  allowedMethods?: string[];
+  /** Allowed headers for CORS. */
+  allowedHeaders?: string[];
+  /** Allow credentials (cookies, auth headers) in CORS. */
+  allowCredentials?: boolean;
+  /** Max age for CORS preflight cache in seconds. */
+  maxAge?: number;
+};
+
 export type GatewayConfig = {
   /** Single multiplexed port for Gateway WS + HTTP (default: 18789). */
   port?: number;
@@ -235,6 +248,7 @@ export type GatewayConfig = {
   tls?: GatewayTlsConfig;
   http?: GatewayHttpConfig;
   nodes?: GatewayNodesConfig;
+  cors?: GatewayCorsConfig;
   /**
    * IPs of trusted reverse proxies (e.g. Traefik, nginx). When a connection
    * arrives from one of these IPs, the Gateway trusts `x-forwarded-for` (or
