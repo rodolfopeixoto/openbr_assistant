@@ -37,6 +37,8 @@ function resolveControlUiRoot(): string | null {
     path.resolve(here, "../../dist/control-ui"),
     // Fallback to cwd (dev)
     path.resolve(process.cwd(), "dist", "control-ui"),
+    // Absolute path fallback for macOS app
+    "/Users/ropeixoto/Project/experiments/openbr_assistant/dist/control-ui",
   ].filter((dir): dir is string => Boolean(dir));
   for (const dir of candidates) {
     if (fs.existsSync(path.join(dir, "index.html"))) {

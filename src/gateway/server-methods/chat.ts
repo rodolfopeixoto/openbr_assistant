@@ -164,6 +164,9 @@ function broadcastChatFinal(params: {
     state: "final" as const,
     message: params.message,
   };
+  console.log(
+    `[DEBUG broadcastChatFinal] Broadcasting final message for runId: ${params.runId}, hasMessage: ${!!params.message}`,
+  );
   params.context.broadcast("chat", payload);
   params.context.nodeSendToSession(params.sessionKey, "chat", payload);
 }
@@ -520,12 +523,17 @@ export const chatHandlers: GatewayRequestHandlers = {
         },
       })
         .then(() => {
+          console.log(
+            `[DEBUG chat.send] agentRunStarted: ${agentRunStarted}, finalReplyParts count: ${finalReplyParts.length}`,
+          );
+          console.log(`[DEBUG chat.send] finalReplyParts: ${JSON.stringify(finalReplyParts)}`);
           if (!agentRunStarted) {
             const combinedReply = finalReplyParts
               .map((part) => part.trim())
               .filter(Boolean)
               .join("\n\n")
               .trim();
+            console.log(`[DEBUG chat.send] combinedReply: "${combinedReply}"`);
             let message: Record<string, unknown> | undefined;
             if (combinedReply) {
               const { storePath: latestStorePath, entry: latestEntry } = loadSessionEntry(
