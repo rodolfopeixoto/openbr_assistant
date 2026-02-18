@@ -6,6 +6,9 @@
 /* Import sidebar (split view) - keep this separate as it works well */
 @import "./chat/sidebar.css";
 
+/* Import text formatting styles (bold, italic, code) */
+@import "./chat/text.css";
+
 /* =============================================
    CSS VARIABLES - Chat-specific overrides
    ============================================= */

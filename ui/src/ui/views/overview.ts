@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import type { GatewayHelloOk } from "../gateway";
 import type { UiSettings } from "../storage";
 import { formatAgo, formatDurationMs } from "../format";
@@ -15,11 +15,13 @@ export type OverviewProps = {
   cronEnabled: boolean | null;
   cronNext: number | null;
   lastChannelsRefresh: number | null;
+  restarting?: boolean;
   onSettingsChange: (next: UiSettings) => void;
   onPasswordChange: (next: string) => void;
   onSessionKeyChange: (next: string) => void;
   onConnect: () => void;
   onRefresh: () => void;
+  onRestart?: () => void;
 };
 
 export function renderOverview(props: OverviewProps) {
@@ -166,6 +168,36 @@ export function renderOverview(props: OverviewProps) {
         <div class="row" style="margin-top: 14px;">
           <button class="btn" @click=${() => props.onConnect()}>Connect</button>
           <button class="btn" @click=${() => props.onRefresh()}>Refresh</button>
+          ${props.onRestart
+            ? html`
+              <button
+                class="btn btn-danger"
+                @click=${() => {
+                  if (confirm("Are you sure you want to restart the gateway?\n\nThis will briefly interrupt all active sessions.")) {
+                    props.onRestart?.();
+                  }
+                }}
+                ?disabled=${props.restarting}
+                title="Restart Gateway"
+              >
+                ${props.restarting
+                  ? html`
+                    <span class="spinner-small"></span>
+                    Restarting...
+                  `
+                  : html`
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <polyline points="1 20 1 14 7 14"></polyline>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    Restart
+                  `
+                }
+              </button>
+            `
+            : nothing
+          }
           <span class="muted">Click Connect to apply connection changes.</span>
         </div>
       </div>
