@@ -34,6 +34,7 @@ import {
 } from "./middleware/rate-limit.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
+import { securityHeadersMiddleware } from "./security-headers.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
@@ -266,6 +267,13 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+
+      // Apply security headers
+      const securityHeadersConfig = configSnapshot.gateway?.securityHeaders;
+      if (securityHeadersConfig !== undefined) {
+        const securityHeadersHandler = securityHeadersMiddleware(securityHeadersConfig);
+        securityHeadersHandler(req, res, () => {});
+      }
 
       // CORS handling
       const corsConfig = configSnapshot.gateway?.cors;

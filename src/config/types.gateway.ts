@@ -220,6 +220,23 @@ export type GatewayCorsConfig = {
   maxAge?: number;
 };
 
+export type GatewaySecurityHeadersConfig = {
+  /** Content-Security-Policy header value (set to false to disable). */
+  contentSecurityPolicy?: string | false;
+  /** X-Frame-Options header value (set to false to disable). */
+  xFrameOptions?: "DENY" | "SAMEORIGIN" | false;
+  /** X-Content-Type-Options header (set to false to disable nosniff). */
+  xContentTypeOptions?: boolean;
+  /** X-XSS-Protection header (set to false to disable). */
+  xXssProtection?: boolean;
+  /** Referrer-Policy header value (set to false to disable). */
+  referrerPolicy?: string | false;
+  /** Permissions-Policy header value (set to false to disable). */
+  permissionsPolicy?: string | false;
+  /** Strict-Transport-Security header value (set to false to disable). */
+  strictTransportSecurity?: string | false;
+};
+
 export type GatewayConfig = {
   /** Single multiplexed port for Gateway WS + HTTP (default: 18789). */
   port?: number;
@@ -249,6 +266,7 @@ export type GatewayConfig = {
   http?: GatewayHttpConfig;
   nodes?: GatewayNodesConfig;
   cors?: GatewayCorsConfig;
+  securityHeaders?: GatewaySecurityHeadersConfig;
   /**
    * IPs of trusted reverse proxies (e.g. Traefik, nginx). When a connection
    * arrives from one of these IPs, the Gateway trusts `x-forwarded-for` (or
