@@ -13,7 +13,7 @@ import { resolveAgentAvatar } from "../agents/identity-avatar.js";
 import { handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { handleSlackHttpRequest } from "../slack/http/index.js";
-import { createSecurityMiddleware, APISecurity } from "./api-security.js";
+import { APISecurity } from "./api-security.js";
 import { handleControlUiAvatarRequest, handleControlUiHttpRequest } from "./control-ui.js";
 import { createCorsHandler } from "./cors.js";
 import { CsrfProtection } from "./csrf.js";
