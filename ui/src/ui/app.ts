@@ -126,6 +126,12 @@ export class OpenClawApp extends LitElement {
   @state() compactionStatus: import("./app-tool-stream").CompactionStatus | null = null;
   @state() chatAvatarUrl: string | null = null;
   @state() chatThinkingLevel: string | null = null;
+  @state() chatThinkingActive = false;
+  @state() chatThinkingSteps: import("./components/ThinkingIndicator").ThinkingStep[] = [];
+  @state() chatThinkingCurrentStepIndex = 0;
+  @state() chatThinkingStartedAt: number | null = null;
+  @state() chatThinkingCompletedAt: number | null = null;
+  @state() chatThinkingSummary: string | null = null;
   @state() chatQueue: ChatQueueItem[] = [];
   @state() chatAttachments: ChatAttachment[] = [];
   @state() commandsMenuOpen = false;
@@ -265,6 +271,15 @@ export class OpenClawApp extends LitElement {
   @state() modelsError: string | null = null;
   @state() modelsProviders: import("./components/provider-card").ProviderCardData[] = [];
   @state() modelsSearchQuery = "";
+  @state() modelsShowAddForm: string | null = null;
+  @state() credentialProfileName = "default";
+  @state() credentialApiKey = "";
+  @state() credentialEmail = "";
+  @state() credentialMode: "api_key" | "oauth" | "token" = "api_key";
+  @state() credentialTesting = false;
+  @state() credentialSaving = false;
+  @state() credentialError = "";
+  @state() credentialTestResult: { ok: boolean; error?: string } | null = null;
 
   // ModelSelector state
   @state() selectedProvider: string | null = null;
@@ -804,6 +819,128 @@ export class OpenClawApp extends LitElement {
       console.warn("[App] Failed to remove credential:", error);
       throw error;
     }
+  }
+
+  // Configure button handler - opens the configuration form for a provider
+  handleModelsConfigure(providerId: string) {
+    console.log("[App] Opening configure form for provider:", providerId);
+    this.modelsShowAddForm = providerId;
+    // Reset form state
+    this.credentialProfileName = "default";
+    this.credentialApiKey = "";
+    this.credentialEmail = "";
+    this.credentialMode = "api_key";
+    this.credentialTesting = false;
+    this.credentialSaving = false;
+    this.credentialError = "";
+    this.credentialTestResult = null;
+  }
+
+  // Manage button handler - opens the management view for a configured provider
+  handleModelsManage(providerId: string) {
+    console.log("[App] Opening manage view for provider:", providerId);
+    // For now, just open the configure form
+    // In the future, this could open a different management view
+    this.modelsShowAddForm = providerId;
+  }
+
+  // Hide configuration form modal
+  handleModelsHideForm() {
+    console.log("[App] Hiding configure form");
+    this.modelsShowAddForm = null;
+    this.credentialProfileName = "default";
+    this.credentialApiKey = "";
+    this.credentialEmail = "";
+    this.credentialMode = "api_key";
+    this.credentialTesting = false;
+    this.credentialSaving = false;
+    this.credentialError = "";
+    this.credentialTestResult = null;
+  }
+
+  // Test credential from form
+  async handleModelsFormTest() {
+    if (!this.client || !this.connected || !this.modelsShowAddForm) {
+      return;
+    }
+    this.credentialTesting = true;
+    this.credentialTestResult = null;
+    this.credentialError = "";
+    
+    try {
+      const profileId = `${this.modelsShowAddForm}:${this.credentialProfileName}`;
+      let credential: unknown;
+      
+      if (this.credentialMode === "api_key") {
+        credential = { type: "api_key", key: this.credentialApiKey };
+      } else if (this.credentialMode === "token") {
+        credential = { type: "token", token: this.credentialApiKey };
+      } else {
+        throw new Error("OAuth not yet supported in form");
+      }
+      
+      const response = await this.client.request("auth.test", {
+        profileId,
+        credential,
+      }) as { ok?: boolean; error?: string };
+      
+      if (response?.ok) {
+        this.credentialTestResult = { ok: true };
+      } else {
+        this.credentialTestResult = { ok: false, error: response?.error || "Test failed" };
+      }
+    } catch (error) {
+      console.warn("[App] Failed to test credential:", error);
+      this.credentialTestResult = { ok: false, error: String(error) };
+    } finally {
+      this.credentialTesting = false;
+    }
+  }
+
+  // Save credential from form
+  async handleModelsFormSave() {
+    if (!this.client || !this.connected || !this.modelsShowAddForm) {
+      return;
+    }
+    this.credentialSaving = true;
+    this.credentialError = "";
+    
+    try {
+      const profileId = `${this.modelsShowAddForm}:${this.credentialProfileName}`;
+      let credential: unknown;
+      
+      if (this.credentialMode === "api_key") {
+        credential = { type: "api_key", key: this.credentialApiKey };
+      } else if (this.credentialMode === "token") {
+        credential = { type: "token", token: this.credentialApiKey };
+      } else {
+        throw new Error("OAuth not yet supported in form");
+      }
+      
+      const response = await this.client.request("auth.save", {
+        profileId,
+        credential,
+        email: this.credentialEmail || undefined,
+      }) as { ok?: boolean; error?: string };
+      
+      if (!response?.ok) {
+        throw new Error(response?.error || "Save failed");
+      }
+      
+      // Close form and refresh
+      this.handleModelsHideForm();
+      await this.handleModelsRefresh();
+    } catch (error) {
+      console.warn("[App] Failed to save credential:", error);
+      this.credentialError = String(error);
+    } finally {
+      this.credentialSaving = false;
+    }
+  }
+
+  // Search query handler
+  handleModelsSearchChange(query: string) {
+    this.modelsSearchQuery = query;
   }
 
   // Environment Variables handlers

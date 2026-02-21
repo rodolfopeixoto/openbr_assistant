@@ -15,3 +15,6 @@ export type { ProviderCardData } from "./provider-card.js";
 // Provider Configuration Wizard
 export { ProviderConfigWizard } from "./provider-config-wizard.js";
 export type { WizardFormData, WizardProviderInfo, WizardStep } from "./provider-config-wizard.js";
+
+// Scroll-to-Bottom Button
+export { ScrollToBottomButton } from "../../components/ScrollToBottomButton.js";

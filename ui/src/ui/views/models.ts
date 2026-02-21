@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import type { TemplateResult } from "lit";
 import type { ProviderCardData } from "../components/provider-card";
 import { icons } from "../icons";
@@ -8,6 +8,17 @@ export interface ModelsViewState {
   error: string | null;
   providers: ProviderCardData[];
   searchQuery: string;
+  // Modal state
+  showAddForm: string | null;
+  selectedProvider: ProviderCardData | null;
+  formProfileName: string;
+  formCredential: string;
+  formEmail: string;
+  formMode: "api_key" | "oauth" | "token";
+  formTesting: boolean;
+  formSaving: boolean;
+  formError: string;
+  formTestResult: { ok: boolean; error?: string } | null;
 }
 
 export interface ModelsViewCallbacks {
@@ -15,6 +26,14 @@ export interface ModelsViewCallbacks {
   onConfigure: (providerId: string) => void;
   onManage: (providerId: string) => void;
   onSearchChange: (query: string) => void;
+  // Modal callbacks
+  onHideAddForm: () => void;
+  onFormProfileNameChange: (value: string) => void;
+  onFormCredentialChange: (value: string) => void;
+  onFormEmailChange: (value: string) => void;
+  onFormModeChange: (value: "api_key" | "oauth" | "token") => void;
+  onFormTest: () => void;
+  onFormSave: () => void;
 }
 
 function getFilteredProviders(providers: ProviderCardData[], query: string): ProviderCardData[] {
@@ -354,6 +373,307 @@ export function renderModels(
           `)}
         </div>
       `}
+
+      ${state.showAddForm && state.selectedProvider ? html`
+        <div class="modal-overlay" @click=${callbacks.onHideAddForm}>
+          <div class="modal" @click=${(e: Event) => e.stopPropagation()}>
+            <div class="modal-header">
+              <h2 class="modal-title">Configure ${state.selectedProvider.name}</h2>
+              <button class="modal-close" @click=${callbacks.onHideAddForm}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="modal-body">
+              ${state.formError ? html`
+                <div class="form-error">${state.formError}</div>
+              ` : null}
+              
+              <div class="form-group">
+                <label class="form-label">Profile Name</label>
+                <input 
+                  type="text" 
+                  class="form-input"
+                  .value=${state.formProfileName}
+                  @input=${(e: Event) => callbacks.onFormProfileNameChange((e.target as HTMLInputElement).value)}
+                  placeholder="e.g., default, work, personal"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Authentication Mode</label>
+                <select 
+                  class="form-select"
+                  .value=${state.formMode}
+                  @change=${(e: Event) => callbacks.onFormModeChange((e.target as HTMLSelectElement).value as "api_key" | "oauth" | "token")}
+                >
+                  <option value="api_key">API Key</option>
+                  <option value="token">Token</option>
+                  <option value="oauth" disabled>OAuth (coming soon)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  ${state.formMode === "api_key" ? "API Key" : "Token"}
+                </label>
+                <input 
+                  type="password" 
+                  class="form-input"
+                  .value=${state.formCredential}
+                  @input=${(e: Event) => callbacks.onFormCredentialChange((e.target as HTMLInputElement).value)}
+                  placeholder=${state.formMode === "api_key" ? "sk-..." : "Enter your token"}
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email (optional)</label>
+                <input 
+                  type="email" 
+                  class="form-input"
+                  .value=${state.formEmail}
+                  @input=${(e: Event) => callbacks.onFormEmailChange((e.target as HTMLInputElement).value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              ${state.formTestResult ? html`
+                <div class="test-result ${state.formTestResult.ok ? 'success' : 'error'}">
+                  ${state.formTestResult.ok 
+                    ? html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Connection successful!`
+                    : html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> ${state.formTestResult.error}`
+                  }
+                </div>
+              ` : null}
+            </div>
+            
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click=${callbacks.onHideAddForm}>Cancel</button>
+              <button 
+                class="btn btn-secondary" 
+                @click=${callbacks.onFormTest}
+                ?disabled=${state.formTesting || !state.formCredential}
+              >
+                ${state.formTesting ? html`<span class="btn-spinner"></span> Testing...` : 'Test Connection'}
+              </button>
+              <button 
+                class="btn btn-primary" 
+                @click=${callbacks.onFormSave}
+                ?disabled=${state.formSaving || !state.formCredential}
+              >
+                ${state.formSaving ? html`<span class="btn-spinner"></span> Saving...` : 'Save Configuration'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+          }
+
+          .modal {
+            background: var(--bg-elevated, #1a1a2e);
+            border: 1px solid var(--border, #2d2d44);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          }
+
+          .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border, #2d2d44);
+          }
+
+          .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text, #fff);
+            margin: 0;
+          }
+
+          .modal-close {
+            background: none;
+            border: none;
+            color: var(--muted, #888);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+          }
+
+          .modal-close:hover {
+            color: var(--text, #fff);
+            background: var(--bg-hover, #252540);
+          }
+
+          .modal-body {
+            padding: 24px;
+          }
+
+          .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border, #2d2d44);
+          }
+
+          .form-group {
+            margin-bottom: 20px;
+          }
+
+          .form-group:last-child {
+            margin-bottom: 0;
+          }
+
+          .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text, #fff);
+            margin-bottom: 8px;
+          }
+
+          .form-input,
+          .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg, #0f0f1a);
+            border: 1px solid var(--border, #2d2d44);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text, #fff);
+            transition: all 0.15s ease;
+          }
+
+          .form-input:focus,
+          .form-select:focus {
+            outline: none;
+            border-color: var(--accent, #6366f1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+          }
+
+          .form-input::placeholder {
+            color: var(--muted, #666);
+          }
+
+          .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+          }
+
+          .form-select option:disabled {
+            color: #666;
+          }
+
+          .form-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #ef4444;
+            margin-bottom: 20px;
+          }
+
+          .test-result {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 16px;
+          }
+
+          .test-result.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+          }
+
+          .test-result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+          }
+
+          .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+          }
+
+          .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          .btn-primary {
+            background: var(--accent, #6366f1);
+            color: white;
+          }
+
+          .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover, #818cf8);
+          }
+
+          .btn-secondary {
+            background: var(--bg-accent, #2d2d44);
+            color: var(--text, #fff);
+            border: 1px solid var(--border, #2d2d44);
+          }
+
+          .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-hover, #252540);
+            border-color: var(--border-strong, #3d3d5c);
+          }
+
+          .btn-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        </style>
+      ` : nothing}
     </div>
   `;
 }
