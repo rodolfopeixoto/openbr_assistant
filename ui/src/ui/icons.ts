@@ -255,6 +255,11 @@ export const icons = {
       <path d="m9 18 6-6-6-6" />
     </svg>
   `,
+  chevronDown: html`
+    <svg viewBox="0 0 24 24">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  `,
   send: html`
     <svg viewBox="0 0 24 24">
       <path d="m22 2-7 20-4-9-9-4 20-7z" />
