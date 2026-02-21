@@ -267,9 +267,12 @@ export function handleControlUiHttpRequest(
     return true;
   }
 
-  const url = new URL(urlRaw, "http://localhost");
   const basePath = normalizeControlUiBasePath(opts?.basePath);
-  const pathname = url.pathname;
+  // Parse URL manually to preserve special characters like --
+  // new URL() normalizes the path and removes repeated dashes
+  const urlMatch = urlRaw.match(/^([^?]*)(\?.*)?$/);
+  const pathname = urlMatch ? urlMatch[1] : urlRaw;
+  const search = urlMatch && urlMatch[2] ? urlMatch[2] : "";
 
   if (!basePath) {
     if (pathname === "/ui" || pathname.startsWith("/ui/")) {
@@ -281,7 +284,7 @@ export function handleControlUiHttpRequest(
   if (basePath) {
     if (pathname === basePath) {
       res.statusCode = 302;
-      res.setHeader("Location", `${basePath}/${url.search}`);
+      res.setHeader("Location", `${basePath}/${search}`);
       res.end();
       return true;
     }
@@ -336,6 +339,36 @@ export function handleControlUiHttpRequest(
     }
     serveFile(res, filePath);
     return true;
+  }
+
+  // Workaround: Node.js HTTP parser may normalize URLs and remove repeated dashes (--)
+  // Try to find a file with -- in the name if the original wasn't found
+  // This handles cases like index-CX0dux.css -> index-CX--0dux.css
+  const fileDir = path.dirname(filePath);
+  const fileBase = path.basename(fileRel);
+  if (fs.existsSync(fileDir) && fs.statSync(fileDir).isDirectory()) {
+    const files = fs.readdirSync(fileDir);
+    // Try multiple normalization strategies
+    // Strategy 1: Replace -- with - in filenames
+    let possibleMatches = files.filter((f) => {
+      const normalizedFile = f.replace(/--/g, "-");
+      return normalizedFile === fileBase;
+    });
+    // Strategy 2: Normalize both by removing all dashes and comparing
+    if (possibleMatches.length === 0) {
+      const normalizedRequest = fileBase.replace(/-/g, "");
+      possibleMatches = files.filter((f) => {
+        const normalizedFile = f.replace(/-/g, "");
+        return normalizedFile === normalizedRequest;
+      });
+    }
+    if (possibleMatches.length > 0) {
+      const matchedFile = path.join(fileDir, possibleMatches[0]);
+      if (fs.statSync(matchedFile).isFile()) {
+        serveFile(res, matchedFile);
+        return true;
+      }
+    }
   }
 
   // SPA fallback (client-side router): serve index.html for unknown paths.

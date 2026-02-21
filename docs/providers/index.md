@@ -22,33 +22,91 @@ Venice is our recommended Venice AI setup for privacy-first inference with an op
 
 See [Venice AI](/providers/venice).
 
-## Quick start
+## Quick Start
 
-1. Authenticate with the provider (usually via `openclaw onboard`).
-2. Set the default model:
+### Add Your First Provider
+
+Choose a provider and add it in one command:
+
+```bash
+# OpenAI
+openclaw providers add openai --api-key "sk-..."
+
+# NVIDIA API Catalog
+openclaw providers add nvidia --api-key "nvapi-..."
+
+# Local Ollama instance
+openclaw providers add custom --template ollama --url http://localhost:11434
+```
+
+### Set Default Model
+
+Configure your default model in `openclaw.config.json`:
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-opus-4-5",
+        fallback: "openai/gpt-4o"
+      }
+    }
+  }
 }
 ```
 
-## Provider docs
+### List and Manage Providers
 
-- [OpenAI (API + Codex)](/providers/openai)
-- [Anthropic (API + Claude Code CLI)](/providers/anthropic)
-- [Qwen (OAuth)](/providers/qwen)
-- [OpenRouter](/providers/openrouter)
-- [Vercel AI Gateway](/providers/vercel-ai-gateway)
-- [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot)
-- [OpenCode Zen](/providers/opencode)
-- [Amazon Bedrock](/bedrock)
+```bash
+# See all configured providers
+openclaw providers list
+
+# Test a provider connection
+openclaw providers test <provider-id>
+
+# Set default provider
+openclaw providers default <provider-id>
+```
+
+## Managing Providers
+
+For detailed instructions on adding, configuring, and troubleshooting providers:
+
+- **[User Guide](/providers/user-guide)** - Step-by-step setup for NVIDIA, OpenAI, and custom endpoints
+- **[Developer Guide](/providers/developer-guide)** - API reference and architecture for building provider integrations
+- **[Code Examples](https://github.com/openclaw/openclaw/tree/main/examples/providers)** - Working JavaScript examples for programmatic provider management
+
+## Provider Docs
+
+### Cloud Providers
+
+- [OpenAI (API + Codex)](/providers/openai) - GPT-4o, GPT-4o Mini, o1 reasoning
+- [Anthropic (API + Claude Code CLI)](/providers/anthropic) - Claude 3.5 Sonnet, Claude 3 Opus
+- [NVIDIA API Catalog](/providers/nvidia) - GLM5, Kimi K2.5, Qwen3 Coder via NVIDIA
+- [Groq](/providers/groq) - Fast inference with open models
+- [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot) - Kimi models for long context
+- [Qwen (OAuth)](/providers/qwen) - Alibaba's Qwen models
+- [MiniMax](/providers/minimax) - MiniMax model family
+- [OpenRouter](/providers/openrouter) - Unified API for multiple providers
+- [Venice (Venice AI, privacy-focused)](/providers/venice)
+
+### Enterprise & Custom
+
+- [Amazon Bedrock](/bedrock) - AWS managed models
+- [Vercel AI Gateway](/providers/vercel-ai-gateway) - Unified AI gateway
 - [Z.AI](/providers/zai)
 - [Xiaomi](/providers/xiaomi)
-- [GLM models](/providers/glm)
-- [MiniMax](/providers/minimax)
-- [Venice (Venice AI, privacy-focused)](/providers/venice)
-- [Ollama (local models)](/providers/ollama)
+- [OpenCode Zen](/providers/opencode)
+
+### Local & Self-Hosted
+
+- [Ollama (local models)](/providers/ollama) - Run models locally
+- [GLM models](/providers/glm) - ChatGLM model family
+
+### Transcription
+
+- [Deepgram (audio transcription)](/providers/deepgram)
 
 ## Transcription providers
 
