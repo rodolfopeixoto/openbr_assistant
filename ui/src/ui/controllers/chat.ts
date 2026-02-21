@@ -2,6 +2,7 @@ import type { GatewayBrowserClient } from "../gateway";
 import type { ChatAttachment } from "../ui-types";
 import { extractText } from "../chat/message-extract";
 import { generateUUID } from "../uuid";
+import type { ThinkingStep, ThinkingLevel } from "../components/ThinkingIndicator";
 
 export type ChatState = {
   client: GatewayBrowserClient | null;
@@ -17,6 +18,13 @@ export type ChatState = {
   chatStream: string | null;
   chatStreamStartedAt: number | null;
   lastError: string | null;
+  // Thinking/reasoning state
+  chatThinkingActive: boolean;
+  chatThinkingSteps: ThinkingStep[];
+  chatThinkingCurrentStepIndex: number;
+  chatThinkingStartedAt: number | null;
+  chatThinkingCompletedAt: number | null;
+  chatThinkingSummary: string | null;
 };
 
 export type ChatEventPayload = {
@@ -25,6 +33,21 @@ export type ChatEventPayload = {
   state: "delta" | "final" | "aborted" | "error";
   message?: unknown;
   errorMessage?: string;
+};
+
+export type ThinkingEventPayload = {
+  type: "thinking";
+  runId: string;
+  sessionKey: string;
+  level: ThinkingLevel;
+  step?: {
+    id: string;
+    text: string;
+    timestamp: number;
+  };
+  stepIndex?: number;
+  summary?: string;
+  completed?: boolean;
 };
 
 export async function loadChatHistory(state: ChatState) {
@@ -216,15 +239,95 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;
+    // Reset thinking state when chat completes
+    resetThinkingState(state);
   } else if (payload.state === "aborted") {
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;
+    // Reset thinking state when chat is aborted
+    resetThinkingState(state);
   } else if (payload.state === "error") {
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;
     state.lastError = payload.errorMessage ?? "chat error";
+    // Reset thinking state when chat errors
+    resetThinkingState(state);
   }
   return payload.state;
+}
+
+export function handleThinkingEvent(state: ChatState, payload?: ThinkingEventPayload): boolean {
+  if (!payload || payload.type !== "thinking") return false;
+  if (payload.sessionKey !== state.sessionKey) return false;
+  if (payload.runId && state.chatRunId && payload.runId !== state.chatRunId) return false;
+
+  // Initialize thinking state if not already active
+  if (!state.chatThinkingActive) {
+    state.chatThinkingActive = true;
+    state.chatThinkingSteps = [];
+    state.chatThinkingCurrentStepIndex = 0;
+    state.chatThinkingStartedAt = Date.now();
+    state.chatThinkingCompletedAt = null;
+    state.chatThinkingSummary = null;
+  }
+
+  // Update thinking level
+  if (payload.level) {
+    state.chatThinkingLevel = payload.level;
+  }
+
+  // Add new step if provided
+  if (payload.step) {
+    const existingIndex = state.chatThinkingSteps.findIndex(s => s.id === payload.step!.id);
+    if (existingIndex >= 0) {
+      // Update existing step
+      state.chatThinkingSteps[existingIndex] = {
+        ...payload.step,
+        completed: payload.stepIndex !== undefined && payload.stepIndex > existingIndex
+      };
+    } else {
+      // Add new step
+      state.chatThinkingSteps.push({
+        ...payload.step,
+        completed: false
+      });
+    }
+  }
+
+  // Update current step index
+  if (payload.stepIndex !== undefined) {
+    state.chatThinkingCurrentStepIndex = payload.stepIndex;
+    // Mark previous steps as completed
+    state.chatThinkingSteps = state.chatThinkingSteps.map((step, idx) => ({
+      ...step,
+      completed: idx < payload.stepIndex!
+    }));
+  }
+
+  // Handle completion
+  if (payload.completed) {
+    state.chatThinkingActive = false;
+    state.chatThinkingCompletedAt = Date.now();
+    if (payload.summary) {
+      state.chatThinkingSummary = payload.summary;
+    }
+    // Mark all steps as completed
+    state.chatThinkingSteps = state.chatThinkingSteps.map(step => ({
+      ...step,
+      completed: true
+    }));
+  }
+
+  return true;
+}
+
+export function resetThinkingState(state: ChatState): void {
+  state.chatThinkingActive = false;
+  state.chatThinkingSteps = [];
+  state.chatThinkingCurrentStepIndex = 0;
+  state.chatThinkingStartedAt = null;
+  state.chatThinkingCompletedAt = null;
+  state.chatThinkingSummary = null;
 }

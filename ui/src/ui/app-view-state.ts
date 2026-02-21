@@ -55,6 +55,12 @@ export type AppViewState = {
   chatStreamStartedAt: number | null;
   chatAvatarUrl: string | null;
   chatThinkingLevel: string | null;
+  chatThinkingActive: boolean;
+  chatThinkingSteps: import("./components/ThinkingIndicator").ThinkingStep[];
+  chatThinkingCurrentStepIndex: number;
+  chatThinkingStartedAt: number | null;
+  chatThinkingCompletedAt: number | null;
+  chatThinkingSummary: string | null;
   chatQueue: ChatQueueItem[];
   nodesLoading: boolean;
   nodes: Array<Record<string, unknown>>;

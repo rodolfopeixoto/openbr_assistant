@@ -14,6 +14,9 @@ import { normalizeMessage, normalizeRoleForGrouping } from "../chat/message-norm
 import { icons } from "../icons";
 import { renderMarkdownSidebar } from "./markdown-sidebar";
 import "../components/resizable-divider";
+import "../components/ThinkingIndicator";
+import type { ThinkingStep, ThinkingLevel } from "../components/ThinkingIndicator";
+import "../../components/ScrollToBottomButton";
 
 // Quick commands definition
 interface QuickCommand {
@@ -61,6 +64,16 @@ export type CompactionIndicatorStatus = {
   completedAt: number | null;
 };
 
+export type ThinkingStatus = {
+  active: boolean;
+  level: ThinkingLevel;
+  steps: ThinkingStep[];
+  currentStepIndex: number;
+  startedAt: number;
+  completedAt?: number;
+  summary?: string;
+};
+
 export type ChatProps = {
   sessionKey: string;
   onSessionKeyChange: (next: string) => void;
@@ -70,6 +83,7 @@ export type ChatProps = {
   sending: boolean;
   canAbort?: boolean;
   compactionStatus?: CompactionIndicatorStatus | null;
+  thinkingStatus?: ThinkingStatus | null;
   messages: unknown[];
   toolMessages: unknown[];
   stream: string | null;
@@ -115,6 +129,10 @@ export type ChatProps = {
   onCloseSidebar?: () => void;
   onSplitRatioChange?: (ratio: number) => void;
   onChatScroll?: (event: Event) => void;
+  // Scroll-to-bottom button props
+  showScrollToBottom?: boolean;
+  newMessageCount?: number;
+  onScrollToBottom?: () => void;
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
@@ -149,6 +167,22 @@ function renderCompactionIndicator(status: CompactionIndicatorStatus | null | un
   }
 
   return nothing;
+}
+
+function renderThinkingIndicator(status: ThinkingStatus | null | undefined) {
+  if (!status || !status.active) return nothing;
+
+  return html`
+    <thinking-indicator
+      .level=${status.level}
+      .steps=${status.steps}
+      .currentStepIndex=${status.currentStepIndex}
+      .startedAt=${status.startedAt}
+      .isComplete=${!!status.completedAt}
+      .summary=${status.summary || ""}
+      .compact=${false}
+    ></thinking-indicator>
+  `;
 }
 
 function generateAttachmentId(): string {
@@ -373,6 +407,9 @@ export function renderChat(props: ChatProps) {
                 `
               : nothing
       }
+      
+      ${renderThinkingIndicator(props.thinkingStatus)}
+      
       ${repeat(
         chatItems,
         (item) => item.key,
@@ -438,6 +475,12 @@ export function renderChat(props: ChatProps) {
           style="flex: ${sidebarOpen ? `0 0 ${splitRatio * 100}%` : "1 1 100%"}"
         >
           ${thread}
+        
+        <scroll-to-bottom-button
+          ?visible=${props.showScrollToBottom ?? false}
+          .newMessageCount=${props.newMessageCount ?? 0}
+          @scroll-to-bottom=${props.onScrollToBottom}
+        ></scroll-to-bottom-button>
         </div>
 
         ${
