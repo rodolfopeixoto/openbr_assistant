@@ -1,4 +1,4 @@
-// Package gateway provides the HTTP/WebSocket gateway functionality
+// Package gateway provides HTTP server and WebSocket handling
 package gateway
 
 import (
@@ -76,15 +76,46 @@ func (s *Server) Shutdown(ctx context.Context) error {
 func (s *Server) setupRoutes() {
 	// Health check
 	s.router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"timestamp": time.Now().Unix(),
+		})
 	})
 
-	// API routes
-	api := s.router.Group("/api")
+	// API routes v1
+	v1 := s.router.Group("/api/v1")
 	{
-		api.GET("/mcp/servers", s.handleMCPListServers)
-		api.POST("/mcp/servers/:id/connect", s.handleMCPConnect)
-		api.POST("/mcp/servers/:id/call", s.handleMCPCallTool)
+		// MCP routes
+		mcp := v1.Group("/mcp")
+		{
+			mcp.GET("/servers", s.handleMCPListServers)
+			mcp.POST("/servers/:id/connect", s.handleMCPConnect)
+			mcp.POST("/servers/:id/disconnect", s.handleMCPDisconnect)
+			mcp.POST("/servers/:id/call", s.handleMCPCallTool)
+			mcp.GET("/servers/:id/tools", s.handleMCPListTools)
+			mcp.GET("/servers/:id/resources", s.handleMCPListResources)
+		}
+
+		// Container routes (from existing implementation)
+		containers := v1.Group("/containers")
+		{
+			containers.GET("", s.handleListContainers)
+			containers.GET("/runtime", s.handleGetRuntimeInfo)
+			containers.GET("/:id/logs", s.handleGetContainerLogs)
+			containers.POST("/:id/stop", s.handleStopContainer)
+			containers.DELETE("/:id", s.handleRemoveContainer)
+		}
+
+		// Intelligence routes
+		intelligence := v1.Group("/intelligence")
+		{
+			intelligence.GET("/articles", s.handleListArticles)
+			intelligence.GET("/articles/:id", s.handleGetArticle)
+			intelligence.POST("/articles/:id/save", s.handleSaveArticle)
+			intelligence.GET("/digests", s.handleListDigests)
+			intelligence.POST("/digests/generate", s.handleGenerateDigest)
+			intelligence.GET("/trends", s.handleGetTrends)
+		}
 	}
 
 	// WebSocket endpoint
