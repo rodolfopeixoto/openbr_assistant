@@ -125,21 +125,36 @@ const result = await mcpClient.callTool('weather-api', 'getForecast', {
 
 ## 🦀 Rust Performance Modules
 
+### Modules
+- **crypto**: SHA256/384/512, HMAC-SHA256, Base64 encode/decode, parallel batch hashing
+- **json**: Parse, stringify, prettify, validate, get value by path
+- **cache**: Thread-safe in-memory cache with TTL support, cleanup, size tracking
+- **image**: Image dimensions, resize, convert, thumbnail calculation
+
 ### Build
 ```bash
 cd openclaw-rs
 cargo build --release
 ```
 
-### API
+### API Examples
 ```rust
 use openclaw_rs::crypto;
+use openclaw_rs::json;
+use openclaw_rs::cache;
 
-// Hash
+// Crypto
 let hash = crypto::sha256("hello world");
-
-// Batch processing (paralelo)
 let hashes = crypto::hash_batch(inputs, crypto::HashAlgorithm::Sha256);
+
+// JSON
+let parsed = json::json_parse('{"key": "value"}');
+let value = json::json_get(json_str, "path.to.key");
+
+// Cache
+let cache = cache::Cache::new();
+cache.set("key", "value", Some(60000)); // 60s TTL
+let value = cache.get("key");
 ```
 
 ## 🚀 Go Gateway
@@ -193,13 +208,43 @@ POST   /api/containers/:id/stop     # Parar
 DELETE /api/containers/:id          # Remover
 ```
 
+## 🖥️ CLI Commands
+
+### Skills
+```bash
+openclaw skills list                  # List all skills
+openclaw skills install <skillId>     # Install a skill
+openclaw skills uninstall <skillId>   # Uninstall a skill
+openclaw skills enable <skillId>      # Enable a skill
+openclaw skills disable <skillId>     # Disable a skill
+openclaw skills apply <id> <path>     # Apply skill to directory
+openclaw skills preview <id> <path>   # Preview changes
+openclaw skills search <query>        # Search skills
+```
+
+### MCP
+```bash
+openclaw mcp list                     # List MCP servers
+openclaw mcp add --name <n> --url <u> # Add server
+openclaw mcp remove <serverId>        # Remove server
+openclaw mcp connect <serverId>       # Connect to server
+openclaw mcp disconnect <serverId>    # Disconnect
+openclaw mcp tools <serverId>         # List tools
+openclaw mcp call <id> <tool>         # Call a tool
+openclaw mcp resources <serverId>     # List resources
+openclaw mcp status                   # Show status
+```
+
 ## 📊 Estatísticas
 
-- **3,117 linhas** adicionadas
+- **6,976 linhas** adicionadas
 - **30+ comandos** bloqueados
-- **14 módulos** TypeScript
+- **23 módulos** TypeScript
+- **4 módulos** Rust
+- **3 módulos** Go
 - **2 linguagens** adicionais (Rust + Go)
 - **2 UI components** Lit
+- **2 CLI commands** (skills + mcp)
 
 ## 🛣️ Roadmap
 
@@ -207,11 +252,12 @@ DELETE /api/containers/:id          # Remover
 - [x] Container Security System
 - [x] Blocked Commands
 - [x] Skills System (Pack + Action)
-- [x] MCP Client
-- [x] MCP Inspector UI
+- [x] MCP Client + Inspector
 - [x] ContainerPanel UI
-- [x] Rust modules structure
-- [x] Go gateway structure
+- [x] Rust modules (crypto, json, cache, image)
+- [x] Go gateway (server, handlers, MCP manager)
+- [x] CLI commands (skills + mcp)
+- [x] Gateway integration
 
 ### Em Progresso 🔄
 - [ ] Podman runtime support
