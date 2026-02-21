@@ -19,3 +19,7 @@ export type { WizardFormData, WizardProviderInfo, WizardStep } from "./provider-
 // Container Panel Component
 export { ContainerPanel } from "./container-panel.js";
 export type { ContainerInfo, RuntimeInfo } from "./container-panel.js";
+
+// MCP Inspector Component
+export { MCPInspector } from "./mcp-inspector.js";
+export type { MCPServerUI, MCPToolUI, MCPResourceUI, MCPInspectorEventUI } from "./mcp-inspector.js";
