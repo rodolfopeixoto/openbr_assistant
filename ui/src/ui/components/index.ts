@@ -15,3 +15,7 @@ export type { ProviderCardData } from "./provider-card.js";
 // Provider Configuration Wizard
 export { ProviderConfigWizard } from "./provider-config-wizard.js";
 export type { WizardFormData, WizardProviderInfo, WizardStep } from "./provider-config-wizard.js";
+
+// Container Panel Component
+export { ContainerPanel } from "./container-panel.js";
+export type { ContainerInfo, RuntimeInfo } from "./container-panel.js";
