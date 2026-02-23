@@ -4,11 +4,10 @@ export const TAB_GROUPS = [
   { label: "Chat", tabs: ["chat"] },
   {
     label: "Control",
-    tabs: ["overview", "channels", "instances", "sessions", "cron", "news"],
+    tabs: ["overview", "channels", "instances", "sessions", "cron"],
   },
-  { label: "Agent", tabs: ["skills", "nodes", "opencode"] },
+  { label: "Agent", tabs: ["skills", "nodes"] },
   { label: "Settings", tabs: ["models", "config", "env", "workspace", "compliance", "debug", "logs"] },
-  { label: "System", tabs: ["features", "mcp", "containers", "security"] },
 ] as const;
 
 export type Tab =
@@ -26,13 +25,7 @@ export type Tab =
   | "workspace"
   | "compliance"
   | "debug"
-  | "logs"
-  | "news"
-  | "features"
-  | "mcp"
-  | "containers"
-  | "security"
-  | "opencode";
+  | "logs";
 
 const TAB_PATHS: Record<Tab, string> = {
   overview: "/overview",
@@ -50,12 +43,6 @@ const TAB_PATHS: Record<Tab, string> = {
   compliance: "/compliance",
   debug: "/debug",
   logs: "/logs",
-  news: "/news",
-  features: "/features",
-  mcp: "/mcp",
-  containers: "/containers",
-  security: "/security",
-  opencode: "/opencode",
 };
 
 const PATH_TO_TAB = new Map(Object.entries(TAB_PATHS).map(([tab, path]) => [path, tab as Tab]));
@@ -151,18 +138,6 @@ export function iconForTab(tab: Tab): IconName {
       return "bug";
     case "logs":
       return "scrollText";
-    case "news":
-      return "newspaper";
-    case "features":
-      return "grid";
-    case "mcp":
-      return "terminal";
-    case "containers":
-      return "box";
-    case "security":
-      return "shield";
-    case "opencode":
-      return "code";
     default:
       return "folder";
   }
@@ -200,18 +175,6 @@ export function titleForTab(tab: Tab) {
       return "Debug";
     case "logs":
       return "Logs";
-    case "news":
-      return "News";
-    case "features":
-      return "Features";
-    case "mcp":
-      return "MCP";
-    case "containers":
-      return "Containers";
-    case "security":
-      return "Security";
-    case "opencode":
-      return "OpenCode";
     default:
       return "Control";
   }
@@ -249,18 +212,6 @@ export function subtitleForTab(tab: Tab) {
       return "Gateway snapshots, events, and manual RPC calls.";
     case "logs":
       return "Live tail of the gateway file logs.";
-    case "news":
-      return "AI-powered news aggregation and analysis from various sources.";
-    case "features":
-      return "Manage all available features and integrations.";
-    case "mcp":
-      return "Manage Model Context Protocol servers and tools.";
-    case "containers":
-      return "Manage Docker containers for agents.";
-    case "security":
-      return "Security dashboard and vulnerability scanning.";
-    case "opencode":
-      return "AI coding assistant in secure containers.";
     default:
       return "";
   }

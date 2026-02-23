@@ -15,12 +15,3 @@ export const AUDIT_EVENTS = {
     INJECTION_DETECTED: "security.injection.detected",
   },
 } as const;
-
-// Base audit event types
-export interface AuditEventBase {
-  type: string;
-  timestamp: string;
-  outcome: AuditOutcome;
-}
-
-export type AuditOutcome = "success" | "failure" | "blocked" | "warning";

@@ -12,7 +12,7 @@ export async function loadModels(host: OpenClawApp): Promise<void> {
       profiles: Array<{ id: string; provider: string; type: string }>;
     };
 
-    // Get default providers from models.providers endpoint
+    // Get all available providers from models.providers endpoint
     const modelProviders = (await host.client?.request("models.providers", {})) as {
       providers: Array<{
         id: string;

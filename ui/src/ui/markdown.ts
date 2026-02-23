@@ -5,22 +5,11 @@ import { truncateText } from "./format";
 // Helper to safely parse inline tokens with fallback
 function safeParseInline(parser: any, tokens: Tokens.Generic[]): string {
   try {
-    // Filter out block-level tokens that can't be parsed inline
-    const inlineTokens = tokens.filter(token => {
-      // Block-level tokens that should not be processed by parseInline
-      const blockTypes = ['list', 'paragraph', 'code', 'blockquote', 'heading', 'table', 'hr', 'space'];
-      return !blockTypes.includes(token.type);
-    });
-    
-    if (inlineTokens.length === 0) {
-      return '';
-    }
-    
     if (parser?.parseInline) {
-      return parser.parseInline(inlineTokens);
+      return parser.parseInline(tokens);
     }
     // Fallback: manually render tokens
-    return inlineTokens.map(token => {
+    return tokens.map(token => {
       if (token.type === 'text') return escapeHtml(token.text || '');
       if (token.type === 'codespan') return `<code>${escapeHtml(token.text || '')}</code>`;
       if (token.type === 'strong') return `<strong>${safeParseInline(parser, token.tokens || [])}</strong>`;

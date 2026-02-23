@@ -19,21 +19,15 @@ export class APISecurity {
     this.endpoints.set(key, config);
   }
 
-  sanitizeInput(input: string, context: "url" | "body" | "query" = "body"): string {
+  sanitizeInput(input: string): string {
     // XSS prevention
     let sanitized = input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<script\b[^\u003c]*(?:(?!<\/script>)<[^\u003c]*)*<\/script>/gi, "")
       .replace(/javascript:/gi, "")
       .replace(/on\w+\s*=/gi, "");
 
     // SQL injection basic prevention
-    // Only remove -- in body/query context, not in URLs (to support filenames like index-CX--0dux.css)
-    if (context !== "url") {
-      sanitized = sanitized.replace(/(['";\\])/g, "\\$1").replace(/--/g, "");
-    } else {
-      // For URLs, only escape quotes but don't remove --
-      sanitized = sanitized.replace(/(['";\\])/g, "\\$1");
-    }
+    sanitized = sanitized.replace(/(['";\\])/g, "\\$1").replace(/--/g, "");
 
     // Path traversal prevention
     sanitized = sanitized.replace(/\.\.\//g, "").replace(/~\//g, "");
@@ -54,7 +48,7 @@ export class APISecurity {
     return async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
       // Sanitize URL
       if (req.url) {
-        req.url = this.sanitizeInput(req.url, "url");
+        req.url = this.sanitizeInput(req.url);
       }
 
       // Validate content type for POST/PUT

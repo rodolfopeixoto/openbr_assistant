@@ -13,14 +13,10 @@ import { cronHandlers } from "./server-methods/cron.js";
 import { deviceHandlers } from "./server-methods/devices.js";
 import { envHandlers } from "./server-methods/env.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
-import { featuresHandlers } from "./server-methods/features.js";
 import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
-import { mcpHandlers } from "./server-methods/mcp.js";
 import { modelsHandlers } from "./server-methods/models.js";
-import { newsHandlers } from "./server-methods/news.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
-import { opencodeHandlers } from "./server-methods/opencode.js";
 import { sendHandlers } from "./server-methods/send.js";
 import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
@@ -90,14 +86,6 @@ const READ_METHODS = new Set([
   "workspace.resetToTemplate",
   "env.list",
   "env.get",
-  "features.list",
-  "features.status",
-  "mcp.list",
-  "mcp.marketplace",
-  "news.list",
-  "news.sources",
-  "news.refresh",
-  "news.source.test",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -119,16 +107,6 @@ const WRITE_METHODS = new Set([
   "workspace.discardDraft",
   "env.set",
   "env.delete",
-  "features.toggle",
-  "features.configure",
-  "mcp.add",
-  "mcp.remove",
-  "mcp.enable",
-  "mcp.install",
-  "opencode.task.create",
-  "opencode.task.approve",
-  "opencode.task.cancel",
-  "opencode.initialize",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -230,10 +208,6 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...browserHandlers,
   ...workspaceHandlers,
   ...complianceHandlers,
-  ...featuresHandlers,
-  ...mcpHandlers,
-  ...opencodeHandlers,
-  ...newsHandlers,
 };
 
 export async function handleGatewayRequest(

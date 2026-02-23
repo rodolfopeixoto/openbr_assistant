@@ -36,7 +36,6 @@ import {
 } from "./middleware/rate-limit.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
-import { handleProviderRoutes } from "./routes/providers.js";
 import { securityHeadersMiddleware } from "./security-headers.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
@@ -211,7 +210,7 @@ export function createHooksRequestHandler(
   };
 }
 
-export async function createGatewayHttpServer(opts: {
+export function createGatewayHttpServer(opts: {
   canvasHost: CanvasHostHandler | null;
   controlUiEnabled: boolean;
   controlUiBasePath: string;
@@ -224,7 +223,7 @@ export async function createGatewayHttpServer(opts: {
   tlsOptions?: TlsOptions;
   rateLimitConfig?: RateLimitMiddlewareConfig;
   csrfProtection?: CsrfProtection;
-}): Promise<HttpServer> {
+}): HttpServer {
   const {
     canvasHost,
     controlUiEnabled,
@@ -248,10 +247,6 @@ export async function createGatewayHttpServer(opts: {
 
   // Create rate limit middleware
   const rateLimitMiddleware = createRateLimitMiddleware(rateLimitConfig);
-
-  // Initialize provider routes
-  const providerRoutes = await import("./routes/providers.js");
-  await providerRoutes.initializeProviderRoutes("/tmp/openclaw/providers");
 
   async function handleRequest(req: IncomingMessage, res: ServerResponse) {
     // Don't interfere with WebSocket upgrades; ws handles the 'upgrade' event.
@@ -365,9 +360,6 @@ export async function createGatewayHttpServer(opts: {
         return;
       }
       if (handlePluginRequest && (await handlePluginRequest(req, res))) {
-        return;
-      }
-      if (await handleProviderRoutes(req, res)) {
         return;
       }
       if (openResponsesEnabled) {

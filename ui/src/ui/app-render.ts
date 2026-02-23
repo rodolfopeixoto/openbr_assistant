@@ -74,7 +74,7 @@ import {
   titleForTab,
   type Tab,
 } from "./navigation";
-import { renderChannels } from "./views/channels.v2";
+import { renderChannels } from "./views/channels";
 import { renderChat } from "./views/chat";
 import { renderCompliance } from "./views/compliance";
 import { renderConfig } from "./views/config";
@@ -89,16 +89,7 @@ import { renderModels } from "./views/models";
 import { renderNodes } from "./views/nodes";
 import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
-import { renderNewsView } from "./views/news";
-import { renderFeaturesView } from "./views/features";
-import { renderMcpView } from "./views/mcp";
-import { renderContainersView } from "./views/containers";
-import { renderSecurityView } from "./views/security";
 import { renderSkills } from "./views/skills";
-import { renderChannelSetupModal } from "./views/channels.setup-modal";
-import { renderOpencodeView } from "./views/opencode";
-import { renderOpencodeSettingsView } from "./views/opencode-settings";
-import { renderOpencodeSecurityView } from "./views/opencode-security";
 import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
@@ -299,8 +290,6 @@ export function renderApp(state: AppViewState) {
                 onNostrProfileSave: () => state.handleNostrProfileSave(),
                 onNostrProfileImport: () => state.handleNostrProfileImport(),
                 onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
-                onToggleChannel: (channelKey, enabled) => state.handleToggleChannel(channelKey, enabled),
-                onChannelSetupOpen: (channelKey) => state.handleChannelSetupOpen(channelKey),
               })
             : nothing
         }
@@ -510,15 +499,6 @@ export function renderApp(state: AppViewState) {
                 loading: state.chatLoading,
                 sending: state.chatSending,
                 compactionStatus: state.compactionStatus,
-                thinkingStatus: state.chatThinkingActive ? {
-                  active: state.chatThinkingActive,
-                  level: (state.chatThinkingLevel || "medium") as import("./components/ThinkingIndicator").ThinkingLevel,
-                  steps: state.chatThinkingSteps,
-                  currentStepIndex: state.chatThinkingCurrentStepIndex,
-                  startedAt: state.chatThinkingStartedAt || Date.now(),
-                  completedAt: state.chatThinkingCompletedAt || undefined,
-                  summary: state.chatThinkingSummary || undefined,
-                } : null,
                 assistantAvatarUrl: chatAvatarUrl,
                 messages: state.chatMessages,
                 toolMessages: state.chatToolMessages,
@@ -564,11 +544,6 @@ export function renderApp(state: AppViewState) {
                 assistantAvatar: state.assistantAvatar,
                 commandsMenuOpen: state.commandsMenuOpen,
                 onToggleCommandsMenu: () => state.handleToggleCommandsMenu(),
-                voiceRecorderOpen: state.voiceRecorderOpen,
-                onToggleVoiceRecorder: () => state.handleToggleVoiceRecorder(),
-                voiceToken: state.settings.token,
-                chatScrolledUp: state.chatScrolledUp,
-                onScrollToBottom: () => state.handleScrollToBottom(),
                 onToggleThinking: () => {
                   state.applySettings({
                     ...state.settings,
@@ -704,28 +679,11 @@ export function renderApp(state: AppViewState) {
                 error: state.modelsError,
                 providers: state.modelsProviders,
                 searchQuery: state.modelsSearchQuery,
-                showAddForm: state.modelsShowAddForm,
-                selectedProvider: state.modelsProviders?.find(p => p.id === state.modelsShowAddForm) || null,
-                formProfileName: state.credentialProfileName,
-                formCredential: state.credentialApiKey,
-                formEmail: state.credentialEmail,
-                formMode: state.credentialMode,
-                formTesting: state.credentialTesting,
-                formSaving: state.credentialSaving,
-                formError: state.credentialError,
-                formTestResult: state.credentialTestResult,
               }, {
                 onRefresh: () => state.handleModelsRefresh(),
                 onConfigure: (providerId) => state.handleModelsConfigure(providerId),
                 onManage: (providerId) => state.handleModelsManage(providerId),
                 onSearchChange: (query) => state.handleModelsSearchChange(query),
-                onHideAddForm: () => state.handleModelsHideForm(),
-                onFormProfileNameChange: (v) => state.credentialProfileName = v,
-                onFormCredentialChange: (v) => state.credentialApiKey = v,
-                onFormEmailChange: (v) => state.credentialEmail = v,
-                onFormModeChange: (v) => state.credentialMode = v,
-                onFormTest: () => state.handleModelsFormTest(),
-                onFormSave: () => state.handleModelsFormSave(),
               })
             : nothing
         }
@@ -773,51 +731,6 @@ export function renderApp(state: AppViewState) {
               })
             : nothing
         }
-
-        ${
-          state.tab === "news"
-            ? renderNewsView({
-                loading: state.newsLoading,
-                error: state.newsError,
-                items: state.newsItems,
-                selectedItem: state.newsSelectedItem,
-                filter: state.newsFilter,
-                searchQuery: state.newsSearchQuery,
-                sources: state.newsSources,
-                selectedSources: state.newsSelectedSources,
-              })
-            : nothing
-        }
-
-        ${
-          state.tab === "features"
-            ? renderFeaturesView(state)
-            : nothing
-        }
-
-        ${
-          state.tab === "mcp"
-            ? renderMcpView(state)
-            : nothing
-        }
-
-        ${
-          state.tab === "containers"
-            ? renderContainersView(state)
-            : nothing
-        }
-
-        ${
-          state.tab === "security"
-            ? renderSecurityView(state)
-            : nothing
-        }
-
-        ${
-          state.tab === "opencode"
-            ? renderOpencodeView(state)
-            : nothing
-        }
       </main>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
@@ -833,20 +746,6 @@ export function renderApp(state: AppViewState) {
           @oauth-start=${(e: CustomEvent) => state.handleOAuthStart(e)}
         ></provider-config-wizard>
       ` : null}
-      
-      <!-- Channel Setup Modal -->
-      ${renderChannelSetupModal({
-        state: {
-          isOpen: state.channelSetupModalOpen,
-          channelKey: state.channelSetupModalKey as import("./views/channels.config").ChannelConfigType | null,
-          formData: state.channelSetupModalFormData,
-          isSubmitting: state.channelSetupModalSubmitting,
-          error: state.channelSetupModalError,
-        },
-        onClose: () => state.handleChannelSetupClose(),
-        onSubmit: (channelKey, config) => state.handleChannelSetupSubmit(channelKey, config),
-        onFieldChange: (name, value) => state.handleChannelSetupFieldChange(name, value),
-      })}
     </div>
   `;
 }

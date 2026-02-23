@@ -88,7 +88,7 @@ export const CONFIG_DOCUMENTATION: ConfigSectionDoc[] = [
         name: "discord.token",
         type: "string",
         description: "Discord Bot token",
-        example: "MTAxMDEwMTAxMDEw.xxxxxx.xxxxxxxxxx"
+        example: "DISCORD-EXAMPLE-TOKEN-NOT-REAL"
       },
       {
         name: "whatsapp.enabled",
@@ -106,7 +106,7 @@ export const CONFIG_DOCUMENTATION: ConfigSectionDoc[] = [
         name: "slack.token",
         type: "string",
         description: "Slack Bot User OAuth Token",
-        example: "xoxb-EXAMPLE-TOKEN-REPLACE-THIS"
+        example: "xoxb-EXAMPLE-FAKE-TOKEN-NOT-REAL"
       }
     ]
   },
@@ -369,7 +369,7 @@ export const CONFIG_TEMPLATES: Record<string, string> = {
   "channels": {
     "slack": {
       "enabled": true,
-      "token": "xoxb-EXAMPLE-TOKEN-REPLACE-THIS",
+      "token": "xoxb-YOUR-TOKEN-HERE",
       "signingSecret": "YOUR_SIGNING_SECRET"
     }
   }

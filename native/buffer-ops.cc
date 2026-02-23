@@ -122,9 +122,7 @@ Napi::Value BufferOps::Allocate(const Napi::CallbackInfo& info) {
 }
 
 // Module initialization
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
+Napi::Object InitBufferOps(Napi::Env env, Napi::Object exports) {
     BufferOps::Init(env, exports);
     return exports;
 }
-
-NODE_API_MODULE(openclaw_native, Init)
