@@ -49,6 +49,7 @@
 }
 
 .shell--onboarding {
+  grid-template-columns: 0px minmax(0, 1fr);
   grid-template-rows: 0 1fr;
 }
 
@@ -56,8 +57,13 @@
   display: none;
 }
 
+.shell--onboarding .nav {
+  display: none;
+}
+
 .shell--onboarding .content {
   padding-top: 0;
+  grid-area: 2 / 1 / 3 / 3;
 }
 
 .shell--chat-focus .content {
