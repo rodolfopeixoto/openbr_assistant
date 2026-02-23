@@ -1,3 +1,4 @@
+import * as crypto from "node:crypto";
 import type { RuntimeEnv } from "../runtime.js";
 import type { OnboardOptions } from "./onboard-types.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -72,10 +73,48 @@ export async function onboardCommand(opts: OnboardOptions, runtime: RuntimeEnv =
 
   if (normalizedOpts.nonInteractive) {
     await runNonInteractiveOnboarding(normalizedOpts, runtime);
-    return;
+  } else {
+    await runInteractiveOnboarding(normalizedOpts, runtime);
   }
 
-  await runInteractiveOnboarding(normalizedOpts, runtime);
+  // After onboarding completes, start wizard if requested
+  if (normalizedOpts.wizard) {
+    runtime.log("🎨 Starting GUI wizard...");
+    await startOnboardingWizard(normalizedOpts, runtime);
+  }
+}
+
+async function startOnboardingWizard(opts: OnboardOptions, runtime: RuntimeEnv) {
+  try {
+    // Generate a temporary token for the wizard
+    const token = crypto.randomBytes(32).toString("hex");
+
+    // Get gateway port from config
+    const snapshot = await readConfigFileSnapshot();
+    const gatewayPort = snapshot.valid ? (snapshot.config.gateway?.port ?? 18789) : 18789;
+
+    // Start gateway if not running
+    runtime.log(`🚀 Starting gateway on port ${gatewayPort}...`);
+    // TODO: Start gateway process
+
+    // Build URL with token
+    const url = `http://127.0.0.1:${gatewayPort}/ui/onboarding?token=${token}`;
+
+    runtime.log(`🌐 Opening dashboard: ${url}`);
+
+    // Open browser
+    if (opts.openDashboard !== false) {
+      const { exec } = await import("node:child_process");
+      const platform = process.platform;
+      const cmd = platform === "darwin" ? "open" : platform === "win32" ? "start" : "xdg-open";
+      exec(`${cmd} "${url}"`);
+      runtime.log("✅ Browser opened! Complete the setup in the GUI.");
+    } else {
+      runtime.log(`🔗 Please open: ${url}`);
+    }
+  } catch (err) {
+    runtime.error(`Failed to start wizard: ${err instanceof Error ? err.message : String(err)}`);
+  }
 }
 
 export type { OnboardOptions } from "./onboard-types.js";
