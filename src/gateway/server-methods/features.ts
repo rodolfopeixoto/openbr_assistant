@@ -1,6 +1,7 @@
 import type { OpenClawConfig } from "../../config/config.js";
 import type { GatewayRequestHandlers } from "./types.js";
 import { loadConfig, writeConfigFile } from "../../config/config.js";
+import { buildDashboardResponse } from "../../config/feature-registry.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 
 // Feature definitions with their configuration requirements
@@ -465,6 +466,24 @@ export const featuresHandlers: GatewayRequestHandlers = {
         errorShape(
           ErrorCodes.INTERNAL_ERROR,
           `failed to get feature status: ${err instanceof Error ? err.message : String(err)}`,
+        ),
+      );
+    }
+  },
+
+  "features.dashboard": ({ respond }) => {
+    try {
+      const cfg = loadConfig();
+      const dashboard = buildDashboardResponse(cfg);
+
+      respond(true, dashboard);
+    } catch (err) {
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INTERNAL_ERROR,
+          `failed to load dashboard: ${err instanceof Error ? err.message : String(err)}`,
         ),
       );
     }
