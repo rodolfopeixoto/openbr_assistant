@@ -100,6 +100,57 @@ export class OpenClawApp extends LitElement {
   @state() password = "";
   @state() tab: Tab = "chat";
   @state() onboarding = resolveOnboardingMode();
+  @state() onboardingStep: "welcome" | "auth" | "channels" | "features" | "complete" = "welcome";
+  @state() onboardingProgress = 0;
+  @state() onboardingAuthProvider: string | null = null;
+  @state() onboardingApiKey: string | null = null;
+  @state() onboardingChannels: string[] = [];
+  @state() onboardingFeatures: string[] = ["voice_recorder", "tts", "web_search"];
+  @state() onboardingSessionToken: string | null = null;
+  @state() onboardingLoading = false;
+  @state() onboardingError: string | null = null;
+  // Provider config wizard
+  @state() wizardOpen = false;
+  @state() wizardProviderId: string | null = null;
+  @state() wizardProviderName: string | null = null;
+  // News
+  @state() newsLoading = false;
+  @state() newsError: string | null = null;
+  @state() newsItems: unknown[] = [];
+  @state() newsTotalCount = 0;
+  @state() newsHasMore = false;
+  @state() newsSelectedSource: string | null = null;
+  @state() newsSelectedCategory: string | null = null;
+  @state() newsTimeRange = "7d";
+  @state() newsSearchQuery = "";
+  @state() newsSelectedSentiment: string | null = null;
+  @state() newsLimit = 20;
+  @state() newsOffset = 0;
+  // Features
+  @state() featuresLoading = false;
+  @state() featuresError: string | null = null;
+  @state() featuresList: unknown[] = [];
+  @state() featuresSearchQuery = "";
+  @state() featuresSummary: Record<string, unknown> = {};
+  @state() featureCategories: string[] = [];
+  @state() expandedCategories: string[] = [];
+  // Containers
+  @state() containersLoading = false;
+  @state() containersError: string | null = null;
+  @state() containers: unknown[] = [];
+  // Opencode
+  @state() opencodeStatus: string | null = null;
+  @state() opencodeTasks: unknown[] = [];
+  @state() opencodeTaskCreating = false;
+  @state() opencodeTaskInput = "";
+  @state() opencodeConfigLoading = false;
+  @state() opencodeConfigError: string | null = null;
+  @state() opencodeConfig: Record<string, unknown> = {};
+  @state() opencodeConfigDirty = false;
+  @state() opencodeConfigSaving = false;
+  @state() opencodeSecurityConfig: Record<string, unknown> = {};
+  @state() opencodeSecurityDirty = false;
+  @state() opencodeSecuritySaving = false;
   @state() connected = false;
   @state() theme: ThemeMode = this.settings.theme ?? "system";
   @state() themeResolved: ResolvedTheme = "dark";
@@ -265,6 +316,8 @@ export class OpenClawApp extends LitElement {
   @state() modelsError: string | null = null;
   @state() modelsProviders: import("./components/provider-card").ProviderCardData[] = [];
   @state() modelsSearchQuery = "";
+  @state() configuredProfileIds: string[] = [];
+  @state() modelsShowAddForm: string | null = null;
 
   // ModelSelector state
   @state() selectedProvider: string | null = null;
@@ -935,6 +988,488 @@ export class OpenClawApp extends LitElement {
     } finally {
       this.restarting = false;
     }
+  }
+
+  // Onboarding wizard methods
+  setOnboardingAuthProvider(provider: string) {
+    this.onboardingAuthProvider = provider;
+    this.onboardingError = null;
+  }
+
+  setOnboardingApiKey(key: string) {
+    this.onboardingApiKey = key;
+    this.onboardingError = null;
+  }
+
+  toggleOnboardingChannel(channel: string) {
+    const idx = this.onboardingChannels.indexOf(channel);
+    if (idx >= 0) {
+      this.onboardingChannels.splice(idx, 1);
+    } else {
+      this.onboardingChannels.push(channel);
+    }
+  }
+
+  toggleOnboardingFeature(feature: string) {
+    const idx = this.onboardingFeatures.indexOf(feature);
+    if (idx >= 0) {
+      this.onboardingFeatures.splice(idx, 1);
+    } else {
+      this.onboardingFeatures.push(feature);
+    }
+  }
+
+  async onboardingNextStep() {
+    const STEP_ORDER: Array<"welcome" | "auth" | "channels" | "features" | "complete"> = ["welcome", "auth", "channels", "features", "complete"];
+    const STEP_PROGRESS: Record<string, number> = {
+      welcome: 0,
+      auth: 25,
+      channels: 50,
+      features: 75,
+      complete: 100,
+    };
+    
+    const currentIdx = STEP_ORDER.indexOf(this.onboardingStep);
+    if (currentIdx < STEP_ORDER.length - 1) {
+      const nextStep = STEP_ORDER[currentIdx + 1];
+      
+      if (this.client && this.connected && this.onboardingSessionToken) {
+        try {
+          this.onboardingLoading = true;
+          await this.client.request("onboard.wizard", {
+            action: "next",
+            token: this.onboardingSessionToken,
+            data: {
+              provider: this.onboardingAuthProvider,
+              apiKey: this.onboardingAuthProvider === "ollama" ? null : this.onboardingApiKey,
+              channels: this.onboardingChannels,
+              features: this.onboardingFeatures,
+            },
+          });
+        } catch (err) {
+          this.onboardingError = String(err);
+          this.onboardingLoading = false;
+          return;
+        } finally {
+          this.onboardingLoading = false;
+        }
+      }
+      
+      this.onboardingStep = nextStep;
+      this.onboardingProgress = STEP_PROGRESS[nextStep];
+      this.onboardingError = null;
+    }
+  }
+
+  onboardingPrevStep() {
+    const STEP_ORDER: Array<"welcome" | "auth" | "channels" | "features" | "complete"> = ["welcome", "auth", "channels", "features", "complete"];
+    const STEP_PROGRESS: Record<string, number> = {
+      welcome: 0,
+      auth: 25,
+      channels: 50,
+      features: 75,
+      complete: 100,
+    };
+    
+    const currentIdx = STEP_ORDER.indexOf(this.onboardingStep);
+    if (currentIdx > 0) {
+      const prevStep = STEP_ORDER[currentIdx - 1];
+      this.onboardingStep = prevStep;
+      this.onboardingProgress = STEP_PROGRESS[prevStep];
+      this.onboardingError = null;
+    }
+  }
+
+  async completeOnboarding() {
+    if (!this.client || !this.connected || !this.onboardingSessionToken) {
+      this.onboardingError = "Not connected to gateway";
+      return;
+    }
+
+    try {
+      this.onboardingLoading = true;
+      await this.client.request("onboard.wizard", {
+        action: "complete",
+        token: this.onboardingSessionToken,
+        data: {
+          provider: this.onboardingAuthProvider,
+          apiKey: this.onboardingAuthProvider === "ollama" ? null : this.onboardingApiKey,
+          channels: this.onboardingChannels,
+          features: this.onboardingFeatures,
+        },
+      });
+      
+      this.onboardingStep = "complete";
+      this.onboardingProgress = 100;
+      this.onboardingError = null;
+      this.onboarding = false;
+      this.setTab("chat");
+    } catch (err) {
+      this.onboardingError = String(err);
+    } finally {
+      this.onboardingLoading = false;
+    }
+  }
+
+  async startOnboarding() {
+    if (!this.client || !this.connected) {
+      this.onboardingError = "Not connected to gateway";
+      return;
+    }
+
+    try {
+      this.onboardingLoading = true;
+      this.onboardingError = null;
+      
+      const res = await this.client.request("onboard.wizard", {
+        action: "start",
+      }) as { token?: string; step?: string; progress?: number };
+      
+      if (res?.token) {
+        this.onboardingSessionToken = res.token;
+      }
+      
+      const STEP_ORDER: Array<"welcome" | "auth" | "channels" | "features" | "complete"> = ["welcome", "auth", "channels", "features", "complete"];
+      const step = (res?.step as "welcome" | "auth" | "channels" | "features" | "complete") || "welcome";
+      if (STEP_ORDER.includes(step)) {
+        this.onboardingStep = step;
+      } else {
+        this.onboardingStep = "welcome";
+      }
+      this.onboardingProgress = res?.progress ?? 0;
+      this.onboardingAuthProvider = null;
+      this.onboardingApiKey = null;
+      this.onboardingChannels = [];
+      this.onboardingFeatures = ["voice_recorder", "tts", "web_search"];
+    } catch (err) {
+      this.onboardingError = String(err);
+    } finally {
+      this.onboardingLoading = false;
+    }
+  }
+
+  // Config methods
+  async handleConfigLoad() {
+    this.configLoading = true;
+    try {
+      // Implementation would go here
+      this.configLoading = false;
+    } catch (err) {
+      this.configLoading = false;
+      throw err;
+    }
+  }
+
+  async handleConfigSave() {
+    this.configSaving = true;
+    try {
+      // Implementation would go here
+      this.configSaving = false;
+    } catch (err) {
+      this.configSaving = false;
+      throw err;
+    }
+  }
+
+  async handleConfigApply() {
+    this.configApplying = true;
+    try {
+      // Implementation would go here
+      this.configApplying = false;
+    } catch (err) {
+      this.configApplying = false;
+      throw err;
+    }
+  }
+
+  handleConfigFormUpdate(path: string, value: unknown) {
+    if (this.configForm) {
+      this.configForm[path] = value;
+    }
+  }
+
+  handleConfigFormModeChange(mode: "form" | "raw") {
+    this.configFormMode = mode;
+  }
+
+  handleConfigRawChange(raw: string) {
+    this.configRaw = raw;
+  }
+
+  // Wizard methods
+  handleWizardClose() {
+    this.wizardOpen = false;
+    this.wizardProviderId = null;
+    this.wizardProviderName = null;
+  }
+
+  handleWizardSave(e: CustomEvent) {
+    console.log("[Wizard] Save:", e.detail);
+    this.handleWizardClose();
+  }
+
+  handleOAuthStart(e: CustomEvent) {
+    console.log("[Wizard] OAuth start:", e.detail);
+  }
+
+  // News methods
+  async handleNewsLoad() {
+    this.newsLoading = true;
+    this.newsError = null;
+    try {
+      // Implementation would go here
+      this.newsLoading = false;
+    } catch (err) {
+      this.newsError = String(err);
+      this.newsLoading = false;
+    }
+  }
+
+  handleNewsSourceChange(source: string | null) {
+    this.newsSelectedSource = source;
+  }
+
+  handleNewsCategoryChange(category: string | null) {
+    this.newsSelectedCategory = category;
+  }
+
+  handleNewsTimeRangeChange(range: string) {
+    this.newsTimeRange = range;
+  }
+
+  handleNewsSearchChange(query: string) {
+    this.newsSearchQuery = query;
+  }
+
+  handleNewsSentimentChange(sentiment: string | null) {
+    this.newsSelectedSentiment = sentiment;
+  }
+
+  handleNewsLimitChange(limit: number) {
+    this.newsLimit = limit;
+  }
+
+  handleNewsOffsetChange(offset: number) {
+    this.newsOffset = offset;
+  }
+
+  // Features methods
+  async handleFeaturesLoad() {
+    // Implementation would go here
+  }
+
+  handleFeaturesSearchChange(query: string) {
+    // Implementation would go here
+    console.log("[Features] Search:", query);
+  }
+
+  handleToggleCategory(category: string) {
+    // Implementation would go here
+    console.log("[Features] Toggle category:", category);
+  }
+
+  // Container methods
+  async handleContainersLoad() {
+    // Implementation would go here
+  }
+
+  async handleContainerStart(containerId: string) {
+    console.log("[Container] Start:", containerId);
+  }
+
+  async handleContainerStop(containerId: string) {
+    console.log("[Container] Stop:", containerId);
+  }
+
+  async handleContainerRestart(containerId: string) {
+    console.log("[Container] Restart:", containerId);
+  }
+
+  async handleContainerLogs(containerId: string) {
+    console.log("[Container] Logs:", containerId);
+  }
+
+  // Opencode methods
+  async handleOpencodeLoad() {
+    // Implementation would go here
+  }
+
+  handleOpencodeTaskInput(value: string) {
+    // Implementation would go here
+    console.log("[Opencode] Task input:", value);
+  }
+
+  async handleOpencodeTaskCreate() {
+    // Implementation would go here
+  }
+
+  // Models methods
+  handleModelsConfigure(providerId: string) {
+    console.log("[Models] Configure:", providerId);
+    this.wizardProviderId = providerId;
+    this.wizardOpen = true;
+  }
+
+  handleModelsManage(providerId: string) {
+    console.log("[Models] Manage:", providerId);
+  }
+
+  handleModelsSearchChange(query: string) {
+    this.modelsSearchQuery = query;
+  }
+
+  // Skill methods
+  async handleInstallSkill(key: string) {
+    console.log("[Skills] Install:", key);
+  }
+
+  async handleUpdateSkill(key: string) {
+    console.log("[Skills] Update:", key);
+  }
+
+  async handleToggleSkillEnabled(key: string, enabled: boolean) {
+    console.log("[Skills] Toggle:", key, enabled);
+  }
+
+  handleUpdateSkillEdit(key: string, value: string) {
+    console.log("[Skills] Edit:", key, value);
+  }
+
+  async handleSaveSkillApiKey(key: string, apiKey: string) {
+    console.log("[Skills] Save API key:", key);
+  }
+
+  handleSkillsActiveFilterChange(filter: "all" | "active" | "needs-setup" | "disabled") {
+    this.skillsActiveFilter = filter;
+  }
+
+  handleSkillsSelectSkill(skillKey: string | null) {
+    this.skillsSelectedSkill = skillKey;
+  }
+
+  handleSkillsSelectSkillTab(tab: import("./views/skills").SkillDetailTab) {
+    this.skillsSelectedSkillTab = tab;
+  }
+
+  async handleAnalyzeSkill(skillKey: string, filePath: string) {
+    console.log("[Skills] Analyze:", skillKey, filePath);
+  }
+
+  // Cron methods
+  async handleCronToggle(jobId: string, enabled: boolean) {
+    console.log("[Cron] Toggle:", jobId, enabled);
+  }
+
+  async handleCronRun(jobId: string) {
+    console.log("[Cron] Run:", jobId);
+  }
+
+  async handleCronRemove(jobId: string) {
+    console.log("[Cron] Remove:", jobId);
+  }
+
+  async handleCronAdd() {
+    console.log("[Cron] Add");
+  }
+
+  async handleCronRunsLoad(jobId: string) {
+    console.log("[Cron] Load runs:", jobId);
+  }
+
+  handleCronFormUpdate(path: string, value: unknown) {
+    console.log("[Cron] Form update:", path, value);
+  }
+
+  // Sessions methods
+  async handleSessionsLoad() {
+    console.log("[Sessions] Load");
+  }
+
+  async handleSessionsPatch(key: string, patch: unknown) {
+    console.log("[Sessions] Patch:", key, patch);
+  }
+
+  // Nodes methods
+  async handleLoadNodes() {
+    console.log("[Nodes] Load");
+  }
+
+  // Presence methods
+  async handleLoadPresence() {
+    console.log("[Presence] Load");
+  }
+
+  // Skills load
+  async handleLoadSkills() {
+    console.log("[Skills] Load");
+  }
+
+  // Debug methods
+  async handleLoadDebug() {
+    console.log("[Debug] Load");
+  }
+
+  async handleDebugCall() {
+    console.log("[Debug] Call");
+  }
+
+  // Logs methods
+  async handleLoadLogs() {
+    console.log("[Logs] Load");
+  }
+
+  handleLogsFilterChange(next: string) {
+    this.logsFilterText = next;
+  }
+
+  handleLogsLevelFilterToggle(level: import("./types").LogLevel) {
+    this.logsLevelFilters = { ...this.logsLevelFilters, [level]: !this.logsLevelFilters[level] };
+  }
+
+  handleLogsAutoFollowToggle(next: boolean) {
+    this.logsAutoFollow = next;
+  }
+
+  // Update methods
+  async handleRunUpdate() {
+    console.log("[Update] Run");
+  }
+
+  setPassword(next: string) {
+    this.password = next;
+  }
+
+  setSessionKey(next: string) {
+    this.sessionKey = next;
+  }
+
+  setChatMessage(next: string) {
+    this.chatMessage = next;
+  }
+
+  // Chat queue methods
+  handleChatSelectQueueItem(id: string) {
+    console.log("[Chat] Select queue item:", id);
+  }
+
+  handleChatDropQueueItem(id: string) {
+    console.log("[Chat] Drop queue item:", id);
+  }
+
+  handleChatClearQueue() {
+    console.log("[Chat] Clear queue");
+  }
+
+  async handleChatSend() {
+    console.log("[Chat] Send");
+  }
+
+  async handleChatAbort() {
+    console.log("[Chat] Abort");
+  }
+
+  async handleCallDebugMethod(method: string, params: string) {
+    console.log("[Debug] Call method:", method, params);
   }
 
   render() {

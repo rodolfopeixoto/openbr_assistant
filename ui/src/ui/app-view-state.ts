@@ -151,6 +151,24 @@ export type AppViewState = {
   client: GatewayBrowserClient | null;
   connect: () => void;
   setTab: (tab: Tab) => void;
+  // Onboarding wizard state
+  onboardingStep: "welcome" | "auth" | "channels" | "features" | "complete";
+  onboardingProgress: number;
+  onboardingAuthProvider: string | null;
+  onboardingApiKey: string | null;
+  onboardingChannels: string[];
+  onboardingFeatures: string[];
+  onboardingSessionToken: string | null;
+  onboardingLoading: boolean;
+  onboardingError: string | null;
+  setOnboardingAuthProvider: (provider: string) => void;
+  setOnboardingApiKey: (key: string) => void;
+  toggleOnboardingChannel: (channel: string) => void;
+  toggleOnboardingFeature: (feature: string) => void;
+  onboardingNextStep: () => Promise<void>;
+  onboardingPrevStep: () => void;
+  completeOnboarding: () => Promise<void>;
+  startOnboarding: () => Promise<void>;
   setTheme: (theme: ThemeMode, context?: ThemeTransitionContext) => void;
   applySettings: (next: UiSettings) => void;
   loadOverview: () => Promise<void>;
@@ -298,4 +316,47 @@ export type AppViewState = {
   // Gateway restart
   restarting: boolean;
   handleRestart: () => Promise<void>;
+  // Provider config wizard
+  wizardOpen: boolean;
+  wizardProviderId: string | null;
+  wizardProviderName: string | null;
+  handleWizardClose: () => void;
+  handleWizardSave: (e: CustomEvent) => void;
+  handleOAuthStart: (e: CustomEvent) => void;
+  // Chat sidebar
+  sidebarOpen: boolean;
+  sidebarContent: string | null;
+  sidebarError: string | null;
+  splitRatio: number;
+  // Chat compaction
+  compactionStatus: import("./app-tool-stream").CompactionStatus | null;
+  // Config
+  configSearchQuery: string;
+  configActiveSection: string | null;
+  configActiveSubsection: string | null;
+  // Models
+  handleModelsConfigure: (providerId: string) => void;
+  handleModelsManage: (providerId: string) => void;
+  handleModelsSearchChange: (query: string) => void;
+  // News
+  newsLoading: boolean;
+  newsError: string | null;
+  newsItems: unknown[];
+  newsTotalCount: number;
+  newsHasMore: boolean;
+  newsSelectedSource: string | null;
+  newsSelectedCategory: string | null;
+  newsTimeRange: string;
+  newsSearchQuery: string;
+  newsSelectedSentiment: string | null;
+  newsLimit: number;
+  newsOffset: number;
+  handleNewsLoad: () => Promise<void>;
+  handleNewsSourceChange: (source: string | null) => void;
+  handleNewsCategoryChange: (category: string | null) => void;
+  handleNewsTimeRangeChange: (range: string) => void;
+  handleNewsSearchChange: (query: string) => void;
+  handleNewsSentimentChange: (sentiment: string | null) => void;
+  handleNewsLimitChange: (limit: number) => void;
+  handleNewsOffsetChange: (offset: number) => void;
 };

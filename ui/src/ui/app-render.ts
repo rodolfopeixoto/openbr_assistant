@@ -90,6 +90,7 @@ import { renderNodes } from "./views/nodes";
 import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
+import { renderOnboardingWizard } from "./views/onboarding-wizard";
 import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
@@ -210,6 +211,7 @@ export function renderApp(state: AppViewState) {
         </div>
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
+        ${state.onboarding ? renderOnboardingWizard(state) : html`
         <section class="content-header">
           <div>
             <div class="page-title">${titleForTab(state.tab)}</div>
@@ -731,6 +733,7 @@ export function renderApp(state: AppViewState) {
               })
             : nothing
         }
+        `}
       </main>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
