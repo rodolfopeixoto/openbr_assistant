@@ -108,7 +108,7 @@ export async function createGatewayRuntimeState(params: {
   const httpServers: HttpServer[] = [];
   const httpBindHosts: string[] = [];
   for (const host of bindHosts) {
-    const httpServer = createGatewayHttpServer({
+    const httpServer = await createGatewayHttpServer({
       canvasHost,
       controlUiEnabled: params.controlUiEnabled,
       controlUiBasePath: params.controlUiBasePath,

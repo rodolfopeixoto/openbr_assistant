@@ -6,6 +6,7 @@ type ScrollHost = {
   chatScrollTimeout: number | null;
   chatHasAutoScrolled: boolean;
   chatUserNearBottom: boolean;
+  chatScrolledUp: boolean;
   logsScrollFrame: number | null;
   logsAtBottom: boolean;
   topbarObserver: ResizeObserver | null;
@@ -78,6 +79,8 @@ export function handleChatScroll(host: ScrollHost, event: Event) {
   if (!container) return;
   const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
   host.chatUserNearBottom = distanceFromBottom < 200;
+  // Update scrolled up state - show button when scrolled up more than 300px
+  (host as any).chatScrolledUp = distanceFromBottom > 300;
 }
 
 export function handleLogsScroll(host: ScrollHost, event: Event) {

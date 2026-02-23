@@ -467,3 +467,161 @@ export function applyCompactionDefaults(cfg: OpenClawConfig): OpenClawConfig {
 export function resetSessionDefaultsWarningForTests() {
   defaultWarnState = { warned: false };
 }
+
+// OpenCode AI Coding Assistant Default Configuration
+const DEFAULT_OPENCODE_CONFIG = {
+  enabled: false,
+  container: {
+    runtime: "auto" as const,
+    image: "opencode/runtime:latest",
+    resources: {
+      memory: 1024,
+      cpus: 1.0,
+      timeout: 30,
+    },
+    network: {
+      enabled: true,
+    },
+    security: {
+      readOnly: false,
+      dropCapabilities: true,
+      seccompProfile: "default" as const,
+    },
+  },
+  workspace: {
+    basePath: "~/projects",
+    allowedProjects: {
+      mode: "all" as const,
+      whitelist: [],
+    },
+    protectedPatterns: ["*.env", "*.key", "*.pem", "secrets.json", ".env.local"],
+  },
+  security: {
+    approvalMode: "on-miss" as const,
+    autoApproveSafe: true,
+    commands: {
+      allowlist: {
+        enabled: true,
+        commands: [
+          "git",
+          "npm",
+          "yarn",
+          "pnpm",
+          "npx",
+          "node",
+          "python",
+          "python3",
+          "cat",
+          "ls",
+          "find",
+          "grep",
+          "head",
+          "tail",
+          "mkdir",
+          "touch",
+          "cp",
+          "mv",
+          "rm",
+        ],
+      },
+      blocklist: {
+        enabled: true,
+        commands: [
+          "sudo",
+          "su",
+          "chmod",
+          "chown",
+          "mkfs",
+          "dd",
+          "fdisk",
+          "format",
+          "curl | bash",
+          "wget | sh",
+          "eval",
+          "rm -rf /",
+          "rm -rf /*",
+        ],
+      },
+    },
+    paths: {
+      whitelist: ["~/projects/*", "~/workspace/*"],
+      blacklist: ["/etc", "/usr", "~/.ssh", "~/.aws", "~/.openclaw", "/"],
+    },
+  },
+  notifications: {
+    desktop: true,
+    mobile: true,
+    email: false,
+  },
+  audit: {
+    enabled: true,
+    retentionDays: 30,
+    logLevel: "info" as const,
+  },
+};
+
+export function applyOpencodeDefaults(cfg: OpenClawConfig): OpenClawConfig {
+  if (cfg.opencode === undefined) {
+    return cfg;
+  }
+
+  const opencode = cfg.opencode;
+
+  return {
+    ...cfg,
+    opencode: {
+      ...DEFAULT_OPENCODE_CONFIG,
+      ...opencode,
+      container: {
+        ...DEFAULT_OPENCODE_CONFIG.container,
+        ...opencode.container,
+        resources: {
+          ...DEFAULT_OPENCODE_CONFIG.container.resources,
+          ...opencode.container?.resources,
+        },
+        network: {
+          ...DEFAULT_OPENCODE_CONFIG.container.network,
+          ...opencode.container?.network,
+        },
+        security: {
+          ...DEFAULT_OPENCODE_CONFIG.container.security,
+          ...opencode.container?.security,
+        },
+      },
+      workspace: {
+        ...DEFAULT_OPENCODE_CONFIG.workspace,
+        ...opencode.workspace,
+        allowedProjects: {
+          ...DEFAULT_OPENCODE_CONFIG.workspace.allowedProjects,
+          ...opencode.workspace?.allowedProjects,
+        },
+      },
+      security: {
+        ...DEFAULT_OPENCODE_CONFIG.security,
+        ...opencode.security,
+        commands: {
+          allowlist: {
+            ...DEFAULT_OPENCODE_CONFIG.security.commands.allowlist,
+            ...opencode.security?.commands?.allowlist,
+          },
+          blocklist: {
+            ...DEFAULT_OPENCODE_CONFIG.security.commands.blocklist,
+            ...opencode.security?.commands?.blocklist,
+          },
+        },
+        paths: {
+          ...DEFAULT_OPENCODE_CONFIG.security.paths,
+          ...opencode.security?.paths,
+        },
+      },
+      notifications: {
+        ...DEFAULT_OPENCODE_CONFIG.notifications,
+        ...opencode.notifications,
+      },
+      audit: {
+        ...DEFAULT_OPENCODE_CONFIG.audit,
+        ...opencode.audit,
+      },
+    },
+  };
+}

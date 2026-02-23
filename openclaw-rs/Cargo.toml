@@ -1,0 +1,48 @@
+[package]
+name = "openclaw-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["OpenClaw Team"]
+description = "Rust performance modules for OpenClaw"
+license = "MIT"
+repository = "https://github.com/openclaw/openclaw"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+thiserror = "1.0"
+
+# Crypto
+ring = "0.17"
+base64 = "0.21"
+
+# Performance
+rayon = "1.8"
+parking_lot = "0.12"
+crossbeam = "0.8"
+
+# N-API for Node.js integration
+napi = { version = "2", features = ["full"] }
+napi-derive = "2"
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "crypto_bench"
+harness = false
+
+[lib]
+name = "openclaw_rs"
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

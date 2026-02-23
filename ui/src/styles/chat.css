@@ -1649,3 +1649,53 @@
     transition: none;
   }
 }
+<<<<<<< HEAD
+=======
+
+
+/* =============================================
+   SCROLL TO BOTTOM BUTTON
+   ============================================= */
+.scroll-to-bottom-btn {
+  position: fixed;
+  bottom: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.3s ease;
+}
+
+.scroll-to-bottom-btn:hover {
+  background: var(--accent-strong);
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-to-bottom-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+>>>>>>> develop
