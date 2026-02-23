@@ -17,6 +17,7 @@ import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
+import { onboardWizardHandlers } from "./server-methods/onboard-wizard.js";
 import { sendHandlers } from "./server-methods/send.js";
 import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
@@ -208,6 +209,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...browserHandlers,
   ...workspaceHandlers,
   ...complianceHandlers,
+  ...onboardWizardHandlers,
 };
 
 export async function handleGatewayRequest(
