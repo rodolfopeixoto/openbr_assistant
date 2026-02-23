@@ -88,7 +88,7 @@ export const CONFIG_DOCUMENTATION: ConfigSectionDoc[] = [
         name: "discord.token",
         type: "string",
         description: "Discord Bot token",
-        example: "DISCORD-EXAMPLE-TOKEN-NOT-REAL"
+        example: "MTAxMDEwMTAxMDEw.xxxxxx.xxxxxxxxxx"
       },
       {
         name: "whatsapp.enabled",
@@ -106,7 +106,7 @@ export const CONFIG_DOCUMENTATION: ConfigSectionDoc[] = [
         name: "slack.token",
         type: "string",
         description: "Slack Bot User OAuth Token",
-        example: "xoxb-EXAMPLE-FAKE-TOKEN-NOT-REAL"
+        example: "xoxb-EXAMPLE-TOKEN-REPLACE-THIS"
       }
     ]
   },

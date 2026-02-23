@@ -115,20 +115,21 @@ export class ModelSelector extends LitElement {
     }
 
     .dropdown-menu {
-      position: fixed;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
       background: var(--bg-elevated, #1a1a2e);
       border: 1px solid var(--border, #2d2d44);
       border-radius: 12px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-      max-height: 400px;
+      max-height: 500px;
       overflow-y: auto;
-      z-index: 9999;
+      z-index: 1000;
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
       transition: all 0.2s ease;
-      min-width: 320px;
-      max-width: 400px;
     }
 
     .dropdown-menu.open {
@@ -523,7 +524,7 @@ export class ModelSelector extends LitElement {
         </svg>
       </button>
 
-      <div class="dropdown-menu ${this.isOpen ? "open" : ""}" style="${this.isOpen ? 'top: 60px; right: 20px;' : ''}">
+      <div class="dropdown-menu ${this.isOpen ? "open" : ""}">
         <div class="dropdown-header">AI Models</div>
 
         <div class="search-container">

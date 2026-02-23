@@ -62,6 +62,7 @@ export type AppViewState = {
   chatThinkingCompletedAt: number | null;
   chatThinkingSummary: string | null;
   chatQueue: ChatQueueItem[];
+  chatScrolledUp: boolean;
   nodesLoading: boolean;
   nodes: Array<Record<string, unknown>>;
   devicesLoading: boolean;
@@ -173,6 +174,17 @@ export type AppViewState = {
   handleNostrProfileSave: () => Promise<void>;
   handleNostrProfileImport: () => Promise<void>;
   handleNostrProfileToggleAdvanced: () => void;
+  handleToggleChannel: (channelKey: string, enabled: boolean) => Promise<void>;
+  // Channel setup modal state
+  channelSetupModalOpen: boolean;
+  channelSetupModalKey: string | null;
+  channelSetupModalFormData: Record<string, unknown>;
+  channelSetupModalSubmitting: boolean;
+  channelSetupModalError: string | null;
+  handleChannelSetupOpen: (channelKey: string) => Promise<void>;
+  handleChannelSetupClose: () => void;
+  handleChannelSetupFieldChange: (fieldName: string, value: unknown) => void;
+  handleChannelSetupSubmit: (channelKey: string, config: Record<string, unknown>) => Promise<void>;
   handleExecApprovalDecision: (decision: "allow-once" | "allow-always" | "deny") => Promise<void>;
   handleGatewayUrlConfirm: () => void;
   handleGatewayUrlCancel: () => void;
@@ -217,6 +229,10 @@ export type AppViewState = {
   // Commands menu state
   commandsMenuOpen: boolean;
   handleToggleCommandsMenu: () => void;
+  // Voice recorder state
+  voiceRecorderOpen: boolean;
+  handleToggleVoiceRecorder: () => void;
+  handleScrollToBottom: () => void;
   // Config documentation panel state
   configDocPanelOpen: boolean;
   configDocSearchQuery: string;
@@ -304,4 +320,165 @@ export type AppViewState = {
   // Gateway restart
   restarting: boolean;
   handleRestart: () => Promise<void>;
+  // News state
+  newsLoading: boolean;
+  newsError: string | null;
+  newsItems: import("./views/news").NewsItem[];
+  newsSelectedItem: import("./views/news").NewsItem | null;
+  newsFilter: "all" | "today" | "week" | "month";
+  newsSearchQuery: string;
+  newsSources: string[];
+  newsSelectedSources: string[];
+  handleNewsLoad: () => Promise<void>;
+  handleNewsRefresh: () => Promise<void>;
+  handleNewsFilterChange: (filter: "all" | "today" | "week" | "month") => void;
+  handleNewsSearchChange: (query: string) => void;
+  handleNewsSourceToggle: (source: string, enabled: boolean) => void;
+  handleNewsSelectItem: (item: import("./views/news").NewsItem | null) => void;
+  // Wizard state
+  wizardOpen: boolean;
+  wizardProviderId: string | null;
+  wizardProviderName: string | null;
+  handleModelsConfigure: (providerId: string) => void;
+  handleModelsManage: (providerId: string) => void;
+  handleModelsSearchChange: (query: string) => void;
+  handleWizardClose: () => void;
+  handleWizardSave: (e: CustomEvent) => Promise<void>;
+  handleOAuthStart: (e: CustomEvent) => void;
+  // MCP state
+  mcpLoading: boolean;
+  mcpError: string | null;
+  mcpServers: Array<{ id: string; name: string; url: string; status: string; category?: string; description?: string; transport?: string }>;
+  mcpSelectedServer: string | null;
+  mcpSearchQuery: string;
+  mcpSelectedCategory: string | null;
+  mcpShowAddModal: boolean;
+  mcpNewServerName: string;
+  mcpNewServerUrl: string;
+  mcpNewServerCategory: string;
+  // Marketplace state
+  mcpShowMarketplace: boolean;
+  mcpMarketplace: Array<{ id: string; name: string; description: string; url: string; transport: string; category: string; installCommand?: string; tags?: string[]; official?: boolean }>;
+  mcpMarketplaceLoading: boolean;
+  mcpMarketplaceCategories: Array<{ id: string; name: string; count: number }>;
+  mcpMarketplaceTags: string[];
+  mcpMarketplaceSearchQuery: string;
+  mcpMarketplaceSelectedCategory: string | null;
+  mcpMarketplaceSelectedTag: string | null;
+  mcpMarketplaceOfficialOnly: boolean;
+  // Handlers
+  handleMcpLoad: () => Promise<void>;
+  handleMcpAddServer: (name: string, url: string, transport: string, category?: string, description?: string) => Promise<void>;
+  handleMcpRemoveServer: (id: string) => Promise<void>;
+  handleMcpToggleServer: (id: string, enabled: boolean) => Promise<void>;
+  handleMcpSearchChange: (query: string) => void;
+  handleMcpCategoryChange: (category: string | null) => void;
+  handleMcpSelectServer: (id: string | null) => void;
+  handleMcpOpenAddModal: () => void;
+  handleMcpCloseAddModal: () => void;
+  handleMcpUpdateNewServerName: (value: string) => void;
+  handleMcpUpdateNewServerUrl: (value: string) => void;
+  handleMcpUpdateNewServerCategory: (value: string) => void;
+  // Marketplace handlers
+  handleMcpShowMarketplace: () => Promise<void>;
+  handleMcpCloseMarketplace: () => void;
+  handleMcpInstallFromMarketplace: (marketplaceId: string) => Promise<void>;
+  handleMcpMarketplaceSearchChange: (query: string) => Promise<void>;
+  handleMcpMarketplaceCategoryChange: (category: string | null) => Promise<void>;
+  handleMcpMarketplaceTagChange: (tag: string | null) => Promise<void>;
+  handleMcpMarketplaceOfficialToggle: () => Promise<void>;
+  handleMcpLoadMarketplaceCategories: () => Promise<void>;
+  handleMcpResetMarketplaceFilters: () => Promise<void>;
+  // Containers state
+  containersLoading: boolean;
+  containersError: string | null;
+  containers: Array<{ id: string; name: string; status: string; image: string }>;
+  handleContainersLoad: () => Promise<void>;
+  handleContainerStart: (id: string) => Promise<void>;
+  handleContainerStop: (id: string) => Promise<void>;
+  handleContainerRestart: (id: string) => Promise<void>;
+  handleContainerLogs: (id: string) => Promise<void>;
+  // Security state
+  securityLoading: boolean;
+  securityError: string | null;
+  securityStatus: { overallScore: number; lastScan: Date | null; vulnerabilities: number } | null;
+  handleSecurityLoad: () => Promise<void>;
+  handleSecurityScan: () => Promise<void>;
+  // Features state
+  featuresLoading: boolean;
+  featuresError: string | null;
+  featuresList: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    status: "enabled" | "disabled" | "needs_config" | "unavailable";
+    configurable: boolean;
+    category: "speech" | "channels" | "ai" | "integrations" | "tools";
+    configFields?: Array<{
+      key: string;
+      label: string;
+      type: "text" | "password" | "select" | "toggle";
+      placeholder?: string;
+      options?: { value: string; label: string }[];
+      required?: boolean;
+    }>;
+  }>;
+  featuresSearchQuery: string;
+  featuresSelectedCategory: string | null;
+  featuresSelectedFeature: string | null;
+  featuresConfigModalOpen: boolean;
+  featuresConfigModalFeature: string | null;
+  featuresConfigFormData: Record<string, unknown>;
+  featuresConfigSubmitting: boolean;
+  handleFeaturesLoad: () => Promise<void>;
+  handleFeaturesToggle: (id: string, enabled: boolean) => Promise<void>;
+  handleFeaturesConfigure: (id: string, config: Record<string, unknown>) => Promise<void>;
+  handleFeaturesSearchChange: (query: string) => void;
+  handleFeaturesCategoryChange: (category: string | null) => void;
+  handleFeaturesSelectFeature: (id: string | null) => void;
+  handleFeaturesOpenConfigModal: (id: string) => void;
+  handleFeaturesCloseConfigModal: () => void;
+  handleFeaturesConfigFormChange: (key: string, value: unknown) => void;
+  // OpenCode state
+  opencodeStatus: { enabled: boolean; runtimeAvailable: boolean; runtimeType: string | null; activeTasks: number; totalTasks: number; pendingApprovals: number } | null;
+  opencodeTasks: Array<{ id: string; prompt: string; status: string; createdAt: string; startedAt?: string; completedAt?: string; containerId?: string; workspacePath?: string; approvedBy?: string; approvedAt?: string; result?: string; error?: string; securityFlags?: string[] }>;
+  opencodeSelectedTask: { id: string; prompt: string; status: string; createdAt: string; startedAt?: string; completedAt?: string; containerId?: string; workspacePath?: string; approvedBy?: string; approvedAt?: string; result?: string; error?: string; securityFlags?: string[] } | null;
+  opencodeTaskInput: string;
+  opencodeTaskCreating: boolean;
+  opencodeConfig: Record<string, unknown>;
+  opencodeConfigLoading: boolean;
+  opencodeConfigError: string | null;
+  opencodeConfigDirty: boolean;
+  opencodeConfigSaving: boolean;
+  opencodeSettingsSection: string;
+  opencodeSecuritySection: string;
+  opencodeSecurityConfig: Record<string, unknown>;
+  opencodeSecurityDirty: boolean;
+  opencodeSecuritySaving: boolean;
+  opencodeAuditLog: Array<{ id: string; timestamp: string; action: string; user?: string; taskId?: string; details: string; severity: string }>;
+  opencodeAuditLoading: boolean;
+  // OpenCode handlers
+  handleOpencodeStatusLoad: () => Promise<void>;
+  handleOpencodeTasksLoad: () => Promise<void>;
+  handleOpencodeTaskInputChange: (value: string) => void;
+  handleOpencodeTaskCreate: () => Promise<void>;
+  handleOpencodeTaskSelect: (task: { id: string; prompt: string; status: string; createdAt: string } | null) => void;
+  handleOpencodeTaskApprove: (taskId: string) => Promise<void>;
+  handleOpencodeTaskCancel: (taskId: string) => Promise<void>;
+  handleOpencodeTaskLogs: (taskId: string) => Promise<void>;
+  handleOpencodeTaskDownload: (taskId: string) => Promise<void>;
+  handleOpencodeConfigLoad: () => Promise<void>;
+  handleOpencodeConfigSave: () => Promise<void>;
+  handleOpencodeConfigReset: () => void;
+  handleOpencodeConfigChange: (key: string, value: unknown) => void;
+  handleOpencodeSettingsSectionChange: (section: string) => void;
+  handleOpencodeSecurityLoad: () => Promise<void>;
+  handleOpencodeSecuritySave: () => Promise<void>;
+  handleOpencodeSecurityReset: () => void;
+  handleOpencodeSecurityChange: (key: string, value: unknown) => void;
+  handleOpencodeSecuritySectionChange: (section: string) => void;
+  handleOpencodeAuditLoad: () => Promise<void>;
+  handleOpencodeAuditRefresh: () => Promise<void>;
+  handleOpencodeAuditExport: () => Promise<void>;
 };

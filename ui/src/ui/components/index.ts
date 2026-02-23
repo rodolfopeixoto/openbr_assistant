@@ -16,5 +16,14 @@ export type { ProviderCardData } from "./provider-card.js";
 export { ProviderConfigWizard } from "./provider-config-wizard.js";
 export type { WizardFormData, WizardProviderInfo, WizardStep } from "./provider-config-wizard.js";
 
-// Scroll-to-Bottom Button
-export { ScrollToBottomButton } from "../../components/ScrollToBottomButton.js";
+// Container Panel Component
+export { ContainerPanel } from "./container-panel.js";
+export type { ContainerInfo, RuntimeInfo } from "./container-panel.js";
+
+// MCP Inspector Component
+export { MCPInspector } from "./mcp-inspector.js";
+export type { MCPServerUI, MCPToolUI, MCPResourceUI, MCPInspectorEventUI } from "./mcp-inspector.js";
+
+// Speech Components
+export { VoiceRecorder, AudioVisualizer } from "./speech/index.js";
+export type { VoiceRecorderState } from "./speech/index.js";
