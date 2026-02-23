@@ -14,6 +14,7 @@ import { normalizeMessage, normalizeRoleForGrouping } from "../chat/message-norm
 import { icons } from "../icons";
 import { renderMarkdownSidebar } from "./markdown-sidebar";
 import "../components/resizable-divider";
+import "../components/speech/voice-recorder";
 
 // Quick commands definition
 interface QuickCommand {
@@ -97,6 +98,10 @@ export type ChatProps = {
   // Commands menu state
   commandsMenuOpen?: boolean;
   onToggleCommandsMenu?: () => void;
+  // Voice recorder state
+  voiceRecorderOpen?: boolean;
+  onToggleVoiceRecorder?: () => void;
+  voiceToken?: string;
   // Reasoning toggle and level
   onToggleThinking?: () => void;
   onSetThinkingLevel?: (level: string) => void;
@@ -115,9 +120,18 @@ export type ChatProps = {
   onCloseSidebar?: () => void;
   onSplitRatioChange?: (ratio: number) => void;
   onChatScroll?: (event: Event) => void;
+  // Scroll state
+  chatScrolledUp?: boolean;
+  onScrollToBottom?: () => void;
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
+
+// Check if browser supports audio recording
+function isVoiceSupported(): boolean {
+  return typeof window !== 'undefined' && 
+         !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
 
 function adjustTextareaHeight(el: HTMLTextAreaElement) {
   el.style.height = "auto";
@@ -197,7 +211,13 @@ function renderAttachmentPreview(props: ChatProps) {
   return html`
     <div class="chat-attachments">
       <div class="chat-attachments__warning">
-        <span class="chat-attachments__warning-icon">⚠️</span>
+        <span class="chat-attachments__warning-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </span>
         <span class="chat-attachments__warning-text">Make sure your AI model supports image analysis (e.g., GPT-4 Vision, Claude 3). Standard GPT-3.5 cannot see images.</span>
       </div>
       ${attachments.map(
@@ -438,6 +458,17 @@ export function renderChat(props: ChatProps) {
           style="flex: ${sidebarOpen ? `0 0 ${splitRatio * 100}%` : "1 1 100%"}"
         >
           ${thread}
+          ${props.chatScrolledUp ? html`
+            <button 
+              class="scroll-to-bottom-btn"
+              @click=${props.onScrollToBottom}
+              title="Scroll to bottom"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+              </svg>
+            </button>
+          ` : nothing}
         </div>
 
         ${
@@ -508,6 +539,18 @@ export function renderChat(props: ChatProps) {
             >
               ${icons.paperclip} Attach
             </button>
+            ${isVoiceSupported() ? html`
+              <button
+                class="chat-input-toolbar__btn ${props.voiceRecorderOpen ? 'active' : ''}"
+                title="Voice input (record and transcribe speech)"
+                @click=${(e: Event) => {
+                  e.stopPropagation();
+                  props.onToggleVoiceRecorder?.();
+                }}
+              >
+                ${icons.mic} Voice
+              </button>
+            ` : nothing}
           <button 
             class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
             title="Quick commands"
@@ -573,6 +616,54 @@ export function renderChat(props: ChatProps) {
             }}
           />
           
+          <!-- Voice Recorder (shown above textarea when active) -->
+          <voice-recorder
+            id="voice-recorder"
+            style="display: ${props.voiceRecorderOpen ? 'block' : 'none'}; margin-bottom: 8px;"
+            apiEndpoint="/api/v1/speech/transcribe"
+            language="auto"
+            .token="${props.voiceToken || ''}"
+            .autoStart="${props.voiceRecorderOpen}"
+            @transcription-complete="${(e: CustomEvent) => {
+              const text = e.detail.text;
+              const recorder = document.getElementById('voice-recorder');
+              if (e.detail.wakeWordDetected && e.detail.command) {
+                // Auto-send if wake word was detected
+                if (text && props.onDraftChange) {
+                  props.onDraftChange(text);
+                  if (props.onSend && props.connected) {
+                    setTimeout(() => props.onSend(), 100);
+                  }
+                }
+                // Hide recorder after sending
+                if (recorder) {
+                  recorder.style.display = 'none';
+                }
+              } else {
+                // Just update draft for review
+                if (text && props.onDraftChange) {
+                  props.onDraftChange(text);
+                }
+              }
+            }}"
+            @send="${(e: CustomEvent) => {
+              const text = e.detail.text;
+              const recorder = document.getElementById('voice-recorder');
+              if (text && props.onDraftChange) {
+                props.onDraftChange(text);
+                if (props.onSend && props.connected) {
+                  setTimeout(() => props.onSend(), 100);
+                }
+              }
+              if (recorder) {
+                recorder.style.display = 'none';
+              }
+            }}"
+            @cancelled="${() => {
+              props.onToggleVoiceRecorder?.();
+            }}"
+          ></voice-recorder>
+
           <!-- Main Input Area -->
           <div class="chat-input-main">
             <textarea

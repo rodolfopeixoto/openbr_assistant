@@ -182,7 +182,6 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
   }
 
   if (evt.event === "chat") {
-    console.log("[DEBUG UI] Received chat event:", evt.payload);
     const payload = evt.payload as ChatEventPayload | undefined;
     if (payload?.sessionKey) {
       setLastActiveSessionKey(

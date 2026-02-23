@@ -49,7 +49,7 @@ export function createMcpCommand(): Command {
           console.log();
         }
       } catch (error) {
-        log.error("Failed to list MCP servers", error);
+        log.error("Failed to list MCP servers", { error: String(error) });
         process.exit(1);
       }
     });
@@ -84,7 +84,7 @@ export function createMcpCommand(): Command {
         console.log(`   URL: ${server.url}`);
         console.log(`   Transport: ${server.transport}`);
       } catch (error) {
-        log.error("Failed to add MCP server", error);
+        log.error("Failed to add MCP server", { error: String(error) });
         console.error(
           `❌ Failed to add server: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -100,7 +100,7 @@ export function createMcpCommand(): Command {
         mcpClient.removeServer(serverId);
         console.log(`✅ MCP server ${serverId} removed`);
       } catch (error) {
-        log.error(`Failed to remove MCP server ${serverId}`, error);
+        log.error(`Failed to remove MCP server ${serverId}`, { error: String(error) });
         console.error(
           `❌ Failed to remove server: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -124,7 +124,7 @@ export function createMcpCommand(): Command {
           console.log(`   Prompts: ${server.prompts.length}`);
         }
       } catch (error) {
-        log.error(`Failed to connect to ${serverId}`, error);
+        log.error(`Failed to connect to ${serverId}`, { error: String(error) });
         console.error(
           `❌ Connection failed: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -140,7 +140,7 @@ export function createMcpCommand(): Command {
         mcpClient.disconnect(serverId);
         console.log(`🔌 Disconnected from ${serverId}`);
       } catch (error) {
-        log.error(`Failed to disconnect from ${serverId}`, error);
+        log.error(`Failed to disconnect from ${serverId}`, { error: String(error) });
         console.error(
           `❌ Failed to disconnect: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -168,7 +168,7 @@ export function createMcpCommand(): Command {
           console.log();
         }
       } catch (error) {
-        log.error(`Failed to list tools from ${serverId}`, error);
+        log.error(`Failed to list tools from ${serverId}`, { error: String(error) });
         console.error(
           `❌ Failed to list tools: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -200,7 +200,7 @@ export function createMcpCommand(): Command {
           process.exit(1);
         }
       } catch (error) {
-        log.error(`Failed to call tool ${toolName}`, error);
+        log.error(`Failed to call tool ${toolName}`, { error: String(error) });
         console.error(
           `❌ Failed to call tool: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -231,7 +231,7 @@ export function createMcpCommand(): Command {
           console.log();
         }
       } catch (error) {
-        log.error(`Failed to list resources from ${serverId}`, error);
+        log.error(`Failed to list resources from ${serverId}`, { error: String(error) });
         console.error(
           `❌ Failed to list resources: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -266,7 +266,7 @@ export function createMcpCommand(): Command {
           console.log();
         }
       } catch (error) {
-        log.error("Failed to get MCP status", error);
+        log.error("Failed to get MCP status", { error: String(error) });
         process.exit(1);
       }
     });

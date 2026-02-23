@@ -49,7 +49,7 @@ export function createSkillsCommand(): Command {
           console.log(`   ${skill.description}\n`);
         }
       } catch (error) {
-        log.error("Failed to list skills", error);
+        log.error("Failed to list skills", { error: String(error) });
         process.exit(1);
       }
     });
@@ -66,7 +66,7 @@ export function createSkillsCommand(): Command {
         console.log(`   Version: ${installation.version}`);
         console.log(`   Installed at: ${installation.installedAt}`);
       } catch (error) {
-        log.error(`Failed to install skill ${skillId}`, error);
+        log.error(`Failed to install skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to install skill: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -82,7 +82,7 @@ export function createSkillsCommand(): Command {
         await skillRegistry.uninstall(skillId);
         console.log(`✅ Skill ${skillId} uninstalled successfully`);
       } catch (error) {
-        log.error(`Failed to uninstall skill ${skillId}`, error);
+        log.error(`Failed to uninstall skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to uninstall skill: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -98,7 +98,7 @@ export function createSkillsCommand(): Command {
         skillRegistry.enable(skillId);
         console.log(`✅ Skill ${skillId} enabled`);
       } catch (error) {
-        log.error(`Failed to enable skill ${skillId}`, error);
+        log.error(`Failed to enable skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to enable skill: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -114,7 +114,7 @@ export function createSkillsCommand(): Command {
         skillRegistry.disable(skillId);
         console.log(`⏸️  Skill ${skillId} disabled`);
       } catch (error) {
-        log.error(`Failed to disable skill ${skillId}`, error);
+        log.error(`Failed to disable skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to disable skill: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -173,7 +173,7 @@ export function createSkillsCommand(): Command {
           process.exit(1);
         }
       } catch (error) {
-        log.error(`Failed to apply skill ${skillId}`, error);
+        log.error(`Failed to apply skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to apply skill: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -212,7 +212,7 @@ export function createSkillsCommand(): Command {
 
         console.log('\n💡 Use "openclaw skills apply" to apply these changes.');
       } catch (error) {
-        log.error(`Failed to preview skill ${skillId}`, error);
+        log.error(`Failed to preview skill ${skillId}`, { error: String(error) });
         console.error(
           `❌ Failed to preview: ${error instanceof Error ? error.message : String(error)}`,
         );
@@ -241,7 +241,7 @@ export function createSkillsCommand(): Command {
           console.log(`   ${skill.description}\n`);
         }
       } catch (error) {
-        log.error("Failed to search skills", error);
+        log.error("Failed to search skills", { error: String(error) });
         process.exit(1);
       }
     });

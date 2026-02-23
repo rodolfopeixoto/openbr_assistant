@@ -23,3 +23,7 @@ export type { ContainerInfo, RuntimeInfo } from "./container-panel.js";
 // MCP Inspector Component
 export { MCPInspector } from "./mcp-inspector.js";
 export type { MCPServerUI, MCPToolUI, MCPResourceUI, MCPInspectorEventUI } from "./mcp-inspector.js";
+
+// Speech Components
+export { VoiceRecorder, AudioVisualizer } from "./speech/index.js";
+export type { VoiceRecorderState } from "./speech/index.js";

@@ -23,6 +23,12 @@ export { ContainerOrchestrator, containerOrchestrator } from "./orchestrator.js"
 // Docker runtime
 export { DockerRuntime } from "./docker-runtime.js";
 
+// Podman runtime
+export { PodmanRuntime } from "./podman-runtime.js";
+
+// Apple Container runtime (macOS)
+export { AppleContainerRuntime } from "./apple-container-runtime.js";
+
 // Secure executor
 export {
   SecureExecutor,

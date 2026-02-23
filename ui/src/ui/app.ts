@@ -128,7 +128,9 @@ export class OpenClawApp extends LitElement {
   @state() chatThinkingLevel: string | null = null;
   @state() chatQueue: ChatQueueItem[] = [];
   @state() chatAttachments: ChatAttachment[] = [];
+  @state() chatScrolledUp = false;
   @state() commandsMenuOpen = false;
+  @state() voiceRecorderOpen = false;
   // Sidebar state for tool output viewing
   @state() sidebarOpen = false;
   @state() sidebarContent: string | null = null;
@@ -294,6 +296,91 @@ export class OpenClawApp extends LitElement {
 
   // Gateway restart state
   @state() restarting = false;
+
+  // News state
+  @state() newsLoading = false;
+  @state() newsError: string | null = null;
+  @state() newsItems: import("./views/news").NewsItem[] = [];
+  @state() newsSelectedItem: import("./views/news").NewsItem | null = null;
+  @state() newsFilter: "all" | "today" | "week" | "month" = "week";
+  @state() newsSearchQuery = "";
+  @state() newsSources: string[] = ["Hacker News", "Dev.to", "RSS Feeds"];
+  @state() newsSelectedSources: string[] = ["Hacker News", "Dev.to", "RSS Feeds"];
+
+  // Wizard state
+  @state() wizardOpen = false;
+  @state() wizardProviderId: string | null = null;
+  @state() wizardProviderName: string | null = null;
+
+  // MCP state
+  @state() mcpLoading = false;
+  @state() mcpError: string | null = null;
+  @state() mcpServers: Array<{ id: string; name: string; url: string; status: string; category?: string; description?: string; transport?: string }> = [];
+  @state() mcpSelectedServer: string | null = null;
+  @state() mcpSearchQuery = "";
+  @state() mcpSelectedCategory: string | null = null;
+  @state() mcpShowAddModal = false;
+  @state() mcpNewServerName = "";
+  @state() mcpNewServerUrl = "";
+  @state() mcpNewServerCategory = "development";
+  // Marketplace expanded state
+  @state() mcpShowMarketplace = false;
+  @state() mcpMarketplace: Array<{ id: string; name: string; description: string; url: string; transport: string; category: string; installCommand?: string; tags?: string[]; official?: boolean }> = [];
+  @state() mcpMarketplaceLoading = false;
+  @state() mcpMarketplaceCategories: Array<{ id: string; name: string; count: number }> = [];
+  @state() mcpMarketplaceTags: string[] = [];
+  @state() mcpMarketplaceSearchQuery = "";
+  @state() mcpMarketplaceSelectedCategory: string | null = null;
+  @state() mcpMarketplaceSelectedTag: string | null = null;
+  @state() mcpMarketplaceOfficialOnly = false;
+
+  // Containers state
+  @state() containersLoading = false;
+  @state() containersError: string | null = null;
+  @state() containers: Array<{ id: string; name: string; status: string; image: string }> = [];
+
+  // Security state
+  @state() securityLoading = false;
+  @state() securityError: string | null = null;
+  @state() securityStatus: { overallScore: number; lastScan: Date | null; vulnerabilities: number } | null = null;
+
+  // Features state
+  @state() featuresLoading = false;
+  @state() featuresError: string | null = null;
+  @state() featuresList: Array<{ id: string; name: string; description: string; icon: string; status: "enabled" | "disabled" | "needs_config" | "unavailable"; configurable: boolean; category: "speech" | "channels" | "ai" | "integrations" | "tools"; configFields?: Array<{ key: string; label: string; type: "text" | "password" | "select" | "toggle"; placeholder?: string; options?: { value: string; label: string }[]; required?: boolean }>; config?: Record<string, unknown> }> = [];
+  @state() featuresSearchQuery = "";
+  @state() featuresSelectedCategory: string | null = null;
+  @state() featuresSelectedFeature: string | null = null;
+  @state() featuresConfigModalOpen = false;
+  @state() featuresConfigModalFeature: string | null = null;
+  @state() featuresConfigFormData: Record<string, unknown> = {};
+  @state() featuresConfigSubmitting = false;
+
+  // OpenCode state
+  @state() opencodeStatus: { enabled: boolean; runtimeAvailable: boolean; runtimeType: string | null; activeTasks: number; totalTasks: number; pendingApprovals: number } | null = null;
+  @state() opencodeTasks: Array<{ id: string; prompt: string; status: string; createdAt: string; startedAt?: string; completedAt?: string; containerId?: string; workspacePath?: string; approvedBy?: string; approvedAt?: string; result?: string; error?: string; securityFlags?: string[] }> = [];
+  @state() opencodeSelectedTask: { id: string; prompt: string; status: string; createdAt: string; startedAt?: string; completedAt?: string; containerId?: string; workspacePath?: string; approvedBy?: string; approvedAt?: string; result?: string; error?: string; securityFlags?: string[] } | null = null;
+  @state() opencodeTaskInput = "";
+  @state() opencodeTaskCreating = false;
+  @state() opencodeConfig: Record<string, unknown> = {};
+  @state() opencodeConfigLoading = false;
+  @state() opencodeConfigError: string | null = null;
+  @state() opencodeConfigDirty = false;
+  @state() opencodeConfigSaving = false;
+  @state() opencodeSettingsSection = "general";
+  @state() opencodeSecuritySection = "overview";
+  @state() opencodeSecurityConfig: Record<string, unknown> = {};
+  @state() opencodeSecurityDirty = false;
+  @state() opencodeSecuritySaving = false;
+  @state() opencodeAuditLog: Array<{ id: string; timestamp: string; action: string; user?: string; taskId?: string; details: string; severity: string }> = [];
+  @state() opencodeAuditLoading = false;
+
+  // Channel setup modal state
+  @state() channelSetupModalOpen = false;
+  @state() channelSetupModalKey: string | null = null;
+  @state() channelSetupModalFormData: Record<string, unknown> = {};
+  @state() channelSetupModalSubmitting = false;
+  @state() channelSetupModalError: string | null = null;
 
   client: GatewayBrowserClient | null = null;
   private chatScrollFrame: number | null = null;
@@ -524,6 +611,19 @@ export class OpenClawApp extends LitElement {
     this.commandsMenuOpen = !this.commandsMenuOpen;
   }
 
+  handleToggleVoiceRecorder() {
+    this.voiceRecorderOpen = !this.voiceRecorderOpen;
+  }
+
+  handleScrollToBottom() {
+    // Find the chat thread element and scroll to bottom
+    const chatThread = document.querySelector('.chat-thread');
+    if (chatThread) {
+      chatThread.scrollTop = chatThread.scrollHeight;
+      this.chatScrolledUp = false;
+    }
+  }
+
   handleToggleConfigDocPanel() {
     this.configDocPanelOpen = !this.configDocPanelOpen;
   }
@@ -727,16 +827,12 @@ export class OpenClawApp extends LitElement {
     this.modelsLoading = true;
     this.modelsError = null;
     try {
-      console.log("[DEBUG] Calling models.providers...");
       const response = await this.client?.request("models.providers", {}) as {
         providers?: import("./components/provider-card.js").ProviderCardData[];
       };
-      console.log("[DEBUG] models.providers response:", response);
       if (response?.providers) {
-        console.log("[DEBUG] Got providers:", response.providers.length);
         this.modelsProviders = response.providers;
       } else {
-        console.log("[DEBUG] No providers in response");
         this.modelsProviders = [];
       }
     } catch (error) {
@@ -803,6 +899,64 @@ export class OpenClawApp extends LitElement {
     } catch (error) {
       console.warn("[App] Failed to remove credential:", error);
       throw error;
+    }
+  }
+
+  // Skills handlers
+  handleSkillsActiveFilterChange(filter: "all" | "active" | "needs-setup" | "disabled") {
+    this.skillsActiveFilter = filter;
+  }
+
+  handleSkillsSelectSkill(skillKey: string | null) {
+    this.skillsSelectedSkill = skillKey;
+    // Reset to overview tab when selecting a new skill
+    if (skillKey) {
+      this.skillsSelectedSkillTab = "overview";
+    }
+  }
+
+  handleSkillsSelectSkillTab(tab: import("./views/skills").SkillDetailTab) {
+    this.skillsSelectedSkillTab = tab;
+  }
+
+  async handleAnalyzeSkill(skillKey: string, filePath: string) {
+    if (!this.client || !this.connected) {
+      return;
+    }
+    this.analyzingSkill = skillKey;
+    this.skillsError = null;
+    try {
+      const result = (await this.client.request("skills.analyze", {
+        skillKey,
+        filePath,
+      })) as { securityScan?: import("./types").SkillSecurityScan; richDescription?: import("./types").RichSkillDescription } | undefined;
+      if (result) {
+        this.skillAnalysis = {
+          ...this.skillAnalysis,
+          [skillKey]: result,
+        };
+        // Also update the skill in the report if it exists
+        if (this.skillsReport?.skills) {
+          const skillIndex = this.skillsReport.skills.findIndex(s => s.skillKey === skillKey);
+          if (skillIndex >= 0) {
+            const updatedSkills = [...this.skillsReport.skills];
+            updatedSkills[skillIndex] = {
+              ...updatedSkills[skillIndex],
+              securityScan: result.securityScan,
+              richDescription: result.richDescription,
+            };
+            this.skillsReport = {
+              ...this.skillsReport,
+              skills: updatedSkills,
+            };
+          }
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.skillsError = message;
+    } finally {
+      this.analyzingSkill = null;
     }
   }
 
@@ -934,6 +1088,893 @@ export class OpenClawApp extends LitElement {
       this.lastError = String(error);
     } finally {
       this.restarting = false;
+    }
+  }
+
+  // News handlers
+  async handleNewsLoad() {
+    if (!this.client || !this.connected) {
+      this.newsError = "Not connected to gateway";
+      return;
+    }
+
+    this.newsLoading = true;
+    this.newsError = null;
+    try {
+      const response = await this.client.request("news.list", {
+        limit: 50,
+        sources: this.newsSelectedSources,
+      }) as { items?: import("./views/news").NewsItem[] };
+
+      this.newsItems = response?.items || [];
+      console.log(`[News] Loaded ${this.newsItems.length} items`);
+    } catch (error) {
+      console.error("[News] Failed to load:", error);
+      this.newsError = error instanceof Error ? error.message : "Failed to load news";
+      this.newsItems = [];
+    } finally {
+      this.newsLoading = false;
+    }
+  }
+
+  async handleNewsRefresh() {
+    await this.handleNewsLoad();
+  }
+
+  handleNewsFilterChange(filter: "all" | "today" | "week" | "month") {
+    this.newsFilter = filter;
+  }
+
+  handleNewsSearchChange(query: string) {
+    this.newsSearchQuery = query;
+  }
+
+  handleNewsSourceToggle(source: string, enabled: boolean) {
+    if (enabled) {
+      this.newsSelectedSources = [...this.newsSelectedSources, source];
+    } else {
+      this.newsSelectedSources = this.newsSelectedSources.filter(s => s !== source);
+    }
+  }
+
+  handleNewsSelectItem(item: import("./views/news").NewsItem | null) {
+    this.newsSelectedItem = item;
+  }
+
+  // Wizard handlers
+  handleModelsConfigure(providerId: string) {
+    const provider = this.modelsProviders?.find(p => p.id === providerId);
+    this.wizardProviderId = providerId;
+    this.wizardProviderName = provider?.name || null;
+    this.wizardOpen = true;
+  }
+
+  handleModelsManage(providerId: string) {
+    console.log("[Models] Manage provider:", providerId);
+    // TODO: Implement manage functionality
+  }
+
+  handleModelsSearchChange(query: string) {
+    this.modelsSearchQuery = query;
+  }
+
+  handleWizardClose() {
+    this.wizardOpen = false;
+    this.wizardProviderId = null;
+    this.wizardProviderName = null;
+  }
+
+  async handleWizardSave(e: CustomEvent) {
+    const { providerId, credential } = e.detail;
+    console.log("[Wizard] Save provider:", providerId);
+    try {
+      await this.handleModelsSave(providerId, credential);
+      this.handleWizardClose();
+    } catch (error) {
+      console.error("[Wizard] Failed to save:", error);
+    }
+  }
+
+  handleOAuthStart(e: CustomEvent) {
+    const { providerId, url } = e.detail;
+    console.log("[Wizard] OAuth start for:", providerId);
+    window.open(url, "_blank");
+  }
+
+  // MCP handlers
+  async handleMcpLoad() {
+    console.log("[MCP] Loading servers...");
+    this.mcpLoading = true;
+    this.mcpError = null;
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("mcp.list", {}) as { servers?: Array<{ id: string; name: string; url: string; status: string; category?: string; description?: string; transport?: string }> };
+      this.mcpServers = result?.servers || [];
+    } catch (error) {
+      console.error("[MCP] Failed to load:", error);
+      this.mcpError = error instanceof Error ? error.message : "Failed to load MCP servers";
+    } finally {
+      this.mcpLoading = false;
+    }
+  }
+
+  async handleMcpAddServer(name: string, url: string, transport: string = "stdio", category?: string, description?: string) {
+    console.log("[MCP] Add server:", name, url, transport, category);
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("mcp.add", { 
+        name, 
+        url, 
+        transport,
+        category: category || "other",
+        description: description || ""
+      }) as { server?: { id: string; name: string; url: string; status: string; category?: string; description?: string } };
+      
+      if (result?.server) {
+        this.mcpServers = [...this.mcpServers, result.server];
+      }
+      
+      this.handleMcpCloseAddModal();
+    } catch (error) {
+      console.error("[MCP] Failed to add server:", error);
+      this.mcpError = error instanceof Error ? error.message : "Failed to add MCP server";
+    }
+  }
+
+  async handleMcpRemoveServer(id: string) {
+    console.log("[MCP] Remove server:", id);
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      await this.client.request("mcp.remove", { id });
+      
+      this.mcpServers = this.mcpServers.filter(s => s.id !== id);
+      if (this.mcpSelectedServer === id) {
+        this.mcpSelectedServer = null;
+      }
+    } catch (error) {
+      console.error("[MCP] Failed to remove server:", error);
+      this.mcpError = error instanceof Error ? error.message : "Failed to remove MCP server";
+    }
+  }
+
+  async handleMcpToggleServer(id: string, enabled: boolean) {
+    console.log(`[MCP] Toggle server ${id}:`, enabled);
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      await this.client.request("mcp.enable", { id, enabled });
+      
+      // Update local state
+      const serverIndex = this.mcpServers.findIndex(s => s.id === id);
+      if (serverIndex >= 0) {
+        this.mcpServers[serverIndex] = {
+          ...this.mcpServers[serverIndex],
+          status: enabled ? "connected" : "disconnected"
+        };
+        this.mcpServers = [...this.mcpServers];
+      }
+    } catch (error) {
+      console.error(`[MCP] Failed to toggle server ${id}:`, error);
+      this.mcpError = error instanceof Error ? error.message : `Failed to ${enabled ? "enable" : "disable"} MCP server`;
+    }
+  }
+
+  async handleMcpInstallFromMarketplace(marketplaceId: string) {
+    console.log("[MCP] Install from marketplace:", marketplaceId);
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("mcp.install", { marketplaceId }) as { server?: { id: string; name: string; url: string; status: string; category?: string; description?: string }; installCommand?: string };
+      
+      if (result?.server) {
+        this.mcpServers = [...this.mcpServers, result.server];
+        
+        // Show install command if available
+        if (result.installCommand) {
+          console.log(`[MCP] Install command: ${result.installCommand}`);
+        }
+      }
+    } catch (error) {
+      console.error("[MCP] Failed to install from marketplace:", error);
+      this.mcpError = error instanceof Error ? error.message : "Failed to install MCP server";
+    }
+  }
+
+  async handleMcpLoadMarketplace() {
+    console.log("[MCP] Loading marketplace...");
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("mcp.marketplace", {}) as { servers?: Array<{ id: string; name: string; description: string; url: string; transport: string; category: string; installCommand?: string }> };
+      return result?.servers || [];
+    } catch (error) {
+      console.error("[MCP] Failed to load marketplace:", error);
+      return [];
+    }
+  }
+
+  handleMcpSearchChange(query: string) {
+    this.mcpSearchQuery = query;
+  }
+
+  handleMcpCategoryChange(category: string | null) {
+    this.mcpSelectedCategory = category;
+  }
+
+  handleMcpSelectServer(id: string | null) {
+    this.mcpSelectedServer = id;
+  }
+
+  handleMcpOpenAddModal() {
+    this.mcpShowAddModal = true;
+  }
+
+  handleMcpCloseAddModal() {
+    this.mcpShowAddModal = false;
+    this.mcpNewServerName = "";
+    this.mcpNewServerUrl = "";
+    this.mcpNewServerCategory = "development";
+    this.mcpError = null;
+  }
+
+  handleMcpUpdateNewServerName(value: string) {
+    this.mcpNewServerName = value;
+  }
+
+  handleMcpUpdateNewServerUrl(value: string) {
+    this.mcpNewServerUrl = value;
+  }
+
+  handleMcpUpdateNewServerCategory(value: string) {
+    this.mcpNewServerCategory = value;
+  }
+
+  async handleMcpShowMarketplace() {
+    console.log("[MCP] Opening marketplace...");
+    this.mcpShowMarketplace = true;
+    this.mcpMarketplaceLoading = true;
+    this.mcpError = null;
+    
+    try {
+      // Load categories first
+      await this.handleMcpLoadMarketplaceCategories();
+      // Then load all servers
+      const servers = await this.handleMcpLoadMarketplace();
+      this.mcpMarketplace = servers;
+    } catch (error) {
+      console.error("[MCP] Failed to load marketplace:", error);
+      this.mcpMarketplace = [];
+    } finally {
+      this.mcpMarketplaceLoading = false;
+    }
+  }
+
+  handleMcpCloseMarketplace() {
+    console.log("[MCP] Closing marketplace...");
+    this.mcpShowMarketplace = false;
+    this.mcpMarketplace = [];
+    this.mcpMarketplaceCategories = [];
+    this.mcpMarketplaceTags = [];
+    this.mcpMarketplaceSearchQuery = "";
+    this.mcpMarketplaceSelectedCategory = null;
+    this.mcpMarketplaceSelectedTag = null;
+    this.mcpMarketplaceOfficialOnly = false;
+    this.mcpError = null;
+  }
+
+  async handleMcpMarketplaceSearchChange(query: string) {
+    this.mcpMarketplaceSearchQuery = query;
+    await this.handleMcpRefreshMarketplace();
+  }
+
+  async handleMcpMarketplaceCategoryChange(category: string | null) {
+    this.mcpMarketplaceSelectedCategory = category;
+    await this.handleMcpRefreshMarketplace();
+  }
+
+  async handleMcpMarketplaceTagChange(tag: string | null) {
+    this.mcpMarketplaceSelectedTag = tag;
+    await this.handleMcpRefreshMarketplace();
+  }
+
+  async handleMcpMarketplaceOfficialToggle() {
+    this.mcpMarketplaceOfficialOnly = !this.mcpMarketplaceOfficialOnly;
+    await this.handleMcpRefreshMarketplace();
+  }
+
+  async handleMcpRefreshMarketplace() {
+    if (!this.client || !this.connected) return;
+    
+    this.mcpMarketplaceLoading = true;
+    try {
+      const result = await this.client.request("mcp.marketplace", {
+        search: this.mcpMarketplaceSearchQuery || undefined,
+        category: this.mcpMarketplaceSelectedCategory || undefined,
+        tag: this.mcpMarketplaceSelectedTag || undefined,
+        official: this.mcpMarketplaceOfficialOnly || undefined,
+      }) as { 
+        servers?: Array<{ id: string; name: string; description: string; url: string; transport: string; category: string; installCommand?: string; tags?: string[]; official?: boolean }>;
+        tags?: string[];
+      };
+      
+      this.mcpMarketplace = result?.servers || [];
+      if (result?.tags) {
+        this.mcpMarketplaceTags = result.tags;
+      }
+    } catch (error) {
+      console.error("[MCP] Failed to refresh marketplace:", error);
+      this.mcpError = error instanceof Error ? error.message : "Failed to refresh marketplace";
+    } finally {
+      this.mcpMarketplaceLoading = false;
+    }
+  }
+
+  async handleMcpLoadMarketplaceCategories() {
+    if (!this.client || !this.connected) return;
+    
+    try {
+      const result = await this.client.request("mcp.categories", {}) as { 
+        categories?: Array<{ id: string; name: string; count: number }>;
+      };
+      this.mcpMarketplaceCategories = result?.categories || [];
+    } catch (error) {
+      console.error("[MCP] Failed to load categories:", error);
+    }
+  }
+
+  async handleMcpResetMarketplaceFilters() {
+    this.mcpMarketplaceSearchQuery = "";
+    this.mcpMarketplaceSelectedCategory = null;
+    this.mcpMarketplaceSelectedTag = null;
+    this.mcpMarketplaceOfficialOnly = false;
+    await this.handleMcpRefreshMarketplace();
+  }
+
+  // Containers handlers
+  async handleContainersLoad() {
+    this.containersLoading = true;
+    this.containersError = null;
+    try {
+      const response = await fetch("/api/containers", {
+        headers: {
+          "Authorization": `Bearer ${this.sessionKey}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to load containers: ${response.statusText}`);
+      }
+      const data = await response.json() as { containers: Array<{ id: string; name: string; status: string; image: string }> };
+      this.containers = data.containers || [];
+    } catch (error) {
+      this.containersError = error instanceof Error ? error.message : "Failed to load containers";
+      this.containers = [];
+    } finally {
+      this.containersLoading = false;
+    }
+  }
+
+  async handleContainerStart(id: string) {
+    console.log("[Containers] Start:", id);
+    // Note: Starting containers is handled via the sandbox system, not the containers API
+    // This would require a separate sandbox creation endpoint
+    this.containersError = "Container start is handled via the sandbox system";
+  }
+
+  async handleContainerStop(id: string) {
+    console.log("[Containers] Stop:", id);
+    try {
+      const response = await fetch(`/api/containers/${id}/stop`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.sessionKey}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to stop container: ${response.statusText}`);
+      }
+      // Refresh the containers list
+      await this.handleContainersLoad();
+    } catch (error) {
+      this.containersError = error instanceof Error ? error.message : "Failed to stop container";
+    }
+  }
+
+  async handleContainerRestart(id: string) {
+    console.log("[Containers] Restart:", id);
+    // Note: Restarting containers typically involves stopping and then starting
+    // For now, we'll just stop and let the user start it via sandbox
+    try {
+      await this.handleContainerStop(id);
+      this.containersError = "Container stopped. Use sandbox system to restart.";
+    } catch (error) {
+      this.containersError = error instanceof Error ? error.message : "Failed to restart container";
+    }
+  }
+
+  async handleContainerLogs(id: string) {
+    console.log("[Containers] View logs:", id);
+    try {
+      const response = await fetch(`/api/containers/${id}/logs?tail=100`, {
+        headers: {
+          "Authorization": `Bearer ${this.sessionKey}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to get container logs: ${response.statusText}`);
+      }
+      const data = await response.json() as { containerId: string; logs: string; tail: number };
+      // Store logs in a way that the UI can display them
+      // For now, we'll use a simple alert or store in state
+      this.sidebarContent = data.logs;
+      this.sidebarOpen = true;
+    } catch (error) {
+      this.containersError = error instanceof Error ? error.message : "Failed to get container logs";
+    }
+  }
+
+  // Channel toggle handler
+  async handleToggleChannel(channelKey: string, enabled: boolean) {
+    console.log(`[Channels] Toggle ${channelKey}:`, enabled);
+    if (!this.client || !this.connected) {
+      this.channelsError = "Not connected to gateway";
+      return;
+    }
+
+    try {
+      // Load current config to get the base hash
+      const configRes = await this.client.request("config.get", {}) as {
+        hash?: string;
+        config?: Record<string, unknown>;
+      };
+      const baseHash = configRes?.hash;
+      const currentConfig = configRes?.config ?? {};
+
+      if (!baseHash) {
+        throw new Error("Config hash missing; cannot update");
+      }
+
+      // Create the config patch - preserve existing channel config
+      const channels = (currentConfig.channels as Record<string, unknown>) ?? {};
+      const existingChannelConfig = (channels[channelKey] as Record<string, unknown>) ?? {};
+
+      // Get channel-specific default config if enabling and no config exists
+      let channelConfig: Record<string, unknown>;
+      if (enabled && Object.keys(existingChannelConfig).length === 0) {
+        const { getDefaultChannelConfig } = await import("./views/channels.config");
+        channelConfig = getDefaultChannelConfig(channelKey as import("./views/channels.config").ChannelConfigType);
+      } else {
+        // Merge with existing config
+        channelConfig = { ...existingChannelConfig };
+        if (channelKey !== "whatsapp") {
+          channelConfig.enabled = enabled;
+        }
+      }
+
+      const newConfig = {
+        ...currentConfig,
+        channels: {
+          ...channels,
+          [channelKey]: channelConfig,
+        },
+      };
+
+      console.log(`[Channels] Setting config for ${channelKey}:`, newConfig.channels[channelKey]);
+
+      // Apply the config change
+      const response = await this.client.request("config.set", {
+        raw: JSON.stringify(newConfig),
+        baseHash,
+      }) as { ok?: boolean; error?: string; details?: unknown };
+
+      if (!response?.ok) {
+        throw new Error(response?.error || "Failed to update configuration");
+      }
+
+      // Clear any previous error
+      this.channelsError = null;
+
+      // Refresh channels status
+      const { loadChannels } = await import("./controllers/channels");
+      await loadChannels(
+        {
+          client: this.client,
+          connected: this.connected,
+          channelsLoading: this.channelsLoading,
+          channelsSnapshot: this.channelsSnapshot,
+          channelsError: this.channelsError,
+          channelsLastSuccess: this.channelsLastSuccess,
+          whatsappLoginMessage: this.whatsappLoginMessage,
+          whatsappLoginQrDataUrl: this.whatsappLoginQrDataUrl,
+          whatsappLoginConnected: this.whatsappLoginConnected,
+          whatsappBusy: this.whatsappBusy,
+        },
+        true,
+      );
+
+      console.log(`[Channels] Successfully toggled ${channelKey} to ${enabled}`);
+    } catch (error) {
+      console.error(`[Channels] Failed to toggle ${channelKey}:`, error);
+      this.channelsError = error instanceof Error ? error.message : `Failed to toggle ${channelKey}`;
+
+      // Force a refresh to show current state
+      const { loadChannels } = await import("./controllers/channels");
+      await loadChannels(
+        {
+          client: this.client,
+          connected: this.connected,
+          channelsLoading: this.channelsLoading,
+          channelsSnapshot: this.channelsSnapshot,
+          channelsError: this.channelsError,
+          channelsLastSuccess: this.channelsLastSuccess,
+          whatsappLoginMessage: this.whatsappLoginMessage,
+          whatsappLoginQrDataUrl: this.whatsappLoginQrDataUrl,
+          whatsappLoginConnected: this.whatsappLoginConnected,
+          whatsappBusy: this.whatsappBusy,
+        },
+        false,
+      );
+    }
+  }
+
+  // Security handlers
+  async handleSecurityLoad() {
+    this.securityLoading = true;
+    this.securityError = null;
+    try {
+      // TODO: Load security status from backend
+      this.securityStatus = { overallScore: 0, lastScan: null, vulnerabilities: 0 };
+    } catch (error) {
+      this.securityError = error instanceof Error ? error.message : "Failed to load security data";
+    } finally {
+      this.securityLoading = false;
+    }
+  }
+
+  async handleSecurityScan() {
+    console.log("[Security] Starting scan...");
+    // TODO: Implement security scan
+  }
+
+  // Features handlers
+  async handleFeaturesLoad() {
+    console.log("[Features] Loading...");
+    this.featuresLoading = true;
+    this.featuresError = null;
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("features.list", {}) as { features?: Array<{ id: string; name: string; description: string; icon: string; status: "enabled" | "disabled" | "needs_config" | "unavailable"; configurable: boolean; category: "speech" | "channels" | "ai" | "integrations" | "tools"; configFields?: Array<{ key: string; label: string; type: "text" | "password" | "select" | "toggle"; placeholder?: string; options?: { value: string; label: string }[]; required?: boolean }>; config?: Record<string, unknown> }> };
+      this.featuresList = result?.features || [];
+    } catch (error) {
+      console.error("[Features] Failed to load:", error);
+      this.featuresError = error instanceof Error ? error.message : "Failed to load features";
+    } finally {
+      this.featuresLoading = false;
+    }
+  }
+
+  async handleFeaturesToggle(id: string, enabled: boolean) {
+    console.log(`[Features] Toggle ${id}:`, enabled);
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      await this.client.request("features.toggle", { id, enabled });
+      
+      // Update local state
+      const featureIndex = this.featuresList.findIndex(f => f.id === id);
+      if (featureIndex >= 0) {
+        this.featuresList[featureIndex] = {
+          ...this.featuresList[featureIndex],
+          status: enabled ? "enabled" : "disabled"
+        };
+        this.featuresList = [...this.featuresList];
+      }
+    } catch (error) {
+      console.error(`[Features] Failed to toggle ${id}:`, error);
+      this.featuresError = error instanceof Error ? error.message : `Failed to toggle ${id}`;
+    }
+  }
+
+  async handleFeaturesConfigure(id: string, config: Record<string, unknown>) {
+    console.log(`[Features] Configure ${id}:`, config);
+    this.featuresConfigSubmitting = true;
+    
+    try {
+      if (!this.client || !this.connected) {
+        throw new Error("Not connected to gateway");
+      }
+      
+      const result = await this.client.request("features.configure", { id, config }) as { status?: string };
+      
+      // Update local state
+      const featureIndex = this.featuresList.findIndex(f => f.id === id);
+      if (featureIndex >= 0) {
+        this.featuresList[featureIndex] = {
+          ...this.featuresList[featureIndex],
+          status: (result?.status as "enabled" | "disabled" | "needs_config" | "unavailable") || "enabled"
+        };
+        this.featuresList = [...this.featuresList];
+      }
+      
+      // Close modal on success
+      this.handleFeaturesCloseConfigModal();
+    } catch (error) {
+      console.error(`[Features] Failed to configure ${id}:`, error);
+      this.featuresError = error instanceof Error ? error.message : `Failed to configure ${id}`;
+    } finally {
+      this.featuresConfigSubmitting = false;
+    }
+  }
+
+  handleFeaturesSearchChange(query: string) {
+    this.featuresSearchQuery = query;
+  }
+
+  handleFeaturesCategoryChange(category: string | null) {
+    this.featuresSelectedCategory = category;
+  }
+
+  handleFeaturesSelectFeature(id: string | null) {
+    this.featuresSelectedFeature = id;
+  }
+
+  handleFeaturesOpenConfigModal(id: string) {
+    const feature = this.featuresList.find(f => f.id === id);
+    if (!feature) return;
+    
+    this.featuresConfigModalFeature = id;
+    // Pre-populate form with current config values
+    this.featuresConfigFormData = feature.config || {};
+    this.featuresConfigModalOpen = true;
+    this.featuresError = null;
+  }
+
+  handleFeaturesCloseConfigModal() {
+    this.featuresConfigModalOpen = false;
+    this.featuresConfigModalFeature = null;
+    this.featuresConfigFormData = {};
+    this.featuresConfigSubmitting = false;
+  }
+
+  handleFeaturesConfigFormChange(key: string, value: unknown) {
+    this.featuresConfigFormData = {
+      ...this.featuresConfigFormData,
+      [key]: value
+    };
+  }
+
+  // OpenCode handlers
+  async handleOpencodeStatusLoad() {
+    const { loadOpencodeStatus } = await import("./controllers/opencode");
+    await loadOpencodeStatus(this as unknown as Parameters<typeof loadOpencodeStatus>[0]);
+  }
+
+  async handleOpencodeTasksLoad() {
+    const { loadOpencodeTasks } = await import("./controllers/opencode");
+    await loadOpencodeTasks(this as unknown as Parameters<typeof loadOpencodeTasks>[0]);
+  }
+
+  handleOpencodeTaskInputChange(value: string) {
+    this.opencodeTaskInput = value;
+  }
+
+  async handleOpencodeTaskCreate() {
+    if (!this.opencodeTaskInput.trim()) return;
+    const { createOpencodeTask } = await import("./controllers/opencode");
+    await createOpencodeTask(this as unknown as Parameters<typeof createOpencodeTask>[0], this.opencodeTaskInput);
+  }
+
+  handleOpencodeTaskSelect(task: { id: string; prompt: string; status: string; createdAt: string } | null) {
+    this.opencodeSelectedTask = task as typeof this.opencodeSelectedTask;
+  }
+
+  async handleOpencodeTaskApprove(taskId: string) {
+    const { approveOpencodeTask } = await import("./controllers/opencode");
+    await approveOpencodeTask(this as unknown as Parameters<typeof approveOpencodeTask>[0], taskId);
+  }
+
+  async handleOpencodeTaskCancel(taskId: string) {
+    const { cancelOpencodeTask } = await import("./controllers/opencode");
+    await cancelOpencodeTask(this as unknown as Parameters<typeof cancelOpencodeTask>[0], taskId);
+  }
+
+  async handleOpencodeTaskLogs(taskId: string) {
+    console.log("View logs for task:", taskId);
+  }
+
+  async handleOpencodeTaskDownload(taskId: string) {
+    console.log("Download workspace for task:", taskId);
+  }
+
+  async handleOpencodeConfigLoad() {
+    const { loadOpencodeConfig } = await import("./controllers/opencode");
+    await loadOpencodeConfig(this as unknown as Parameters<typeof loadOpencodeConfig>[0]);
+  }
+
+  async handleOpencodeConfigSave() {
+    const { saveOpencodeConfig } = await import("./controllers/opencode");
+    await saveOpencodeConfig(this as unknown as Parameters<typeof saveOpencodeConfig>[0]);
+  }
+
+  handleOpencodeConfigReset() {
+    this.handleOpencodeConfigLoad();
+  }
+
+  async handleOpencodeConfigChange(key: string, value: unknown) {
+    const { updateOpencodeConfigValue } = await import("./controllers/opencode");
+    updateOpencodeConfigValue(this as unknown as Parameters<typeof updateOpencodeConfigValue>[0], key, value);
+  }
+
+  handleOpencodeSettingsSectionChange(section: string) {
+    this.opencodeSettingsSection = section;
+  }
+
+  async handleOpencodeSecurityLoad() {
+    const { loadOpencodeSecurity } = await import("./controllers/opencode");
+    await loadOpencodeSecurity(this as unknown as Parameters<typeof loadOpencodeSecurity>[0]);
+  }
+
+  async handleOpencodeSecuritySave() {
+    const { saveOpencodeSecurity } = await import("./controllers/opencode");
+    await saveOpencodeSecurity(this as unknown as Parameters<typeof saveOpencodeSecurity>[0]);
+  }
+
+  handleOpencodeSecurityReset() {
+    this.handleOpencodeSecurityLoad();
+  }
+
+  async handleOpencodeSecurityChange(key: string, value: unknown) {
+    const { updateOpencodeSecurityValue } = await import("./controllers/opencode");
+    updateOpencodeSecurityValue(this as unknown as Parameters<typeof updateOpencodeSecurityValue>[0], key, value);
+  }
+
+  handleOpencodeSecuritySectionChange(section: string) {
+    this.opencodeSecuritySection = section;
+  }
+
+  async handleOpencodeAuditLoad() {
+    const { loadOpencodeAudit } = await import("./controllers/opencode");
+    await loadOpencodeAudit(this as unknown as Parameters<typeof loadOpencodeAudit>[0]);
+  }
+
+  async handleOpencodeAuditRefresh() {
+    await this.handleOpencodeAuditLoad();
+  }
+
+  async handleOpencodeAuditExport() {
+    const { exportOpencodeAudit } = await import("./controllers/opencode");
+    await exportOpencodeAudit(this as unknown as Parameters<typeof exportOpencodeAudit>[0]);
+  }
+
+  // Channel setup modal handlers
+  async handleChannelSetupOpen(channelKey: string) {
+    console.log(`[ChannelSetup] Opening modal for ${channelKey}`);
+    const { getDefaultChannelConfig } = await import("./views/channels.config");
+    
+    this.channelSetupModalKey = channelKey;
+    this.channelSetupModalFormData = getDefaultChannelConfig(channelKey as import("./views/channels.config").ChannelConfigType);
+    this.channelSetupModalOpen = true;
+    this.channelSetupModalSubmitting = false;
+    this.channelSetupModalError = null;
+  }
+
+  handleChannelSetupClose() {
+    console.log("[ChannelSetup] Closing modal");
+    this.channelSetupModalOpen = false;
+    this.channelSetupModalKey = null;
+    this.channelSetupModalFormData = {};
+    this.channelSetupModalSubmitting = false;
+    this.channelSetupModalError = null;
+  }
+
+  handleChannelSetupFieldChange(fieldName: string, value: unknown) {
+    console.log(`[ChannelSetup] Field ${fieldName} changed:`, value);
+    this.channelSetupModalFormData = {
+      ...this.channelSetupModalFormData,
+      [fieldName]: value,
+    };
+  }
+
+  async handleChannelSetupSubmit(channelKey: string, config: Record<string, unknown>) {
+    console.log(`[ChannelSetup] Submitting config for ${channelKey}:`, config);
+    
+    if (!this.client || !this.connected) {
+      this.channelSetupModalError = "Not connected to gateway";
+      return;
+    }
+
+    this.channelSetupModalSubmitting = true;
+    this.channelSetupModalError = null;
+
+    try {
+      // Load current config to get the base hash
+      const configRes = await this.client.request("config.get", {}) as {
+        hash?: string;
+        config?: Record<string, unknown>;
+      };
+      const baseHash = configRes?.hash;
+      const currentConfig = configRes?.config ?? {};
+
+      if (!baseHash) {
+        throw new Error("Config hash missing; cannot update");
+      }
+
+      // Create the config patch
+      const channels = (currentConfig.channels as Record<string, unknown>) ?? {};
+      
+      const newConfig = {
+        ...currentConfig,
+        channels: {
+          ...channels,
+          [channelKey]: config,
+        },
+      };
+
+      console.log(`[ChannelSetup] Setting config for ${channelKey}:`, newConfig.channels[channelKey]);
+
+      // Apply the config change
+      const response = await this.client.request("config.set", {
+        raw: JSON.stringify(newConfig),
+        baseHash,
+      }) as { ok?: boolean; error?: string; details?: unknown };
+
+      if (!response?.ok) {
+        throw new Error(response?.error || "Failed to update configuration");
+      }
+
+      // Close modal on success
+      this.handleChannelSetupClose();
+
+      // Refresh channels status
+      const { loadChannels } = await import("./controllers/channels");
+      await loadChannels(
+        {
+          client: this.client,
+          connected: this.connected,
+          channelsLoading: this.channelsLoading,
+          channelsSnapshot: this.channelsSnapshot,
+          channelsError: this.channelsError,
+          channelsLastSuccess: this.channelsLastSuccess,
+          whatsappLoginMessage: this.whatsappLoginMessage,
+          whatsappLoginQrDataUrl: this.whatsappLoginQrDataUrl,
+          whatsappLoginConnected: this.whatsappLoginConnected,
+          whatsappBusy: this.whatsappBusy,
+        },
+        true,
+      );
+
+      console.log(`[ChannelSetup] Successfully configured ${channelKey}`);
+    } catch (error) {
+      console.error(`[ChannelSetup] Failed to configure ${channelKey}:`, error);
+      this.channelSetupModalError = error instanceof Error ? error.message : `Failed to configure ${channelKey}`;
+    } finally {
+      this.channelSetupModalSubmitting = false;
     }
   }
 

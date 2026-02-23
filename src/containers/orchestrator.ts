@@ -9,7 +9,9 @@ import type {
   ContainerRuntime as IContainerRuntime,
   ContainerExecutionResult,
 } from "./types.js";
+import { AppleContainerRuntime } from "./apple-container-runtime.js";
 import { DockerRuntime } from "./docker-runtime.js";
+import { PodmanRuntime } from "./podman-runtime.js";
 import { runtimeDetector, type ContainerRuntime } from "./runtime-detector.js";
 
 export { type ContainerConfig, type ContainerStatus, type ContainerExecutionResult };
@@ -49,9 +51,11 @@ export class ContainerOrchestrator {
         this.runtime = new DockerRuntime();
         break;
       case "apple-container":
-        throw new Error("Apple Container runtime not yet implemented");
+        this.runtime = new AppleContainerRuntime();
+        break;
       case "podman":
-        throw new Error("Podman runtime not yet implemented");
+        this.runtime = new PodmanRuntime();
+        break;
       default:
         throw new Error(`Unsupported runtime: ${runtimeType}`);
     }

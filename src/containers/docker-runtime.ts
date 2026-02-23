@@ -127,7 +127,7 @@ export class DockerRuntime implements IContainerRuntime {
       });
 
       return {
-        exitCode: result.exitCode,
+        exitCode: result.exitCode ?? -1,
         stdout: result.stdout,
         stderr: result.stderr,
         executionTime: Date.now() - startTime,

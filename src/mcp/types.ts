@@ -7,7 +7,7 @@
 export interface MCPServer {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   url: string;
   transport: "stdio" | "http" | "websocket";
   auth?: MCPAuthConfig;
@@ -17,6 +17,7 @@ export interface MCPServer {
   prompts: MCPPrompt[];
   connected: boolean;
   lastError?: string;
+  env?: Record<string, string>;
 }
 
 export interface MCPAuthConfig {

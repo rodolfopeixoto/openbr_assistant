@@ -9,7 +9,6 @@ import {
 import { createServer as createHttpsServer } from "node:https";
 import type { CanvasHostHandler } from "../canvas-host/server.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
-import type { ResolvedGatewayAuth } from "./auth.js";
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
 import { handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
@@ -38,6 +37,7 @@ import {
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
 import { handleContainersHttpRequest } from "./routes/containers.js";
+import { handleSpeechHttpRequest } from "./routes/speech.js";
 import { securityHeadersMiddleware } from "./security-headers.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
@@ -351,6 +351,14 @@ export function createGatewayHttpServer(opts: {
         return;
       }
       if (await handleContainersHttpRequest(req, res, { auth: resolvedAuth, trustedProxies })) {
+        return;
+      }
+      if (
+        await handleSpeechHttpRequest(req, res, {
+          auth: { userId: "user" },
+          trustedProxies,
+        })
+      ) {
         return;
       }
       if (

@@ -27,21 +27,32 @@ export type ChatEventPayload = {
   errorMessage?: string;
 };
 
+/**
+ * Normalize session key for comparison.
+ * Converts shorthand keys like "main" to canonical form "agent:main:main"
+ * to handle mismatch between server events and client state.
+ */
+function normalizeSessionKey(key: string): string {
+  if (!key) return key;
+  // If key doesn't start with "agent:", it's a shorthand - canonicalize it
+  if (!key.startsWith("agent:")) {
+    return `agent:${key}:${key}`;
+  }
+  return key;
+}
+
 export async function loadChatHistory(state: ChatState) {
   if (!state.client || !state.connected) return;
   state.chatLoading = true;
   state.lastError = null;
   try {
-    console.log("[DEBUG loadChatHistory] Loading chat history for sessionKey:", state.sessionKey);
     const res = (await state.client.request("chat.history", {
       sessionKey: state.sessionKey,
       limit: 200,
     })) as { messages?: unknown[]; thinkingLevel?: string | null };
-    console.log("[DEBUG loadChatHistory] Received messages count:", res.messages?.length);
     state.chatMessages = Array.isArray(res.messages) ? res.messages : [];
     state.chatThinkingLevel = res.thinkingLevel ?? null;
   } catch (err) {
-    console.error("[DEBUG loadChatHistory] Error:", err);
     state.lastError = String(err);
   } finally {
     state.chatLoading = false;
@@ -189,7 +200,27 @@ export async function abortChatRun(state: ChatState): Promise<boolean> {
 
 export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
   if (!payload) return null;
-  if (payload.sessionKey !== state.sessionKey) return null;
+  
+  // Normalize session keys before comparison to handle format differences
+  // e.g., "main" vs "agent:main:main"
+  const normalizedPayloadKey = normalizeSessionKey(payload.sessionKey);
+  const normalizedStateKey = normalizeSessionKey(state.sessionKey);
+  
+  // Debug logging for session key mismatch issues
+  console.log('[Chat Debug] Event received:', {
+    payloadSessionKey: payload.sessionKey,
+    normalizedPayloadKey,
+    stateSessionKey: state.sessionKey,
+    normalizedStateKey,
+    match: normalizedPayloadKey === normalizedStateKey,
+    state: payload.state,
+    hasMessage: !!payload.message
+  });
+  
+  if (normalizedPayloadKey !== normalizedStateKey) {
+    console.warn('[Chat Debug] Session key mismatch - dropping event');
+    return null;
+  }
 
   // Final from another run (e.g. sub-agent announce): refresh history to show new message.
   // See https://github.com/openclaw/openclaw/issues/1909
@@ -209,9 +240,7 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
   } else if (payload.state === "final") {
     // Add the final message to chat history
     if (payload.message) {
-      console.log("[DEBUG handleChatEvent] Adding message to chatMessages, current length:", state.chatMessages.length);
       state.chatMessages = [...state.chatMessages, payload.message];
-      console.log("[DEBUG handleChatEvent] New chatMessages length:", state.chatMessages.length);
     }
     state.chatStream = null;
     state.chatRunId = null;

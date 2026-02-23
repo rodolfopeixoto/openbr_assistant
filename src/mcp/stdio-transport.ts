@@ -4,7 +4,7 @@
  */
 
 import { spawn, type ChildProcess } from "child_process";
-import type { MCPServer } from "../types.js";
+import type { MCPServer } from "./types.js";
 
 export interface StdioConnection {
   process: ChildProcess;

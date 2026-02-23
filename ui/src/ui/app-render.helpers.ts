@@ -41,7 +41,6 @@ export function renderTab(state: AppViewState, tab: Tab) {
 }
 
 export function renderChatControls(state: AppViewState) {
-  console.log("[DEBUG renderChatControls] configuredProviders:", state.configuredProviders?.length);
   const mainSessionKey = resolveMainSessionKey(state.hello, state.sessionsResult);
   const sessionOptions = resolveSessionOptions(
     state.sessionKey,
@@ -160,23 +159,18 @@ export function renderChatControls(state: AppViewState) {
         .selectedModel=${state.selectedModel}
         .loading=${state.providersLoading}
         @model-selected=${(e: CustomEvent) => {
-          console.log("[DEBUG] model-selected event:", e.detail);
           const { providerId, modelId } = e.detail;
           // Update local state
           state.selectedProvider = providerId;
           state.selectedModel = modelId;
-          console.log("[DEBUG] Updated state:", providerId, modelId);
           // Persist to backend
           if (state.client) {
-            console.log("[DEBUG] Calling models.select...");
             void state.client.request("models.select", {
               sessionKey: state.sessionKey,
               providerId,
               modelId,
-            }).then(() => {
-              console.log("[DEBUG] models.select success");
             }).catch((err: unknown) => {
-              console.error("[DEBUG] models.select error:", err);
+              console.error("[models.select] error:", err);
             });
           }
         }}
@@ -207,12 +201,63 @@ function resolveMainSessionKey(
   return null;
 }
 
+// Channel icons mapping for sessions
+const CHANNEL_ICONS: Record<string, string> = {
+  telegram: "📱",
+  whatsapp: "💬",
+  discord: "🎮",
+  slack: "💼",
+  signal: "🔒",
+  imessage: "🍎",
+  nostr: "🌐",
+  googlechat: "💬",
+  web: "🌐",
+  api: "🔌",
+  cli: "⌨️",
+};
+
+function getChannelIcon(surface?: string): string {
+  if (!surface) return "💬";
+  const normalized = surface.toLowerCase();
+  return CHANNEL_ICONS[normalized] || "💬";
+}
+
 function resolveSessionDisplayName(key: string, row?: SessionsListResult["sessions"][number]) {
+  const icon = getChannelIcon(row?.surface);
   const label = row?.label?.trim();
-  if (label) return `${label} (${key})`;
+  if (label) return `${icon} ${label}`;
   const displayName = row?.displayName?.trim();
-  if (displayName) return displayName;
-  return key;
+  if (displayName) return `${icon} ${displayName}`;
+  return `${icon} ${key}`;
+}
+
+function getSessionTooltip(row?: SessionsListResult["sessions"][number] | null): string {
+  if (!row) return "";
+  const parts: string[] = [];
+  
+  if (row.surface) {
+    parts.push(`Channel: ${row.surface}`);
+  }
+  
+  if (row.kind) {
+    const kindLabels: Record<string, string> = {
+      direct: "Direct Message",
+      group: "Group Chat",
+      global: "Global Session",
+      unknown: "Unknown"
+    };
+    parts.push(`Type: ${kindLabels[row.kind] || row.kind}`);
+  }
+  
+  if (row.model) {
+    parts.push(`Model: ${row.model}`);
+  }
+  
+  if (row.totalTokens) {
+    parts.push(`Tokens: ${row.totalTokens.toLocaleString()}`);
+  }
+  
+  return parts.join(" | ");
 }
 
 function resolveSessionOptions(
