@@ -6,10 +6,14 @@
 @import "./styles/compliance.css";
 @import "./styles/skills.css";
 @import "./styles/channels.css";
+@import "./styles/channels.v2.css";
 @import "./styles/sessions.css";
 @import "./styles/branding.css";
 @import "./styles/debug.css";
 @import "./styles/cron.css";
 @import "./styles/nodes.css";
+@import "./styles/features.css";
 @import "./styles/chat.css";
 @import "./styles/env.css";
+@import "./styles/news.css";
+@import "./styles/mcp.css";

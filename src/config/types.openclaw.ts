@@ -95,6 +95,94 @@ export type OpenClawConfig = {
   canvasHost?: CanvasHostConfig;
   talk?: TalkConfig;
   gateway?: GatewayConfig;
+  mcpServers?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    url: string;
+    transport: "stdio" | "http" | "websocket";
+    category?: string;
+    enabled: boolean;
+    auth?: {
+      type: "bearer" | "api-key" | "basic";
+      token?: string;
+      apiKey?: string;
+      username?: string;
+      password?: string;
+    };
+    env?: Record<string, string>;
+  }>;
+  opencode?: OpenCodeConfig;
+};
+
+// OpenCode AI Coding Assistant Configuration
+export type OpenCodeConfig = {
+  enabled: boolean;
+  version?: string;
+
+  // Container Runtime Configuration
+  container: {
+    runtime: "docker" | "podman" | "container" | "auto";
+    image: string;
+    resources: {
+      memory: number; // MB
+      cpus: number; // Cores
+      timeout: number; // Minutes
+    };
+    network: {
+      enabled: boolean;
+      ports?: number[];
+    };
+    security: {
+      readOnly: boolean;
+      dropCapabilities: boolean;
+      seccompProfile: "default" | "strict" | "custom";
+    };
+  };
+
+  // Workspace Configuration
+  workspace: {
+    basePath: string;
+    allowedProjects: {
+      mode: "all" | "whitelist";
+      whitelist: string[];
+    };
+    protectedPatterns: string[];
+  };
+
+  // Security Configuration
+  security: {
+    approvalMode: "always" | "on-miss" | "auto";
+    autoApproveSafe: boolean;
+    commands: {
+      allowlist: {
+        enabled: boolean;
+        commands: string[];
+      };
+      blocklist: {
+        enabled: boolean;
+        commands: string[];
+      };
+    };
+    paths: {
+      whitelist: string[];
+      blacklist: string[];
+    };
+  };
+
+  // Notifications
+  notifications: {
+    desktop: boolean;
+    mobile: boolean;
+    email: boolean;
+  };
+
+  // Audit Logging
+  audit: {
+    enabled: boolean;
+    retentionDays: number;
+    logLevel: "debug" | "info" | "warn" | "error";
+  };
 };
 
 export type ConfigValidationIssue = {

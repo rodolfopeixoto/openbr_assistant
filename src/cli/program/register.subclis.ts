@@ -224,6 +224,14 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "speech",
+    description: "Speech-to-text and voice commands",
+    register: async (program) => {
+      const mod = await import("../commands/speech.js");
+      program.addCommand(mod.createSpeechCommand());
+    },
+  },
+  {
     name: "update",
     description: "CLI update helpers",
     register: async (program) => {
