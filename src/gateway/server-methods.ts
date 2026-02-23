@@ -4,6 +4,8 @@ import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
 import { authHandlers } from "./server-methods/auth.js";
 import { browserHandlers } from "./server-methods/browser.js";
+import { budgetHandlers } from "./server-methods/budget.js";
+import { cacheHandlers } from "./server-methods/cache.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
 import { complianceHandlers } from "./server-methods/compliance.js";
@@ -15,9 +17,13 @@ import { envHandlers } from "./server-methods/env.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
+import { metricsHandlers } from "./server-methods/metrics.js";
+import { modelRoutingHandlers } from "./server-methods/model-routing.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
+import { ollamaHandlers } from "./server-methods/ollama.js";
 import { onboardWizardHandlers } from "./server-methods/onboard-wizard.js";
+import { rateLimitsHandlers } from "./server-methods/rate-limits.js";
 import { sendHandlers } from "./server-methods/send.js";
 import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
@@ -192,6 +198,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...execApprovalsHandlers,
   ...webHandlers,
   ...modelsHandlers,
+  ...modelRoutingHandlers,
   ...authHandlers,
   ...configHandlers,
   ...wizardHandlers,
@@ -210,6 +217,11 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...workspaceHandlers,
   ...complianceHandlers,
   ...onboardWizardHandlers,
+  ...ollamaHandlers,
+  ...rateLimitsHandlers,
+  ...budgetHandlers,
+  ...metricsHandlers,
+  ...cacheHandlers,
 };
 
 export async function handleGatewayRequest(
