@@ -91,6 +91,12 @@ import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
 import { renderOnboardingWizard } from "./views/onboarding-wizard";
+import { renderNewsView } from "./views/news";
+import { renderFeaturesView } from "./views/features";
+import { renderContainersView } from "./views/containers";
+import { renderSecurityView } from "./views/security";
+import { renderOpencodeView } from "./views/opencode";
+import { renderMcpView } from "./views/mcp";
 import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
@@ -733,6 +739,13 @@ export function renderApp(state: AppViewState) {
               })
             : nothing
         }
+
+        ${state.tab === "news" ? renderNewsView(state) : nothing}
+        ${state.tab === "features" ? renderFeaturesView(state) : nothing}
+        ${state.tab === "containers" ? renderContainersView(state) : nothing}
+        ${state.tab === "security" ? renderSecurityView(state) : nothing}
+        ${state.tab === "opencode" ? renderOpencodeView(state) : nothing}
+        ${state.tab === "mcp" ? renderMcpView(state) : nothing}
         `}
       </main>
       ${renderExecApprovalPrompt(state)}
