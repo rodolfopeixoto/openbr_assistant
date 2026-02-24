@@ -139,6 +139,8 @@ export class OpenClawApp extends LitElement {
   @state() containersError: string | null = null;
   @state() containers: unknown[] = [];
   // Opencode
+  @state() opencodeLoading = false;
+  @state() opencodeError: string | null = null;
   @state() opencodeStatus: string | null = null;
   @state() opencodeTasks: unknown[] = [];
   @state() opencodeTaskCreating = false;
@@ -347,6 +349,47 @@ export class OpenClawApp extends LitElement {
 
   // Gateway restart state
   @state() restarting = false;
+
+  // Security state
+  @state() securityLoading = false;
+  @state() securityError: string | null = null;
+  @state() securityStatus: Record<string, unknown> | null = null;
+
+  // MCP state
+  @state() mcpLoading = false;
+  @state() mcpError: string | null = null;
+  @state() mcpServers: unknown[] = [];
+  @state() mcpSearchQuery = "";
+
+  // Model Routing state
+  @state() modelRoutingLoading = false;
+  @state() modelRoutingError: string | null = null;
+  @state() modelRoutingStatus: Record<string, unknown> | null = null;
+
+  // Ollama state
+  @state() ollamaLoading = false;
+  @state() ollamaError: string | null = null;
+  @state() ollamaStatus: Record<string, unknown> | null = null;
+
+  // Rate Limits state
+  @state() rateLimitsLoading = false;
+  @state() rateLimitsError: string | null = null;
+  @state() rateLimitsStatus: Record<string, unknown> | null = null;
+
+  // Budget state
+  @state() budgetLoading = false;
+  @state() budgetError: string | null = null;
+  @state() budgetStatus: Record<string, unknown> | null = null;
+
+  // Metrics state
+  @state() metricsLoading = false;
+  @state() metricsError: string | null = null;
+  @state() metricsStatus: Record<string, unknown> | null = null;
+
+  // Cache state
+  @state() cacheLoading = false;
+  @state() cacheError: string | null = null;
+  @state() cacheStatus: Record<string, unknown> | null = null;
 
   client: GatewayBrowserClient | null = null;
   private chatScrollFrame: number | null = null;
@@ -1301,6 +1344,70 @@ export class OpenClawApp extends LitElement {
 
   async handleOpencodeTaskCreate() {
     // Implementation would go here
+  }
+
+  // Security handlers
+  async handleSecurityLoad() {
+    console.log("[Security] Load");
+  }
+
+  async handleSecurityScan() {
+    console.log("[Security] Scan");
+  }
+
+  // MCP handlers
+  async handleMcpLoad() {
+    console.log("[MCP] Load");
+  }
+
+  handleMcpSearchChange(query: string) {
+    this.mcpSearchQuery = query;
+  }
+
+  // Model Routing handlers
+  async handleModelRoutingLoad() {
+    console.log("[Model Routing] Load");
+  }
+
+  async handleModelRoutingConfigure(config: Record<string, unknown>) {
+    console.log("[Model Routing] Configure:", config);
+  }
+
+  // Ollama handlers
+  async handleOllamaLoad() {
+    console.log("[Ollama] Load");
+  }
+
+  // Rate Limits handlers
+  async handleRateLimitsLoad() {
+    console.log("[Rate Limits] Load");
+  }
+
+  async handleRateLimitsConfigure(config: Record<string, unknown>) {
+    console.log("[Rate Limits] Configure:", config);
+  }
+
+  // Budget handlers
+  async handleBudgetLoad() {
+    console.log("[Budget] Load");
+  }
+
+  async handleBudgetConfigure(config: Record<string, unknown>) {
+    console.log("[Budget] Configure:", config);
+  }
+
+  // Metrics handlers
+  async handleMetricsLoad() {
+    console.log("[Metrics] Load");
+  }
+
+  // Cache handlers
+  async handleCacheLoad() {
+    console.log("[Cache] Load");
+  }
+
+  async handleCacheClear() {
+    console.log("[Cache] Clear");
   }
 
   // Models methods

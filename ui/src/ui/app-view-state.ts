@@ -359,4 +359,77 @@ export type AppViewState = {
   handleNewsSentimentChange: (sentiment: string | null) => void;
   handleNewsLimitChange: (limit: number) => void;
   handleNewsOffsetChange: (offset: number) => void;
+  // Features Dashboard
+  featuresLoading: boolean;
+  featuresError: string | null;
+  featuresList: unknown[];
+  featuresSearchQuery: string;
+  featuresSummary: Record<string, unknown>;
+  featureCategories: string[];
+  expandedCategories: string[];
+  handleFeaturesLoad: () => Promise<void>;
+  handleFeaturesSearchChange: (query: string) => void;
+  handleToggleCategory: (category: string) => void;
+  // Containers
+  containersLoading: boolean;
+  containersError: string | null;
+  containers: unknown[];
+  handleContainersLoad: () => Promise<void>;
+  handleContainerStart: (containerId: string) => Promise<void>;
+  handleContainerStop: (containerId: string) => Promise<void>;
+  handleContainerRestart: (containerId: string) => Promise<void>;
+  handleContainerLogs: (containerId: string) => Promise<void>;
+  // Security
+  securityLoading: boolean;
+  securityError: string | null;
+  securityStatus: Record<string, unknown> | null;
+  handleSecurityLoad: () => Promise<void>;
+  handleSecurityScan: () => Promise<void>;
+  // OpenCode
+  opencodeLoading: boolean;
+  opencodeError: string | null;
+  opencodeStatus: string | null;
+  opencodeTasks: unknown[];
+  handleOpencodeLoad: () => Promise<void>;
+  // MCP
+  mcpLoading: boolean;
+  mcpError: string | null;
+  mcpServers: unknown[];
+  mcpSearchQuery: string;
+  handleMcpLoad: () => Promise<void>;
+  handleMcpSearchChange: (query: string) => void;
+  // Model Routing
+  modelRoutingLoading: boolean;
+  modelRoutingError: string | null;
+  modelRoutingStatus: Record<string, unknown> | null;
+  handleModelRoutingLoad: () => Promise<void>;
+  handleModelRoutingConfigure: (config: Record<string, unknown>) => Promise<void>;
+  // Ollama
+  ollamaLoading: boolean;
+  ollamaError: string | null;
+  ollamaStatus: Record<string, unknown> | null;
+  handleOllamaLoad: () => Promise<void>;
+  // Rate Limits
+  rateLimitsLoading: boolean;
+  rateLimitsError: string | null;
+  rateLimitsStatus: Record<string, unknown> | null;
+  handleRateLimitsLoad: () => Promise<void>;
+  handleRateLimitsConfigure: (config: Record<string, unknown>) => Promise<void>;
+  // Budget
+  budgetLoading: boolean;
+  budgetError: string | null;
+  budgetStatus: Record<string, unknown> | null;
+  handleBudgetLoad: () => Promise<void>;
+  handleBudgetConfigure: (config: Record<string, unknown>) => Promise<void>;
+  // Metrics
+  metricsLoading: boolean;
+  metricsError: string | null;
+  metricsStatus: Record<string, unknown> | null;
+  handleMetricsLoad: () => Promise<void>;
+  // Cache
+  cacheLoading: boolean;
+  cacheError: string | null;
+  cacheStatus: Record<string, unknown> | null;
+  handleCacheLoad: () => Promise<void>;
+  handleCacheClear: () => Promise<void>;
 };
