@@ -4,10 +4,13 @@ export const TAB_GROUPS = [
   { label: "Chat", tabs: ["chat"] },
   {
     label: "Control",
-    tabs: ["overview", "channels", "instances", "sessions", "cron"],
+    tabs: ["overview", "features", "channels", "instances", "sessions", "cron"],
   },
-  { label: "Agent", tabs: ["skills", "nodes"] },
-  { label: "Settings", tabs: ["models", "config", "env", "workspace", "compliance", "debug", "logs"] },
+  { label: "Intelligence", tabs: ["news"] },
+  { label: "Agent", tabs: ["skills", "nodes", "opencode", "mcp"] },
+  { label: "AI", tabs: ["models", "modelRouting", "ollama"] },
+  { label: "System", tabs: ["containers", "security", "rateLimits", "budget", "metrics", "cache"] },
+  { label: "Settings", tabs: ["config", "env", "workspace", "compliance", "debug", "logs"] },
 ] as const;
 
 export type Tab =
@@ -25,7 +28,19 @@ export type Tab =
   | "workspace"
   | "compliance"
   | "debug"
-  | "logs";
+  | "logs"
+  | "news"
+  | "features"
+  | "containers"
+  | "security"
+  | "opencode"
+  | "mcp"
+  | "modelRouting"
+  | "ollama"
+  | "rateLimits"
+  | "budget"
+  | "metrics"
+  | "cache";
 
 const TAB_PATHS: Record<Tab, string> = {
   overview: "/overview",
@@ -43,6 +58,18 @@ const TAB_PATHS: Record<Tab, string> = {
   compliance: "/compliance",
   debug: "/debug",
   logs: "/logs",
+  news: "/news",
+  features: "/features",
+  containers: "/containers",
+  security: "/security",
+  opencode: "/opencode",
+  mcp: "/mcp",
+  modelRouting: "/model-routing",
+  ollama: "/ollama",
+  rateLimits: "/rate-limits",
+  budget: "/budget",
+  metrics: "/metrics",
+  cache: "/cache",
 };
 
 const PATH_TO_TAB = new Map(Object.entries(TAB_PATHS).map(([tab, path]) => [path, tab as Tab]));
@@ -138,6 +165,30 @@ export function iconForTab(tab: Tab): IconName {
       return "bug";
     case "logs":
       return "scrollText";
+    case "news":
+      return "globe";
+    case "features":
+      return "layers";
+    case "containers":
+      return "package";
+    case "security":
+      return "lock";
+    case "opencode":
+      return "code";
+    case "mcp":
+      return "puzzle";
+    case "modelRouting":
+      return "gitBranch";
+    case "ollama":
+      return "cpu";
+    case "rateLimits":
+      return "alertCircle";
+    case "budget":
+      return "star";
+    case "metrics":
+      return "barChart";
+    case "cache":
+      return "database";
     default:
       return "folder";
   }
@@ -175,6 +226,30 @@ export function titleForTab(tab: Tab) {
       return "Debug";
     case "logs":
       return "Logs";
+    case "news":
+      return "News";
+    case "features":
+      return "Features";
+    case "containers":
+      return "Containers";
+    case "security":
+      return "Security";
+    case "opencode":
+      return "OpenCode";
+    case "mcp":
+      return "MCP";
+    case "modelRouting":
+      return "Model Routing";
+    case "ollama":
+      return "Ollama";
+    case "rateLimits":
+      return "Rate Limits";
+    case "budget":
+      return "Budget";
+    case "metrics":
+      return "Metrics";
+    case "cache":
+      return "Cache";
     default:
       return "Control";
   }
@@ -212,6 +287,30 @@ export function subtitleForTab(tab: Tab) {
       return "Gateway snapshots, events, and manual RPC calls.";
     case "logs":
       return "Live tail of the gateway file logs.";
+    case "news":
+      return "News and intelligence aggregation.";
+    case "features":
+      return "Feature management and configuration.";
+    case "containers":
+      return "Container management and orchestration.";
+    case "security":
+      return "Security settings and audit logs.";
+    case "opencode":
+      return "AI-powered code assistance.";
+    case "mcp":
+      return "Model Context Protocol servers.";
+    case "modelRouting":
+      return "Intelligent model routing and tier management.";
+    case "ollama":
+      return "Local Ollama model management.";
+    case "rateLimits":
+      return "Rate limiting and throttling controls.";
+    case "budget":
+      return "Budget management and cost controls.";
+    case "metrics":
+      return "Usage metrics and analytics.";
+    case "cache":
+      return "Cache management and configuration.";
     default:
       return "";
   }
