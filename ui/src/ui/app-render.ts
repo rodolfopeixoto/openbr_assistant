@@ -97,6 +97,12 @@ import { renderContainersView } from "./views/containers";
 import { renderSecurityView } from "./views/security";
 import { renderOpencodeView } from "./views/opencode";
 import { renderMcpView } from "./views/mcp";
+import { renderModelRoutingView } from "./views/model-routing";
+import { renderOllamaView } from "./views/ollama";
+import { renderRateLimitsView } from "./views/rate-limits";
+import { renderBudgetView } from "./views/budget";
+import { renderMetricsView } from "./views/metrics";
+import { renderCacheView } from "./views/cache";
 import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
@@ -746,6 +752,12 @@ export function renderApp(state: AppViewState) {
         ${state.tab === "security" ? renderSecurityView(state) : nothing}
         ${state.tab === "opencode" ? renderOpencodeView(state) : nothing}
         ${state.tab === "mcp" ? renderMcpView(state) : nothing}
+        ${state.tab === "modelRouting" ? renderModelRoutingView(state) : nothing}
+        ${state.tab === "ollama" ? renderOllamaView(state) : nothing}
+        ${state.tab === "rateLimits" ? renderRateLimitsView(state) : nothing}
+        ${state.tab === "budget" ? renderBudgetView(state) : nothing}
+        ${state.tab === "metrics" ? renderMetricsView(state) : nothing}
+        ${state.tab === "cache" ? renderCacheView(state) : nothing}
         `}
       </main>
       ${renderExecApprovalPrompt(state)}
