@@ -51,6 +51,7 @@ import {
   handleFirstUpdated,
   handleUpdated,
 } from "./app-lifecycle";
+import { applySettingsFromUrl } from "./app-settings";
 import { renderApp } from "./app-render";
 import {
   exportLogs as exportLogsInternal,
@@ -416,6 +417,8 @@ export class OpenClawApp extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    // Extract token from URL before connecting
+    applySettingsFromUrl(this as unknown as Parameters<typeof applySettingsFromUrl>[0]);
     handleConnected(this as unknown as Parameters<typeof handleConnected>[0]);
   }
 
