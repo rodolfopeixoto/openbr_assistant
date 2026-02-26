@@ -594,6 +594,9 @@ export function renderApp(state: AppViewState) {
                     chatShowTools: !state.settings.chatShowTools,
                   });
                 },
+                voiceRecorderOpen: state.voiceRecorderOpen,
+                onToggleVoiceRecorder: () => state.handleToggleVoiceRecorder(),
+                onVoiceTranscription: (text: string) => state.handleVoiceTranscription(text),
               })
             : nothing
         }

@@ -71,8 +71,25 @@ export function setLastActiveSessionKey(host: SettingsHost, next: string) {
 }
 
 export function applySettingsFromUrl(host: SettingsHost) {
-  if (!window.location.search) return;
-  const params = new URLSearchParams(window.location.search);
+  // Parse query params (e.g., ?token=xxx)
+  if (window.location.search) {
+    const params = new URLSearchParams(window.location.search);
+    parseAndApplyParams(host, params, false);
+  }
+  
+  // Parse hash params (e.g., #token=xxx) - this is how dashboard URL works
+  if (window.location.hash) {
+    const hashContent = window.location.hash.slice(1); // Remove the #
+    const hashParams = new URLSearchParams(hashContent);
+    parseAndApplyParams(host, hashParams, true);
+  }
+}
+
+function parseAndApplyParams(
+  host: SettingsHost,
+  params: URLSearchParams,
+  isHash: boolean
+) {
   const tokenRaw = params.get("token");
   const passwordRaw = params.get("password");
   const sessionRaw = params.get("session");
@@ -91,7 +108,7 @@ export function applySettingsFromUrl(host: SettingsHost) {
   if (passwordRaw != null) {
     const password = passwordRaw.trim();
     if (password) {
-      (host as { password: string }).password = password;
+      (host as unknown as { password: string }).password = password;
     }
     params.delete("password");
     shouldCleanUrl = true;
@@ -119,9 +136,13 @@ export function applySettingsFromUrl(host: SettingsHost) {
   }
 
   if (!shouldCleanUrl) return;
-  const url = new URL(window.location.href);
-  url.search = params.toString();
-  window.history.replaceState({}, "", url.toString());
+  
+  // Only clean URL for query params, not hash
+  if (!isHash) {
+    const url = new URL(window.location.href);
+    url.search = params.toString();
+    window.history.replaceState({}, "", url.toString());
+  }
 }
 
 export function setTab(host: SettingsHost, next: Tab) {
