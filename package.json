@@ -89,6 +89,7 @@
     "canvas:a2ui:bundle": "bash scripts/bundle-a2ui.sh",
     "check:loc": "node --import tsx scripts/check-ts-max-loc.ts --max 500",
     "dev": "node scripts/run-node.mjs",
+    "dev:hot": "bash scripts/dev-hot-reload.sh",
     "docs:bin": "node scripts/build-docs-list.mjs",
     "docs:build": "cd docs && pnpm dlx --reporter append-only mint broken-links",
     "docs:dev": "cd docs && mint dev",
