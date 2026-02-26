@@ -1319,10 +1319,12 @@ export class OpenClawApp extends LitElement {
     this.newsLoading = true;
     this.newsError = null;
     try {
-      // Implementation would go here
-      this.newsLoading = false;
+      const { loadNews, loadNewsSources } = await import("./controllers/news.js");
+      await loadNewsSources(this);
+      await loadNews(this);
     } catch (err) {
       this.newsError = String(err);
+    } finally {
       this.newsLoading = false;
     }
   }
