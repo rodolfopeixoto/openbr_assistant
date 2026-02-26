@@ -522,7 +522,14 @@ export interface RalphServiceConfig {
 
 export type StorageBackendConfig =
   | { type: "local"; path: string }
-  | { type: "s3"; region: string; bucket: string; endpoint?: string }
+  | {
+      type: "s3";
+      region: string;
+      bucket: string;
+      endpoint?: string;
+      accessKeyId: string;
+      secretAccessKey: string;
+    }
   | { type: "minio"; endpoint: string; bucket: string; accessKey: string; secretKey: string }
   | { type: "gcs"; projectId: string; bucket: string }
   | { type: "gdrive"; folderId: string };
