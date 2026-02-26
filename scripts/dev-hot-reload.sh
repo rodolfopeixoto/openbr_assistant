@@ -107,10 +107,21 @@ clear_build_cache() {
 # Build project
 build_project() {
   log_info "Building project..."
+  
+  # Build TypeScript
   if ! pnpm build 2>&1; then
-    log_error "Build failed!"
+    log_error "TypeScript build failed!"
     exit 1
   fi
+  
+  # Build UI (Vite)
+  log_info "Building UI (Vite)..."
+  cd ui && pnpm run build 2>&1 || {
+    log_error "UI build failed!"
+    exit 1
+  }
+  cd ..
+  
   log_success "Build completed"
 }
 
