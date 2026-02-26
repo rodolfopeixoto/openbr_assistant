@@ -107,6 +107,7 @@ const READ_METHODS = new Set([
   "news.sources",
   "news.get",
   "news.stats",
+  "features.dashboard",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -129,6 +130,7 @@ const WRITE_METHODS = new Set([
   "env.set",
   "env.delete",
   "news.refresh",
+  "features.toggle",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
