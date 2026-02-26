@@ -147,6 +147,10 @@ export class GatewayBrowserClient {
       authToken = storedToken ?? this.opts.token;
       canFallbackToShared = Boolean(storedToken && this.opts.token);
     }
+    // Debug logging
+    console.log('[GatewayClient] authToken:', authToken ? `${authToken.substring(0, 30)}...` : 'none');
+    console.log('[GatewayClient] opts.token:', this.opts.token ? `${this.opts.token.substring(0, 30)}...` : 'none');
+    
     const auth =
       authToken || this.opts.password
         ? {

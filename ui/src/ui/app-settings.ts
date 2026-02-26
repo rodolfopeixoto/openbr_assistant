@@ -341,6 +341,9 @@ export function syncUrlWithTab(host: SettingsHost, tab: Tab, replace: boolean) {
   const targetPath = normalizePath(pathForTab(tab, host.basePath));
   const currentPath = normalizePath(window.location.pathname);
   const url = new URL(window.location.href);
+  
+  // Preserve hash params (like #token=xxx) - extract before modifying URL
+  const originalHash = window.location.hash;
 
   if (tab === "chat" && host.sessionKey) {
     url.searchParams.set("session", host.sessionKey);
@@ -351,11 +354,19 @@ export function syncUrlWithTab(host: SettingsHost, tab: Tab, replace: boolean) {
   if (currentPath !== targetPath) {
     url.pathname = targetPath;
   }
+  
+  // Restore hash after URL modifications
+  // Note: We can't set url.hash directly because URL constructor handles it differently
+  // Instead, we'll append it to the string
+  let finalUrl = url.toString();
+  if (originalHash && !finalUrl.includes(originalHash)) {
+    finalUrl = finalUrl + originalHash;
+  }
 
   if (replace) {
-    window.history.replaceState({}, "", url.toString());
+    window.history.replaceState({}, "", finalUrl);
   } else {
-    window.history.pushState({}, "", url.toString());
+    window.history.pushState({}, "", finalUrl);
   }
 }
 
