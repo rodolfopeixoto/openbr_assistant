@@ -253,6 +253,113 @@ export const modelRoutingHandlers: GatewayRequestHandlers = {
     };
     respond(true, { ok: true });
   },
+
+  "model-routing.test": async ({ params, respond }) => {
+    try {
+      const { prompt, tools = [] } = params as {
+        prompt: string;
+        tools?: string[];
+      };
+
+      if (!config.enabled) {
+        respond(false, undefined, {
+          code: "INVALID_PARAMS",
+          message: "Model routing is disabled",
+        });
+        return;
+      }
+
+      const complexity = calculateComplexity(prompt, tools);
+      const tierKey = determineTier(complexity);
+      const tier = config.tiers[tierKey];
+
+      const estimatedTokens = Math.ceil(prompt.length / 4);
+      const estimatedCost =
+        (estimatedTokens / 1000) * (tier.costPer1kTokens.input + tier.costPer1kTokens.output);
+
+      respond(true, {
+        tier: tierKey,
+        model: tier.models[0],
+        reason: `${tierKey} tier selected for ${complexity} complexity task`,
+        estimatedCost,
+        fallbackChain: tier.models.slice(1),
+        complexity,
+        estimatedTokens,
+      });
+    } catch (error) {
+      respond(false, undefined, { code: "INTERNAL_ERROR", message: String(error) });
+    }
+  },
+
+  "model-routing.tier.add-model": async ({ params, respond }) => {
+    try {
+      const { tier, model } = params as { tier: keyof ModelRoutingConfig["tiers"]; model: string };
+
+      if (!config.tiers[tier]) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: `Invalid tier: ${tier}` });
+        return;
+      }
+
+      if (config.tiers[tier].models.includes(model)) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: "Model already in tier" });
+        return;
+      }
+
+      config.tiers[tier].models.push(model);
+      respond(true, { ok: true, tier, models: config.tiers[tier].models });
+    } catch (error) {
+      respond(false, undefined, { code: "INTERNAL_ERROR", message: String(error) });
+    }
+  },
+
+  "model-routing.tier.remove-model": async ({ params, respond }) => {
+    try {
+      const { tier, index } = params as { tier: keyof ModelRoutingConfig["tiers"]; index: number };
+
+      if (!config.tiers[tier]) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: `Invalid tier: ${tier}` });
+        return;
+      }
+
+      if (index < 0 || index >= config.tiers[tier].models.length) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: "Invalid model index" });
+        return;
+      }
+
+      const removed = config.tiers[tier].models.splice(index, 1)[0];
+      respond(true, { ok: true, tier, removed, models: config.tiers[tier].models });
+    } catch (error) {
+      respond(false, undefined, { code: "INTERNAL_ERROR", message: String(error) });
+    }
+  },
+
+  "model-routing.tier.reorder": async ({ params, respond }) => {
+    try {
+      const { tier, fromIndex, toIndex } = params as {
+        tier: keyof ModelRoutingConfig["tiers"];
+        fromIndex: number;
+        toIndex: number;
+      };
+
+      if (!config.tiers[tier]) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: `Invalid tier: ${tier}` });
+        return;
+      }
+
+      const models = config.tiers[tier].models;
+      if (fromIndex < 0 || fromIndex >= models.length || toIndex < 0 || toIndex >= models.length) {
+        respond(false, undefined, { code: "INVALID_PARAMS", message: "Invalid index" });
+        return;
+      }
+
+      const [moved] = models.splice(fromIndex, 1);
+      models.splice(toIndex, 0, moved);
+
+      respond(true, { ok: true, tier, models });
+    } catch (error) {
+      respond(false, undefined, { code: "INTERNAL_ERROR", message: String(error) });
+    }
+  },
 };
 
 export function getModelRoutingConfig(): ModelRoutingConfig {

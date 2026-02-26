@@ -56,6 +56,10 @@ export type AppViewState = {
   chatAvatarUrl: string | null;
   chatThinkingLevel: string | null;
   chatQueue: ChatQueueItem[];
+  // Scroll buttons
+  showScrollToTop: boolean;
+  showScrollToBottom: boolean;
+  newMessageCount: number;
   nodesLoading: boolean;
   nodes: Array<Record<string, unknown>>;
   devicesLoading: boolean;
@@ -260,6 +264,8 @@ export type AppViewState = {
   handleAbortChat: () => Promise<void>;
   removeQueuedMessage: (id: string) => void;
   handleChatScroll: (event: Event) => void;
+  handleScrollToTop: () => void;
+  handleScrollToBottom: () => void;
   resetToolStream: () => void;
   resetChatScroll: () => void;
   exportLogs: (lines: string[], label: string) => void;
@@ -344,21 +350,31 @@ export type AppViewState = {
   newsItems: unknown[];
   newsTotalCount: number;
   newsHasMore: boolean;
+  newsSources: Array<{ id: string; name: string; type: string; url: string; enabled: boolean; itemCount: number }>;
+  newsSelectedSources: string[];
   newsSelectedSource: string | null;
   newsSelectedCategory: string | null;
   newsTimeRange: string;
+  newsFilter: 'all' | 'today' | 'week' | 'month';
   newsSearchQuery: string;
   newsSelectedSentiment: string | null;
   newsLimit: number;
   newsOffset: number;
+  newsSelectedItem: unknown | null;
+  newsModalOpen: boolean;
+  newsRefreshing: boolean;
   handleNewsLoad: () => Promise<void>;
   handleNewsSourceChange: (source: string | null) => void;
+  handleNewsSourceToggle: (source: string, checked: boolean) => void;
   handleNewsCategoryChange: (category: string | null) => void;
   handleNewsTimeRangeChange: (range: string) => void;
+  handleNewsFilterChange: (filter: 'all' | 'today' | 'week' | 'month') => void;
   handleNewsSearchChange: (query: string) => void;
   handleNewsSentimentChange: (sentiment: string | null) => void;
   handleNewsLimitChange: (limit: number) => void;
   handleNewsOffsetChange: (offset: number) => void;
+  handleNewsSelectItem: (item: unknown | null) => void;
+  handleNewsRefresh: () => Promise<void>;
   // Features Dashboard
   featuresLoading: boolean;
   featuresError: string | null;
@@ -367,9 +383,16 @@ export type AppViewState = {
   featuresSummary: Record<string, unknown>;
   featureCategories: string[];
   expandedCategories: string[];
+  featuresConfigModalOpen: boolean;
+  featuresConfigModalFeature: string | null;
+  featuresConfigFormData: Record<string, unknown>;
   handleFeaturesLoad: () => Promise<void>;
   handleFeaturesSearchChange: (query: string) => void;
   handleToggleCategory: (category: string) => void;
+  handleFeaturesToggle: (featureId: string, enabled: boolean) => Promise<void>;
+  handleFeaturesOpenConfigModal: (featureId: string) => void;
+  handleFeaturesCloseConfigModal: () => void;
+  handleFeaturesConfigure: (featureId: string, data: Record<string, unknown>) => Promise<void>;
   // Containers
   containersLoading: boolean;
   containersError: string | null;
@@ -378,7 +401,7 @@ export type AppViewState = {
   handleContainerStart: (containerId: string) => Promise<void>;
   handleContainerStop: (containerId: string) => Promise<void>;
   handleContainerRestart: (containerId: string) => Promise<void>;
-  handleContainerLogs: (containerId: string) => Promise<void>;
+  handleContainerLogs: (containerId: string) => Promise<string>;
   // Security
   securityLoading: boolean;
   securityError: string | null;
@@ -396,19 +419,73 @@ export type AppViewState = {
   mcpError: string | null;
   mcpServers: unknown[];
   mcpSearchQuery: string;
+  mcpSelectedCategory: string | null;
+  mcpShowAddModal: boolean;
+  mcpNewServerName: string;
+  mcpNewServerUrl: string;
+  mcpNewServerCategory: string;
+  mcpShowMarketplace: boolean;
+  mcpMarketplace: unknown[];
+  mcpMarketplaceLoading: boolean;
+  mcpMarketplaceSearchQuery: string;
+  mcpMarketplaceSelectedCategory: string | null;
+  mcpMarketplaceSelectedTag: string | null;
+  mcpMarketplaceOfficialOnly: boolean;
+  mcpMarketplaceCategories: string[];
+  mcpMarketplaceTags: string[];
   handleMcpLoad: () => Promise<void>;
   handleMcpSearchChange: (query: string) => void;
+  handleMcpCategoryChange: (category: string | null) => void;
+  handleMcpToggleServer: (serverId: string, enabled: boolean) => Promise<void>;
+  handleMcpRemoveServer: (serverId: string) => Promise<void>;
+  handleMcpOpenAddModal: () => void;
+  handleMcpCloseAddModal: () => void;
+  handleMcpUpdateNewServerName: (name: string) => void;
+  handleMcpUpdateNewServerUrl: (url: string) => void;
+  handleMcpUpdateNewServerCategory: (category: string) => void;
+  handleMcpAddServer: (name: string, url: string, category: string) => Promise<void>;
+  handleMcpShowMarketplace: () => void;
+  handleMcpCloseMarketplace: () => void;
+  handleMcpMarketplaceSearchChange: (query: string) => void;
+  handleMcpMarketplaceCategoryChange: (category: string | null) => void;
+  handleMcpMarketplaceTagChange: (tag: string | null) => void;
+  handleMcpMarketplaceOfficialToggle: () => void;
+  handleMcpResetMarketplaceFilters: () => void;
+  handleMcpInstallFromMarketplace: (serverId: string) => Promise<void>;
   // Model Routing
   modelRoutingLoading: boolean;
   modelRoutingError: string | null;
   modelRoutingStatus: Record<string, unknown> | null;
+  routingTestPrompt: string;
+  routingTestResult: Record<string, unknown> | undefined;
   handleModelRoutingLoad: () => Promise<void>;
-  handleModelRoutingConfigure: (config: Record<string, unknown>) => Promise<void>;
-  // Ollama
+  handleModelRoutingToggle: (enabled: boolean) => Promise<void>;
+  handleAddModelToTier: (tier: string, model: string) => Promise<void>;
+  handleRemoveModelFromTier: (tier: string, index: number) => Promise<void>;
+  handleReorderModelsInTier: (tier: string, fromIndex: number, toIndex: number) => Promise<void>;
+  handleRoutingTestChange: (prompt: string) => void;
+  handleTestRouting: () => Promise<void>;
+  // Ollama/Llama
   ollamaLoading: boolean;
   ollamaError: string | null;
   ollamaStatus: Record<string, unknown> | null;
+  ollamaPullProgress: {
+    model: string;
+    progress: { status: string; completed?: number; total?: number; percent?: number };
+  } | null;
+  // Toast notifications
+  toasts: Array<{ id: string; message: string; type: 'error' | 'success' | 'info'; duration?: number }>;
+  addToast: (message: string, type: 'error' | 'success' | 'info', duration?: number) => void;
+  removeToast: (id: string) => void;
   handleOllamaLoad: () => Promise<void>;
+  handleOllamaToggleFeature: (enabled: boolean) => Promise<void>;
+  handleOllamaInstall: () => Promise<void>;
+  handleOllamaStart: () => Promise<void>;
+  handleOllamaStop: () => Promise<void>;
+  handleOllamaPullModel: (model: string) => Promise<void>;
+  handleOllamaRemoveModel: (model: string) => Promise<void>;
+  handleOllamaDetectHardware: () => Promise<void>;
+  handleOllamaConfigureHardware: (config: Record<string, unknown>) => Promise<void>;
   // Rate Limits
   rateLimitsLoading: boolean;
   rateLimitsError: string | null;
@@ -432,4 +509,8 @@ export type AppViewState = {
   cacheStatus: Record<string, unknown> | null;
   handleCacheLoad: () => Promise<void>;
   handleCacheClear: () => Promise<void>;
+  // Voice Recorder
+  voiceRecorderOpen: boolean;
+  handleToggleVoiceRecorder: () => void;
+  handleVoiceTranscription: (text: string) => void;
 };

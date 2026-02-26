@@ -241,7 +241,7 @@ export function titleForTab(tab: Tab) {
     case "modelRouting":
       return "Model Routing";
     case "ollama":
-      return "Ollama";
+      return "Local LLM";
     case "rateLimits":
       return "Rate Limits";
     case "budget":
@@ -302,7 +302,7 @@ export function subtitleForTab(tab: Tab) {
     case "modelRouting":
       return "Intelligent model routing and tier management.";
     case "ollama":
-      return "Local Ollama model management.";
+      return "Direct llama.cpp with Llama 3.2:3b - lightweight local inference";
     case "rateLimits":
       return "Rate limiting and throttling controls.";
     case "budget":

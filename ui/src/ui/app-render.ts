@@ -774,6 +774,31 @@ export function renderApp(state: AppViewState) {
           @oauth-start=${(e: CustomEvent) => state.handleOAuthStart(e)}
         ></provider-config-wizard>
       ` : null}
+      
+      <!-- Toast Notifications -->
+      ${renderToasts(state)}
+    </div>
+  `;
+}
+
+function renderToasts(state: AppViewState) {
+  if (!state.toasts || state.toasts.length === 0) return nothing;
+  
+  const iconMap = {
+    error: '⚠️',
+    success: '✓',
+    info: 'ℹ️'
+  };
+  
+  return html`
+    <div class="toast-container">
+      ${state.toasts.map(toast => html`
+        <div class="toast ${toast.type}" data-id="${toast.id}">
+          <span class="toast-icon">${iconMap[toast.type]}</span>
+          <span class="toast-content">${toast.message}</span>
+          <button class="toast-close" @click=${() => state.removeToast?.(toast.id)}>×</button>
+        </div>
+      `)}
     </div>
   `;
 }

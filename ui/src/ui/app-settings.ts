@@ -186,6 +186,43 @@ export async function refreshActiveTab(host: SettingsHost) {
     await loadLogs(host as unknown as OpenClawApp, { reset: true });
     scheduleLogsScroll(host as unknown as Parameters<typeof scheduleLogsScroll>[0], true);
   }
+  if (host.tab === "mcp") {
+    await (host as unknown as OpenClawApp).handleMcpLoad();
+  }
+  if (host.tab === "opencode") {
+    await (host as unknown as OpenClawApp).handleOpencodeLoad();
+  }
+  if (host.tab === "news") {
+    await (host as unknown as OpenClawApp).handleNewsLoad();
+    await (host as unknown as OpenClawApp).handleNewsSourceChange(null);
+  }
+  if (host.tab === "features") {
+    await (host as unknown as OpenClawApp).handleFeaturesLoad();
+  }
+  if (host.tab === "containers") {
+    await (host as unknown as OpenClawApp).handleContainersLoad();
+  }
+  if (host.tab === "security") {
+    await (host as unknown as OpenClawApp).handleSecurityLoad();
+  }
+  if (host.tab === "modelRouting") {
+    await (host as unknown as OpenClawApp).handleModelRoutingLoad();
+  }
+  if (host.tab === "ollama") {
+    await (host as unknown as OpenClawApp).handleOllamaLoad();
+  }
+  if (host.tab === "rateLimits") {
+    await (host as unknown as OpenClawApp).handleRateLimitsLoad();
+  }
+  if (host.tab === "budget") {
+    await (host as unknown as OpenClawApp).handleBudgetLoad();
+  }
+  if (host.tab === "metrics") {
+    await (host as unknown as OpenClawApp).handleMetricsLoad();
+  }
+  if (host.tab === "cache") {
+    await (host as unknown as OpenClawApp).handleCacheLoad();
+  }
 }
 
 export function inferBasePath() {

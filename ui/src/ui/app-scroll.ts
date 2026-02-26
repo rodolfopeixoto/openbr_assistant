@@ -78,9 +78,15 @@ export function handleChatScroll(host: ScrollHost, event: Event) {
   const container = event.currentTarget as HTMLElement | null;
   if (!container) return;
   const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+  const distanceFromTop = container.scrollTop;
+  
   host.chatUserNearBottom = distanceFromBottom < 200;
-  // Update scrolled up state - show button when scrolled up more than 300px
-  (host as any).chatScrolledUp = distanceFromBottom > 300;
+  
+  // Show scroll-to-bottom button when scrolled up more than 300px from bottom
+  (host as any).showScrollToBottom = distanceFromBottom > 300;
+  
+  // Show scroll-to-top button when scrolled down more than 500px from top
+  (host as any).showScrollToTop = distanceFromTop > 500;
 }
 
 export function handleLogsScroll(host: ScrollHost, event: Event) {

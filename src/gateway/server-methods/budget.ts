@@ -1,153 +1,227 @@
 import type { GatewayRequestHandlers } from "./types.js";
-
-export interface BudgetConfig {
-  enabled: boolean;
-  monthlyLimit: number;
-  currency: string;
-  alertThresholds: number[];
-  resetDay: number;
-}
-
-export interface BudgetStatus {
-  enabled: boolean;
-  currentMonth: string;
-  spent: number;
-  remaining: number;
-  limit: number;
-  percentageUsed: number;
-  nextReset: string;
-  history: MonthlyBudget[];
-  alerts: BudgetAlert[];
-}
-
-export interface MonthlyBudget {
-  month: string;
-  spent: number;
-  limit: number;
-  overBudget: boolean;
-}
-
-export interface BudgetAlert {
-  id: string;
-  type: "threshold" | "over_budget";
-  threshold?: number;
-  triggeredAt: string;
-  acknowledged: boolean;
-}
-
-let config: BudgetConfig = {
-  enabled: false,
-  monthlyLimit: 100,
-  currency: "USD",
-  alertThresholds: [50, 80, 95],
-  resetDay: 1,
-};
-
-let currentMonth = new Date().toISOString().slice(0, 7);
-let spent = 0;
-let history: MonthlyBudget[] = [];
-let alerts: BudgetAlert[] = [];
+import { getBudgetTracker } from "../../services/budget.js";
+import { ErrorCodes, errorShape } from "../protocol/index.js";
 
 export const budgetHandlers: GatewayRequestHandlers = {
   "budget.status": async ({ respond }) => {
-    const remaining = config.monthlyLimit - spent;
-    const percentageUsed = config.monthlyLimit > 0 ? (spent / config.monthlyLimit) * 100 : 0;
-
-    respond(true, {
-      enabled: config.enabled,
-      currentMonth,
-      spent,
-      remaining: Math.max(0, remaining),
-      limit: config.monthlyLimit,
-      percentageUsed,
-      nextReset: `${currentMonth}-${String(config.resetDay).padStart(2, "0")}`,
-      history,
-      alerts: alerts.filter((a) => !a.acknowledged),
-    });
+    try {
+      const tracker = getBudgetTracker();
+      const status = tracker.getStatus();
+      respond(true, status);
+    } catch (err) {
+      console.error("[Budget] Status error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get budget status",
+        ),
+      );
+    }
   },
 
-  "budget.configure": async ({ params, respond }) => {
-    const { enabled, monthlyLimit, currency, alertThresholds, resetDay } =
-      params as Partial<BudgetConfig>;
-    if (enabled !== undefined) {
-      config.enabled = enabled;
+  "budget.config.get": async ({ respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const config = tracker.getConfig();
+      respond(true, { config });
+    } catch (err) {
+      console.error("[Budget] Config get error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get budget config",
+        ),
+      );
     }
-    if (monthlyLimit !== undefined) {
-      config.monthlyLimit = monthlyLimit;
+  },
+
+  "budget.config.set": async ({ params, respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const { daily, monthly, notifications } = params as {
+        daily?: {
+          limit?: number;
+          alertThresholds?: number[];
+          hardStop?: boolean;
+        };
+        monthly?: {
+          limit?: number;
+          alertThresholds?: number[];
+          hardStop?: boolean;
+        };
+        notifications?: {
+          desktop?: boolean;
+          email?: boolean;
+          emailAddress?: string;
+        };
+      };
+
+      const config: Partial<import("../../services/budget.js").BudgetConfig> = {};
+      if (daily) {
+        config.daily = daily as { limit: number; alertThresholds: number[]; hardStop: boolean };
+      }
+      if (monthly) {
+        config.monthly = monthly as { limit: number; alertThresholds: number[]; hardStop: boolean };
+      }
+      if (notifications) {
+        config.notifications = notifications as {
+          desktop: boolean;
+          email: boolean;
+          emailAddress?: string;
+        };
+      }
+      tracker.setConfig(config);
+
+      respond(true, { ok: true, config: tracker.getConfig() });
+    } catch (err) {
+      console.error("[Budget] Config set error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to set budget config",
+        ),
+      );
     }
-    if (currency) {
-      config.currency = currency;
-    }
-    if (alertThresholds) {
-      config.alertThresholds = alertThresholds;
-    }
-    if (resetDay !== undefined) {
-      config.resetDay = resetDay;
-    }
-    respond(true, { ok: true, config });
   },
 
   "budget.report": async ({ params, respond }) => {
-    const { cost } = params as { cost: number };
-    spent += cost;
+    try {
+      const tracker = getBudgetTracker();
+      const { provider, model, cost, tokensInput, tokensOutput, sessionKey, description } =
+        params as {
+          provider: string;
+          model: string;
+          cost: number;
+          tokensInput: number;
+          tokensOutput: number;
+          sessionKey?: string;
+          description?: string;
+        };
 
-    const percentageUsed = (spent / config.monthlyLimit) * 100;
+      const tx = tracker.recordTransaction({
+        provider,
+        model,
+        cost,
+        tokensInput,
+        tokensOutput,
+        sessionKey,
+        description,
+      });
 
-    for (const threshold of config.alertThresholds) {
-      if (percentageUsed >= threshold) {
-        const existing = alerts.find(
-          (a) => a.type === "threshold" && a.threshold === threshold && !a.acknowledged,
-        );
-        if (!existing) {
-          alerts.push({
-            id: `alert_${Date.now()}`,
-            type: "threshold",
-            threshold,
-            triggeredAt: new Date().toISOString(),
-            acknowledged: false,
-          });
-        }
-      }
+      respond(true, { ok: true, transactionId: tx.id });
+    } catch (err) {
+      console.error("[Budget] Report error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to record budget transaction",
+        ),
+      );
     }
-
-    if (spent > config.monthlyLimit) {
-      const existing = alerts.find((a) => a.type === "over_budget" && !a.acknowledged);
-      if (!existing) {
-        alerts.push({
-          id: `overbudget_${Date.now()}`,
-          type: "over_budget",
-          triggeredAt: new Date().toISOString(),
-          acknowledged: false,
-        });
-      }
-    }
-
-    respond(true, { ok: true, spent, remaining: Math.max(0, config.monthlyLimit - spent) });
   },
 
-  "budget.history": async ({ respond }) => {
-    respond(true, { history });
+  "budget.history": async ({ params, respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const { days } = params as { days?: number };
+      const history = tracker.getHistory(days || 30);
+      respond(true, { history });
+    } catch (err) {
+      console.error("[Budget] History error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get budget history",
+        ),
+      );
+    }
   },
 
-  "budget.acknowledge-alert": async ({ params, respond }) => {
-    const { alertId } = params as { alertId: string };
-    const alert = alerts.find((a) => a.id === alertId);
-    if (alert) {
-      alert.acknowledged = true;
+  "budget.breakdown": async ({ params, respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const { period, startDate, endDate } = params as {
+        period?: "today" | "month" | "custom";
+        startDate?: string;
+        endDate?: string;
+      };
+
+      const breakdown = tracker.getBreakdown(period, startDate, endDate);
+      respond(true, breakdown);
+    } catch (err) {
+      console.error("[Budget] Breakdown error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get budget breakdown",
+        ),
+      );
     }
-    respond(true, { ok: true });
+  },
+
+  "budget.check": async ({ respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const check = tracker.shouldBlock();
+      respond(true, check);
+    } catch (err) {
+      console.error("[Budget] Check error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to check budget",
+        ),
+      );
+    }
   },
 
   "budget.reset": async ({ respond }) => {
-    history.push({
-      month: currentMonth,
-      spent,
-      limit: config.monthlyLimit,
-      overBudget: spent > config.monthlyLimit,
-    });
-    currentMonth = new Date().toISOString().slice(0, 7);
-    spent = 0;
-    alerts = [];
-    respond(true, { ok: true });
+    try {
+      const tracker = getBudgetTracker();
+      tracker.reset();
+      respond(true, { ok: true });
+    } catch (err) {
+      console.error("[Budget] Reset error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to reset budget",
+        ),
+      );
+    }
+  },
+
+  "budget.export": async ({ respond }) => {
+    try {
+      const tracker = getBudgetTracker();
+      const csv = tracker.exportCSV();
+      respond(true, { csv });
+    } catch (err) {
+      console.error("[Budget] Export error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to export budget",
+        ),
+      );
+    }
   },
 };

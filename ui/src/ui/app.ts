@@ -127,6 +127,12 @@ export class OpenClawApp extends LitElement {
   @state() newsSelectedSentiment: string | null = null;
   @state() newsLimit = 20;
   @state() newsOffset = 0;
+  @state() newsSources: Array<{ id: string; name: string; type: string; url: string; enabled: boolean; itemCount: number }> = [];
+  @state() newsSelectedSources: string[] = [];
+  @state() newsFilter: 'all' | 'today' | 'week' | 'month' = 'all';
+  @state() newsSelectedItem: unknown | null = null;
+  @state() newsModalOpen = false;
+  @state() newsRefreshing = false;
   // Features
   @state() featuresLoading = false;
   @state() featuresError: string | null = null;
@@ -135,6 +141,9 @@ export class OpenClawApp extends LitElement {
   @state() featuresSummary: Record<string, unknown> = {};
   @state() featureCategories: string[] = [];
   @state() expandedCategories: string[] = [];
+  @state() featuresConfigModalOpen = false;
+  @state() featuresConfigModalFeature: string | null = null;
+  @state() featuresConfigFormData: Record<string, unknown> = {};
   // Containers
   @state() containersLoading = false;
   @state() containersError: string | null = null;
@@ -182,6 +191,10 @@ export class OpenClawApp extends LitElement {
   @state() chatThinkingLevel: string | null = null;
   @state() chatQueue: ChatQueueItem[] = [];
   @state() chatAttachments: ChatAttachment[] = [];
+  // Scroll buttons state
+  @state() showScrollToTop = false;
+  @state() showScrollToBottom = false;
+  @state() newMessageCount = 0;
   @state() commandsMenuOpen = false;
   // Sidebar state for tool output viewing
   @state() sidebarOpen = false;
@@ -361,16 +374,39 @@ export class OpenClawApp extends LitElement {
   @state() mcpError: string | null = null;
   @state() mcpServers: unknown[] = [];
   @state() mcpSearchQuery = "";
+  @state() mcpSelectedCategory: string | null = null;
+  @state() mcpShowAddModal = false;
+  @state() mcpNewServerName = "";
+  @state() mcpNewServerUrl = "";
+  @state() mcpNewServerCategory = "other";
+  @state() mcpShowMarketplace = false;
+  @state() mcpMarketplace: unknown[] = [];
+  @state() mcpMarketplaceLoading = false;
+  @state() mcpMarketplaceSearchQuery = "";
+  @state() mcpMarketplaceSelectedCategory: string | null = null;
+  @state() mcpMarketplaceSelectedTag: string | null = null;
+  @state() mcpMarketplaceOfficialOnly = false;
+  @state() mcpMarketplaceCategories: string[] = [];
+  @state() mcpMarketplaceTags: string[] = [];
 
   // Model Routing state
   @state() modelRoutingLoading = false;
   @state() modelRoutingError: string | null = null;
   @state() modelRoutingStatus: Record<string, unknown> | null = null;
+  @state() routingTestPrompt = "";
+  @state() routingTestResult: Record<string, unknown> | undefined = undefined;
 
-  // Ollama state
+  // Ollama/Llama state
   @state() ollamaLoading = false;
   @state() ollamaError: string | null = null;
   @state() ollamaStatus: Record<string, unknown> | null = null;
+  @state() ollamaPullProgress: {
+    model: string;
+    progress: { status: string; completed?: number; total?: number; percent?: number };
+  } | null = null;
+
+  // Toast notifications
+  @state() toasts: Array<{ id: string; message: string; type: 'error' | 'success' | 'info'; duration?: number }> = [];
 
   // Rate Limits state
   @state() rateLimitsLoading = false;
@@ -391,6 +427,9 @@ export class OpenClawApp extends LitElement {
   @state() cacheLoading = false;
   @state() cacheError: string | null = null;
   @state() cacheStatus: Record<string, unknown> | null = null;
+
+  // Voice Recorder state
+  @state() voiceRecorderOpen = false;
 
   client: GatewayBrowserClient | null = null;
   private chatScrollFrame: number | null = null;
@@ -463,6 +502,23 @@ export class OpenClawApp extends LitElement {
 
   resetChatScroll() {
     resetChatScrollInternal(this as unknown as Parameters<typeof resetChatScrollInternal>[0]);
+  }
+
+  handleScrollToTop() {
+    const chatContainer = document.querySelector('.chat-messages');
+    if (chatContainer) {
+      chatContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    this.showScrollToTop = false;
+  }
+
+  handleScrollToBottom() {
+    const chatContainer = document.querySelector('.chat-messages');
+    if (chatContainer) {
+      chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+    }
+    this.showScrollToBottom = false;
+    this.newMessageCount = 0;
   }
 
   async loadAssistantIdentity() {
@@ -1299,129 +1355,603 @@ export class OpenClawApp extends LitElement {
     this.newsOffset = offset;
   }
 
+  handleNewsSourceToggle(source: string, checked: boolean) {
+    if (checked) {
+      this.newsSelectedSources = [...this.newsSelectedSources, source];
+    } else {
+      this.newsSelectedSources = this.newsSelectedSources.filter((s) => s !== source);
+    }
+  }
+
+  handleNewsFilterChange(filter: 'all' | 'today' | 'week' | 'month') {
+    this.newsFilter = filter;
+  }
+
+  handleNewsSelectItem(item: unknown | null) {
+    this.newsSelectedItem = item;
+    this.newsModalOpen = item !== null;
+  }
+
+  async handleNewsRefresh() {
+    this.newsRefreshing = true;
+    try {
+      // Trigger refresh via controller
+      await import('./controllers/news.js').then(({ refreshNews }) => refreshNews(this));
+    } finally {
+      this.newsRefreshing = false;
+    }
+  }
+
   // Features methods
   async handleFeaturesLoad() {
-    // Implementation would go here
+    const { loadFeaturesDashboard } = await import("./controllers/features.js");
+    await loadFeaturesDashboard(this as any);
   }
 
-  handleFeaturesSearchChange(query: string) {
-    // Implementation would go here
-    console.log("[Features] Search:", query);
+  async handleFeaturesSearchChange(query: string) {
+    const { searchFeatures } = await import("./controllers/features.js");
+    searchFeatures(this as any, query);
   }
 
-  handleToggleCategory(category: string) {
-    // Implementation would go here
-    console.log("[Features] Toggle category:", category);
+  async handleToggleCategory(category: string) {
+    const { toggleCategory } = await import("./controllers/features.js");
+    toggleCategory(this as any, category);
+  }
+
+  async handleFeaturesToggle(featureId: string, enabled: boolean) {
+    const { toggleFeature } = await import("./controllers/features.js");
+    await toggleFeature(this as any, featureId, enabled);
+  }
+
+  async handleFeaturesOpenConfigModal(featureId: string) {
+    const { openFeatureConfigModal } = await import("./controllers/features.js");
+    openFeatureConfigModal(this as any, featureId);
+  }
+
+  async handleFeaturesCloseConfigModal() {
+    const { closeFeatureConfigModal } = await import("./controllers/features.js");
+    closeFeatureConfigModal(this as any);
+  }
+
+  async handleFeaturesConfigure(featureId: string, data: Record<string, unknown>) {
+    const { configureFeature } = await import("./controllers/features.js");
+    await configureFeature(this as any, featureId, data);
+    this.handleFeaturesCloseConfigModal();
   }
 
   // Container methods
   async handleContainersLoad() {
-    // Implementation would go here
+    const { loadContainers } = await import("./controllers/containers.js");
+    await loadContainers(this);
   }
 
   async handleContainerStart(containerId: string) {
-    console.log("[Container] Start:", containerId);
+    const { startContainer } = await import("./controllers/containers.js");
+    await startContainer(this, containerId);
   }
 
   async handleContainerStop(containerId: string) {
-    console.log("[Container] Stop:", containerId);
+    const { stopContainer } = await import("./controllers/containers.js");
+    await stopContainer(this, containerId);
   }
 
   async handleContainerRestart(containerId: string) {
-    console.log("[Container] Restart:", containerId);
+    const { restartContainer } = await import("./controllers/containers.js");
+    await restartContainer(this, containerId);
   }
 
   async handleContainerLogs(containerId: string) {
-    console.log("[Container] Logs:", containerId);
+    const { getContainerLogs } = await import("./controllers/containers.js");
+    return await getContainerLogs(this, containerId);
   }
 
   // Opencode methods
   async handleOpencodeLoad() {
-    // Implementation would go here
+    const { loadOpencodeStatus } = await import("./controllers/opencode.js");
+    await loadOpencodeStatus(this);
   }
 
   handleOpencodeTaskInput(value: string) {
-    // Implementation would go here
+    this.opencodeTaskInput = value;
     console.log("[Opencode] Task input:", value);
   }
 
   async handleOpencodeTaskCreate() {
-    // Implementation would go here
+    const { createOpencodeTask } = await import("./controllers/opencode.js");
+    await createOpencodeTask(this, this.opencodeTaskInput);
   }
 
   // Security handlers
   async handleSecurityLoad() {
-    console.log("[Security] Load");
+    const { loadSecurityStatus } = await import("./controllers/security.js");
+    await loadSecurityStatus(this);
   }
 
   async handleSecurityScan() {
-    console.log("[Security] Scan");
+    const { runSecurityScan } = await import("./controllers/security.js");
+    await runSecurityScan(this);
   }
 
   // MCP handlers
   async handleMcpLoad() {
-    console.log("[MCP] Load");
+    const { loadMCPServers } = await import("./controllers/mcp.js");
+    await loadMCPServers(this);
   }
 
-  handleMcpSearchChange(query: string) {
-    this.mcpSearchQuery = query;
+  async handleMcpSearchChange(query: string) {
+    const { searchMCPServers } = await import("./controllers/mcp.js");
+    searchMCPServers(this, query);
+  }
+
+  handleMcpCategoryChange(category: string | null) {
+    this.mcpSelectedCategory = category;
+  }
+
+  async handleMcpToggleServer(serverId: string, enabled: boolean) {
+    if (!this.client?.connected) return;
+    
+    try {
+      await this.client.request("mcp.enable", { id: serverId, enabled });
+      // Reload the server list to reflect changes
+      await this.handleMcpLoad();
+    } catch (err) {
+      console.error(`[MCP] Failed to toggle server ${serverId}:`, err);
+      this.mcpError = err instanceof Error ? err.message : "Failed to toggle server";
+    }
+  }
+
+  async handleMcpRemoveServer(serverId: string) {
+    if (!this.client?.connected) return;
+    
+    try {
+      await this.client.request("mcp.remove", { id: serverId });
+      // Reload the server list to reflect changes
+      await this.handleMcpLoad();
+    } catch (err) {
+      console.error(`[MCP] Failed to remove server ${serverId}:`, err);
+      this.mcpError = err instanceof Error ? err.message : "Failed to remove server";
+    }
+  }
+
+  handleMcpOpenAddModal() {
+    this.mcpShowAddModal = true;
+    this.mcpNewServerName = "";
+    this.mcpNewServerUrl = "";
+    this.mcpNewServerCategory = "other";
+  }
+
+  handleMcpCloseAddModal() {
+    this.mcpShowAddModal = false;
+  }
+
+  handleMcpUpdateNewServerName(name: string) {
+    this.mcpNewServerName = name;
+  }
+
+  handleMcpUpdateNewServerUrl(url: string) {
+    this.mcpNewServerUrl = url;
+  }
+
+  handleMcpUpdateNewServerCategory(category: string) {
+    this.mcpNewServerCategory = category;
+  }
+
+  async handleMcpAddServer(name: string, url: string, category: string) {
+    if (!this.client?.connected) return;
+    
+    try {
+      await this.client.request("mcp.add", {
+        name,
+        url,
+        category,
+        transport: "stdio",
+        enabled: true,
+      });
+      // Reload the server list to reflect changes
+      await this.handleMcpLoad();
+      this.mcpShowAddModal = false;
+      // Reset form
+      this.mcpNewServerName = "";
+      this.mcpNewServerUrl = "";
+      this.mcpNewServerCategory = "other";
+    } catch (err) {
+      console.error("[MCP] Failed to add server:", err);
+      this.mcpError = err instanceof Error ? err.message : "Failed to add server";
+    }
+  }
+
+  handleMcpShowMarketplace() {
+    this.mcpShowMarketplace = true;
+    this.loadMcpMarketplace();
+  }
+
+  handleMcpCloseMarketplace() {
+    this.mcpShowMarketplace = false;
+  }
+
+  async loadMcpMarketplace() {
+    if (!this.client?.connected) {
+      // Fallback to mock data if not connected
+      this.mcpMarketplace = [
+        { id: "1", name: "Filesystem", description: "File system operations", category: "development", official: true },
+        { id: "2", name: "GitHub", description: "GitHub API integration", category: "version-control", official: true },
+        { id: "3", name: "PostgreSQL", description: "PostgreSQL database access", category: "database", official: true },
+        { id: "4", name: "Slack", description: "Slack messaging", category: "communication", official: false },
+        { id: "5", name: "Puppeteer", description: "Browser automation", category: "browser", official: true },
+      ];
+      this.mcpMarketplaceCategories = ["development", "version-control", "database", "communication", "browser", "other"];
+      this.mcpMarketplaceTags = ["official", "community", "database", "api", "automation"];
+      return;
+    }
+
+    this.mcpMarketplaceLoading = true;
+    
+    try {
+      const result = await this.client.request("mcp.marketplace", {
+        search: this.mcpMarketplaceSearchQuery || undefined,
+        category: this.mcpMarketplaceSelectedCategory || undefined,
+        tag: this.mcpMarketplaceSelectedTag || undefined,
+        officialOnly: this.mcpMarketplaceOfficialOnly,
+      }) as { servers: any[]; categories: string[]; tags: string[] };
+
+      this.mcpMarketplace = result.servers || [];
+      this.mcpMarketplaceCategories = result.categories || [];
+      this.mcpMarketplaceTags = result.tags || [];
+    } catch (err) {
+      console.error("[MCP] Failed to load marketplace:", err);
+      this.mcpError = err instanceof Error ? err.message : "Failed to load marketplace";
+      // Fallback to empty arrays on error
+      this.mcpMarketplace = [];
+      this.mcpMarketplaceCategories = [];
+      this.mcpMarketplaceTags = [];
+    } finally {
+      this.mcpMarketplaceLoading = false;
+    }
+  }
+
+  handleMcpMarketplaceSearchChange(query: string) {
+    this.mcpMarketplaceSearchQuery = query;
+  }
+
+  handleMcpMarketplaceCategoryChange(category: string | null) {
+    this.mcpMarketplaceSelectedCategory = category;
+  }
+
+  handleMcpMarketplaceTagChange(tag: string | null) {
+    this.mcpMarketplaceSelectedTag = tag;
+  }
+
+  handleMcpMarketplaceOfficialToggle() {
+    this.mcpMarketplaceOfficialOnly = !this.mcpMarketplaceOfficialOnly;
+  }
+
+  handleMcpResetMarketplaceFilters() {
+    this.mcpMarketplaceSearchQuery = "";
+    this.mcpMarketplaceSelectedCategory = null;
+    this.mcpMarketplaceSelectedTag = null;
+    this.mcpMarketplaceOfficialOnly = false;
+  }
+
+  async handleMcpInstallFromMarketplace(serverId: string) {
+    if (!this.client?.connected) return;
+    
+    try {
+      await this.client.request("mcp.install", { marketplaceId: serverId });
+      // Reload both marketplace and server list
+      await this.loadMcpMarketplace();
+      await this.handleMcpLoad();
+    } catch (err) {
+      console.error(`[MCP] Failed to install from marketplace: ${serverId}`, err);
+      this.mcpError = err instanceof Error ? err.message : "Failed to install server";
+    }
   }
 
   // Model Routing handlers
   async handleModelRoutingLoad() {
-    console.log("[Model Routing] Load");
+    const { loadModelRoutingStatus } = await import("./controllers/model-routing.js");
+    await loadModelRoutingStatus(this as any);
   }
 
-  async handleModelRoutingConfigure(config: Record<string, unknown>) {
-    console.log("[Model Routing] Configure:", config);
+  async handleModelRoutingToggle(enabled: boolean) {
+    const { toggleModelRouting } = await import("./controllers/model-routing.js");
+    await toggleModelRouting(this as any, enabled);
   }
 
-  // Ollama handlers
+  async handleAddModelToTier(tier: string, model: string) {
+    const { addModelToTier } = await import("./controllers/model-routing.js");
+    await addModelToTier(this as any, tier as any, model);
+  }
+
+  async handleRemoveModelFromTier(tier: string, index: number) {
+    const { removeModelFromTier } = await import("./controllers/model-routing.js");
+    await removeModelFromTier(this as any, tier as any, index);
+  }
+
+  async handleReorderModelsInTier(tier: string, fromIndex: number, toIndex: number) {
+    const { reorderModelsInTier } = await import("./controllers/model-routing.js");
+    await reorderModelsInTier(this as any, tier as any, fromIndex, toIndex);
+  }
+
+  handleRoutingTestChange(prompt: string) {
+    this.routingTestPrompt = prompt;
+  }
+
+  async handleTestRouting() {
+    const { testRouting } = await import("./controllers/model-routing.js");
+    const result = await testRouting(this as any, this.routingTestPrompt || "");
+    this.routingTestResult = result as Record<string, unknown> | undefined;
+  }
+
+  // Llama handlers (replaces Ollama)
   async handleOllamaLoad() {
-    console.log("[Ollama] Load");
+    const { loadLlamaStatus } = await import("./controllers/llama.js");
+    await loadLlamaStatus(this as any);
+  }
+
+  async handleOllamaToggleFeature(enabled: boolean) {
+    const { toggleLlamaFeature } = await import("./controllers/llama.js");
+    await toggleLlamaFeature(this as any, enabled);
+  }
+
+  async handleOllamaInstall() {
+    const { installLlama } = await import("./controllers/llama.js");
+    await installLlama(this as any);
+  }
+
+  async handleOllamaStart() {
+    const { startLlamaServer } = await import("./controllers/llama.js");
+    await startLlamaServer(this as any);
+  }
+
+  async handleOllamaStop() {
+    const { stopLlamaServer } = await import("./controllers/llama.js");
+    await stopLlamaServer(this as any);
+  }
+
+  async handleOllamaPullModel(model: string) {
+    const { downloadModel } = await import("./controllers/llama.js");
+    await downloadModel(this as any, model);
+  }
+
+  async handleOllamaRemoveModel(model: string) {
+    const { removeModel } = await import("./controllers/llama.js");
+    await removeModel(this as any, model);
+  }
+
+  async handleOllamaDetectHardware() {
+    if (!this.client) return;
+    try {
+      const result = await this.client.request("llama.hardware.detect") as { ok: boolean; config?: Record<string, unknown> };
+      if (result.ok && result.config) {
+        this.addToast("Hardware auto-detected successfully", "success");
+        // Update status to reflect new hardware config
+        await this.handleOllamaLoad();
+      }
+    } catch (err) {
+      this.addToast("Failed to detect hardware: " + String(err), "error");
+    }
+  }
+
+  async handleOllamaConfigureHardware(config: Record<string, unknown>) {
+    if (!this.client) return;
+    try {
+      await this.client.request("llama.hardware.config", config);
+      this.addToast("Hardware configuration updated", "success");
+      // Reload status to show updated config
+      await this.handleOllamaLoad();
+    } catch (err) {
+      this.addToast("Failed to configure hardware: " + String(err), "error");
+    }
+  }
+
+  // Toast notifications
+  addToast(message: string, type: 'error' | 'success' | 'info' = 'info', duration = 5000) {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.toasts = [...this.toasts, { id, message, type, duration }];
+    
+    // Auto-remove after duration
+    if (duration > 0) {
+      setTimeout(() => {
+        this.removeToast(id);
+      }, duration);
+    }
+  }
+
+  removeToast(id: string) {
+    this.toasts = this.toasts.filter(t => t.id !== id);
   }
 
   // Rate Limits handlers
   async handleRateLimitsLoad() {
-    console.log("[Rate Limits] Load");
+    const { loadRateLimits } = await import("./controllers/rate-limits.js");
+    await loadRateLimits(this as any);
   }
 
   async handleRateLimitsConfigure(config: Record<string, unknown>) {
-    console.log("[Rate Limits] Configure:", config);
+    const { configureRateLimits } = await import("./controllers/rate-limits.js");
+    await configureRateLimits(this as any, config);
+  }
+
+  async handleRateLimitsReset() {
+    const { resetRateLimits } = await import("./controllers/rate-limits.js");
+    await resetRateLimits(this as any);
+  }
+
+  async handleRateLimitsToggle(enabled: boolean) {
+    const { toggleRateLimits } = await import("./controllers/rate-limits.js");
+    await toggleRateLimits(this as any, enabled);
   }
 
   // Budget handlers
   async handleBudgetLoad() {
-    console.log("[Budget] Load");
+    const { loadBudget } = await import("./controllers/budget.js");
+    await loadBudget(this as any);
   }
 
   async handleBudgetConfigure(config: Record<string, unknown>) {
-    console.log("[Budget] Configure:", config);
+    const { configureBudget } = await import("./controllers/budget.js");
+    await configureBudget(this as any, config);
+  }
+
+  async handleBudgetReset() {
+    const { resetBudget } = await import("./controllers/budget.js");
+    await resetBudget(this as any);
+  }
+
+  async handleBudgetBreakdown(period: "today" | "month" | "custom", startDate?: string, endDate?: string) {
+    const { getBudgetBreakdown } = await import("./controllers/budget.js");
+    return await getBudgetBreakdown(this as any, period, startDate, endDate);
+  }
+
+  async handleBudgetExport() {
+    const { exportBudgetCSV } = await import("./controllers/budget.js");
+    return await exportBudgetCSV(this as any);
   }
 
   // Metrics handlers
-  async handleMetricsLoad() {
-    console.log("[Metrics] Load");
+  async handleMetricsLoad(period: import("./controllers/metrics").MetricsPeriod = "24h") {
+    const { loadMetrics } = await import("./controllers/metrics.js");
+    await loadMetrics(this as any, period);
+  }
+
+  async handleMetricsCosts(period: import("./controllers/metrics").MetricsPeriod = "24h", groupBy: "provider" | "model" | "day" = "day") {
+    const { getCosts } = await import("./controllers/metrics.js");
+    return await getCosts(this as any, period, groupBy);
+  }
+
+  async handleMetricsModels(period: import("./controllers/metrics").MetricsPeriod = "24h") {
+    const { getModels } = await import("./controllers/metrics.js");
+    return await getModels(this as any, period);
+  }
+
+  async handleMetricsSessions(period: import("./controllers/metrics").MetricsPeriod = "24h") {
+    const { getSessions } = await import("./controllers/metrics.js");
+    return await getSessions(this as any, period);
+  }
+
+  async handleMetricsExport(format: "json" | "csv" = "csv") {
+    const { exportMetrics } = await import("./controllers/metrics.js");
+    return await exportMetrics(this as any, format);
+  }
+
+  async handleMetricsReset() {
+    const { resetMetrics } = await import("./controllers/metrics.js");
+    await resetMetrics(this as any);
   }
 
   // Cache handlers
   async handleCacheLoad() {
-    console.log("[Cache] Load");
+    const { loadCache } = await import("./controllers/cache.js");
+    await loadCache(this as any);
   }
 
-  async handleCacheClear() {
-    console.log("[Cache] Clear");
+  async handleCacheClear(cacheName?: string) {
+    const { clearCache } = await import("./controllers/cache.js");
+    await clearCache(this as any, cacheName);
+  }
+
+  async handleCacheClearAll() {
+    const { clearAllCaches } = await import("./controllers/cache.js");
+    await clearAllCaches(this as any);
+  }
+
+  async handleCacheGetConfig(cacheName?: string) {
+    const { getCacheConfig } = await import("./controllers/cache.js");
+    return await getCacheConfig(this as any, cacheName);
+  }
+
+  async handleCacheSetConfig(cacheName: string, config: { ttl?: number; maxSize?: number }) {
+    const { setCacheConfig } = await import("./controllers/cache.js");
+    await setCacheConfig(this as any, cacheName, config);
+  }
+
+  async handleCacheWarm(cacheName: string, data: Array<{ key: string; value: unknown }>) {
+    const { warmCache } = await import("./controllers/cache.js");
+    return await warmCache(this as any, cacheName, data);
+  }
+
+  async handleCacheGetStats() {
+    const { getCacheStats } = await import("./controllers/cache.js");
+    return await getCacheStats(this as any);
+  }
+
+  // Memory handlers
+  async handleMemoryLoadFiles() {
+    const { loadMemoryFiles } = await import("./controllers/memory.js");
+    await loadMemoryFiles(this as any);
+  }
+
+  async handleMemoryGetFile(name?: string, date?: string) {
+    const { getMemoryFile } = await import("./controllers/memory.js");
+    return await getMemoryFile(this as any, name, date);
+  }
+
+  async handleMemorySaveFile(name: string, content: string) {
+    const { saveMemoryFile } = await import("./controllers/memory.js");
+    await saveMemoryFile(this as any, name, content);
+  }
+
+  async handleMemorySaveSession(date: string, session: Record<string, unknown>) {
+    const { saveSessionMemory } = await import("./controllers/memory.js");
+    await saveSessionMemory(this as any, date, session);
+  }
+
+  async handleMemoryGenerateSummary(content: string) {
+    const { generateSummary } = await import("./controllers/memory.js");
+    return await generateSummary(this as any, content);
+  }
+
+  async handleMemorySaveSummary(date: string, summary: Record<string, unknown>) {
+    const { saveSummary } = await import("./controllers/memory.js");
+    await saveSummary(this as any, date, summary);
+  }
+
+  async handleMemorySearch(query: string) {
+    const { searchMemories } = await import("./controllers/memory.js");
+    return await searchMemories(this as any, query);
+  }
+
+  async handleMemoryGetConfig() {
+    const { getMemoryConfig } = await import("./controllers/memory.js");
+    return await getMemoryConfig(this as any);
+  }
+
+  async handleMemorySetConfig(config: Record<string, unknown>) {
+    const { setMemoryConfig } = await import("./controllers/memory.js");
+    await setMemoryConfig(this as any, config as any);
+  }
+
+  async handleMemoryDeleteSession(date: string) {
+    const { deleteSessionMemory } = await import("./controllers/memory.js");
+    await deleteSessionMemory(this as any, date);
+  }
+
+  async handleMemoryCleanup() {
+    const { cleanupOldMemories } = await import("./controllers/memory.js");
+    return await cleanupOldMemories(this as any);
+  }
+
+  // Voice Recorder methods
+  handleToggleVoiceRecorder() {
+    this.voiceRecorderOpen = !this.voiceRecorderOpen;
+  }
+
+  handleVoiceTranscription(text: string) {
+    // Append transcription to current chat message
+    const currentMessage = this.chatMessage || "";
+    this.chatMessage = currentMessage ? `${currentMessage} ${text}` : text;
   }
 
   // Models methods
-  handleModelsConfigure(providerId: string) {
-    console.log("[Models] Configure:", providerId);
+  async handleModelsConfigure(providerId: string) {
     this.wizardProviderId = providerId;
     this.wizardOpen = true;
   }
 
-  handleModelsManage(providerId: string) {
-    console.log("[Models] Manage:", providerId);
+  async handleModelsManage(providerId: string) {
+    // Open the provider configuration wizard
+    this.wizardProviderId = providerId;
+    this.wizardOpen = true;
   }
 
   handleModelsSearchChange(query: string) {
@@ -1430,23 +1960,28 @@ export class OpenClawApp extends LitElement {
 
   // Skill methods
   async handleInstallSkill(key: string) {
-    console.log("[Skills] Install:", key);
+    const { installSkill } = await import("./controllers/skills.js");
+    await installSkill(this, key, key, key);
   }
 
   async handleUpdateSkill(key: string) {
-    console.log("[Skills] Update:", key);
+    const { loadSkills } = await import("./controllers/skills.js");
+    await loadSkills(this);
   }
 
   async handleToggleSkillEnabled(key: string, enabled: boolean) {
-    console.log("[Skills] Toggle:", key, enabled);
+    const { updateSkillEnabled } = await import("./controllers/skills.js");
+    await updateSkillEnabled(this, key, enabled);
   }
 
-  handleUpdateSkillEdit(key: string, value: string) {
-    console.log("[Skills] Edit:", key, value);
+  async handleUpdateSkillEdit(key: string, value: string) {
+    const { updateSkillEdit } = await import("./controllers/skills.js");
+    updateSkillEdit(this, key, value);
   }
 
   async handleSaveSkillApiKey(key: string, apiKey: string) {
-    console.log("[Skills] Save API key:", key);
+    const { saveSkillApiKey } = await import("./controllers/skills.js");
+    await saveSkillApiKey(this, key);
   }
 
   handleSkillsActiveFilterChange(filter: "all" | "active" | "needs-setup" | "disabled") {
@@ -1462,70 +1997,103 @@ export class OpenClawApp extends LitElement {
   }
 
   async handleAnalyzeSkill(skillKey: string, filePath: string) {
-    console.log("[Skills] Analyze:", skillKey, filePath);
+    const { analyzeSkill } = await import("./controllers/skills.js");
+    await analyzeSkill(this, skillKey, filePath);
   }
 
   // Cron methods
   async handleCronToggle(jobId: string, enabled: boolean) {
-    console.log("[Cron] Toggle:", jobId, enabled);
+    const { toggleCronJob } = await import("./controllers/cron.js");
+    const job = this.cronJobs.find(j => j.id === jobId);
+    if (job) {
+      await toggleCronJob(this, job, enabled);
+    }
   }
 
   async handleCronRun(jobId: string) {
-    console.log("[Cron] Run:", jobId);
+    const { runCronJob } = await import("./controllers/cron.js");
+    const job = this.cronJobs.find(j => j.id === jobId);
+    if (job) {
+      await runCronJob(this, job);
+    }
   }
 
   async handleCronRemove(jobId: string) {
-    console.log("[Cron] Remove:", jobId);
+    const { removeCronJob } = await import("./controllers/cron.js");
+    const job = this.cronJobs.find(j => j.id === jobId);
+    if (job) {
+      await removeCronJob(this, job);
+    }
   }
 
   async handleCronAdd() {
-    console.log("[Cron] Add");
+    const { addCronJob } = await import("./controllers/cron.js");
+    await addCronJob(this);
   }
 
   async handleCronRunsLoad(jobId: string) {
-    console.log("[Cron] Load runs:", jobId);
+    const { loadCronRuns } = await import("./controllers/cron.js");
+    await loadCronRuns(this, jobId);
   }
 
   handleCronFormUpdate(path: string, value: unknown) {
-    console.log("[Cron] Form update:", path, value);
+    // Update the form state directly
+    if (path.includes('.')) {
+      const parts = path.split('.');
+      let current: any = this.cronForm;
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = current[parts[i]];
+      }
+      current[parts[parts.length - 1]] = value;
+    } else {
+      (this.cronForm as any)[path] = value;
+    }
   }
 
   // Sessions methods
   async handleSessionsLoad() {
-    console.log("[Sessions] Load");
+    const { loadSessions } = await import("./controllers/sessions.js");
+    await loadSessions(this as any);
   }
 
-  async handleSessionsPatch(key: string, patch: unknown) {
-    console.log("[Sessions] Patch:", key, patch);
+  async handleSessionsPatch(key: string, patch: { label?: string | null; thinkingLevel?: string | null; verboseLevel?: string | null; reasoningLevel?: string | null }) {
+    const { patchSession } = await import("./controllers/sessions.js");
+    await patchSession(this as any, key, patch);
   }
 
   // Nodes methods
   async handleLoadNodes() {
-    console.log("[Nodes] Load");
+    const { loadNodes } = await import("./controllers/nodes.js");
+    await loadNodes(this as any);
   }
 
   // Presence methods
   async handleLoadPresence() {
-    console.log("[Presence] Load");
+    const { loadPresence } = await import("./controllers/presence.js");
+    await loadPresence(this as any);
   }
 
   // Skills load
   async handleLoadSkills() {
-    console.log("[Skills] Load");
+    const { loadSkills } = await import("./controllers/skills.js");
+    await loadSkills(this as any);
   }
 
   // Debug methods
   async handleLoadDebug() {
-    console.log("[Debug] Load");
+    const { loadDebug } = await import("./controllers/debug.js");
+    await loadDebug(this as any);
   }
 
   async handleDebugCall() {
-    console.log("[Debug] Call");
+    const { callDebugMethod } = await import("./controllers/debug.js");
+    await callDebugMethod(this as any);
   }
 
   // Logs methods
   async handleLoadLogs() {
-    console.log("[Logs] Load");
+    const { loadLogs } = await import("./controllers/logs.js");
+    await loadLogs(this as any, { reset: true });
   }
 
   handleLogsFilterChange(next: string) {
@@ -1542,7 +2110,8 @@ export class OpenClawApp extends LitElement {
 
   // Update methods
   async handleRunUpdate() {
-    console.log("[Update] Run");
+    const { runUpdate } = await import("./controllers/config.js");
+    await runUpdate(this as any);
   }
 
   setPassword(next: string) {
@@ -1559,27 +2128,39 @@ export class OpenClawApp extends LitElement {
 
   // Chat queue methods
   handleChatSelectQueueItem(id: string) {
-    console.log("[Chat] Select queue item:", id);
+    // Navigate to the session associated with this queue item
+    const item = this.chatQueue.find(q => q.id === id);
+    if (item?.sessionKey) {
+      this.sessionKey = item.sessionKey;
+      this.setTab("chat");
+    }
   }
 
   handleChatDropQueueItem(id: string) {
-    console.log("[Chat] Drop queue item:", id);
+    this.chatQueue = this.chatQueue.filter(q => q.id !== id);
   }
 
   handleChatClearQueue() {
-    console.log("[Chat] Clear queue");
+    this.chatQueue = [];
   }
 
   async handleChatSend() {
-    console.log("[Chat] Send");
+    const { sendChatMessage } = await import("./controllers/chat.js");
+    await sendChatMessage(this as any, this.chatMessage, this.chatAttachments);
+    this.chatMessage = "";
+    this.chatAttachments = [];
   }
 
   async handleChatAbort() {
-    console.log("[Chat] Abort");
+    const { abortChatRun } = await import("./controllers/chat.js");
+    await abortChatRun(this as any);
   }
 
   async handleCallDebugMethod(method: string, params: string) {
-    console.log("[Debug] Call method:", method, params);
+    const { callDebugMethod } = await import("./controllers/debug.js");
+    this.debugCallMethod = method;
+    this.debugCallParams = params;
+    await callDebugMethod(this as any);
   }
 
   render() {

@@ -1,164 +1,175 @@
 import type { GatewayRequestHandlers } from "./types.js";
-
-export interface UsageMetrics {
-  totalRequests: number;
-  totalTokens: number;
-  totalCost: number;
-  avgResponseTime: number;
-  byModel: Record<string, ModelMetrics>;
-  byTool: Record<string, ToolMetrics>;
-  daily: DailyMetrics[];
-}
-
-export interface ModelMetrics {
-  requests: number;
-  tokens: number;
-  cost: number;
-  avgResponseTime: number;
-}
-
-export interface ToolMetrics {
-  invocations: number;
-  avgLatency: number;
-  errors: number;
-}
-
-export interface DailyMetrics {
-  date: string;
-  requests: number;
-  tokens: number;
-  cost: number;
-}
-
-let metrics: UsageMetrics = {
-  totalRequests: 0,
-  totalTokens: 0,
-  totalCost: 0,
-  avgResponseTime: 0,
-  byModel: {},
-  byTool: {},
-  daily: [],
-};
-
-function getModelMetrics(model: string): ModelMetrics {
-  if (!metrics.byModel[model]) {
-    metrics.byModel[model] = {
-      requests: 0,
-      tokens: 0,
-      cost: 0,
-      avgResponseTime: 0,
-    };
-  }
-  return metrics.byModel[model];
-}
-
-function getToolMetrics(tool: string): ToolMetrics {
-  if (!metrics.byTool[tool]) {
-    metrics.byTool[tool] = {
-      invocations: 0,
-      avgLatency: 0,
-      errors: 0,
-    };
-  }
-  return metrics.byTool[tool];
-}
-
-function getDailyMetrics(date: string): DailyMetrics {
-  let day = metrics.daily.find((d) => d.date === date);
-  if (!day) {
-    day = { date, requests: 0, tokens: 0, cost: 0 };
-    metrics.daily.push(day);
-  }
-  return day;
-}
+import { getMetricsService } from "../../services/metrics.js";
+import { ErrorCodes, errorShape } from "../protocol/index.js";
 
 export const metricsHandlers: GatewayRequestHandlers = {
   "metrics.usage": async ({ params, respond }) => {
-    const { period = "7d" } = params as { period?: string };
-    const days = parseInt(period) || 7;
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
+    try {
+      const service = getMetricsService();
+      const { period, startDate, endDate } = params as {
+        period?: "1h" | "24h" | "7d" | "30d";
+        startDate?: string;
+        endDate?: string;
+      };
 
-    const filteredDaily = metrics.daily.filter((d) => new Date(d.date) >= cutoff);
+      const metrics = service.getUsage(period || "24h", startDate, endDate);
+      respond(true, metrics);
+    } catch (err) {
+      console.error("[Metrics] Usage error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get usage metrics",
+        ),
+      );
+    }
+  },
 
-    respond(true, {
-      ...metrics,
-      daily: filteredDaily,
-      period,
-    });
+  "metrics.costs": async ({ params, respond }) => {
+    try {
+      const service = getMetricsService();
+      const { period, groupBy } = params as {
+        period?: "1h" | "24h" | "7d" | "30d";
+        groupBy?: "provider" | "model" | "day";
+      };
+
+      const costs = service.getCosts(period || "24h", groupBy || "day");
+      respond(true, costs);
+    } catch (err) {
+      console.error("[Metrics] Costs error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get costs metrics",
+        ),
+      );
+    }
+  },
+
+  "metrics.models": async ({ params, respond }) => {
+    try {
+      const service = getMetricsService();
+      const { period } = params as { period?: "1h" | "24h" | "7d" | "30d" };
+
+      const models = service.getModels(period || "24h");
+      respond(true, { models });
+    } catch (err) {
+      console.error("[Metrics] Models error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get model metrics",
+        ),
+      );
+    }
+  },
+
+  "metrics.sessions": async ({ params, respond }) => {
+    try {
+      const service = getMetricsService();
+      const { period } = params as { period?: "1h" | "24h" | "7d" | "30d" };
+
+      const sessions = service.getSessions(period || "24h");
+      respond(true, { sessions });
+    } catch (err) {
+      console.error("[Metrics] Sessions error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to get session metrics",
+        ),
+      );
+    }
   },
 
   "metrics.report": async ({ params, respond }) => {
-    const { model, tokens, cost, latency, tool, error } = params as {
-      model?: string;
-      tokens?: number;
-      cost?: number;
-      latency?: number;
-      tool?: string;
-      error?: boolean;
-    };
+    try {
+      const service = getMetricsService();
+      const { provider, model, tokensInput, tokensOutput, cost, latency, sessionKey, requestType } =
+        params as {
+          provider: string;
+          model: string;
+          tokensInput: number;
+          tokensOutput: number;
+          cost: number;
+          latency: number;
+          sessionKey?: string;
+          requestType?: string;
+        };
 
-    const date = new Date().toISOString().slice(0, 10);
-    const day = getDailyMetrics(date);
+      const record = service.record({
+        provider,
+        model,
+        tokensInput,
+        tokensOutput,
+        cost,
+        latency,
+        sessionKey,
+        requestType,
+      });
 
-    if (model) {
-      const modelMetrics = getModelMetrics(model);
-      modelMetrics.requests++;
-      if (tokens) {
-        modelMetrics.tokens += tokens;
-        day.tokens += tokens;
-        metrics.totalTokens += tokens;
-      }
-      if (cost) {
-        modelMetrics.cost += cost;
-        day.cost += cost;
-        metrics.totalCost += cost;
-      }
-      if (latency) {
-        modelMetrics.avgResponseTime =
-          (modelMetrics.avgResponseTime * (modelMetrics.requests - 1) + latency) /
-          modelMetrics.requests;
-        metrics.avgResponseTime =
-          (metrics.avgResponseTime * (metrics.totalRequests - 1) + latency) / metrics.totalRequests;
-      }
-      metrics.totalRequests++;
-      day.requests++;
+      respond(true, { ok: true, recordId: record.id });
+    } catch (err) {
+      console.error("[Metrics] Report error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to report metrics",
+        ),
+      );
     }
-
-    if (tool) {
-      const toolMetrics = getToolMetrics(tool);
-      toolMetrics.invocations++;
-      if (latency) {
-        toolMetrics.avgLatency =
-          (toolMetrics.avgLatency * (toolMetrics.invocations - 1) + latency) /
-          toolMetrics.invocations;
-      }
-      if (error) {
-        toolMetrics.errors++;
-      }
-    }
-
-    respond(true, { ok: true });
   },
 
-  "metrics.models": async ({ respond }) => {
-    respond(true, { models: metrics.byModel });
-  },
+  "metrics.export": async ({ params, respond }) => {
+    try {
+      const service = getMetricsService();
+      const { format } = params as { format?: "json" | "csv" };
 
-  "metrics.tools": async ({ respond }) => {
-    respond(true, { tools: metrics.byTool });
+      if (format === "csv") {
+        const csv = service.exportCSV();
+        respond(true, { csv });
+      } else {
+        const json = service.exportJSON();
+        respond(true, { json });
+      }
+    } catch (err) {
+      console.error("[Metrics] Export error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to export metrics",
+        ),
+      );
+    }
   },
 
   "metrics.reset": async ({ respond }) => {
-    metrics = {
-      totalRequests: 0,
-      totalTokens: 0,
-      totalCost: 0,
-      avgResponseTime: 0,
-      byModel: {},
-      byTool: {},
-      daily: [],
-    };
-    respond(true, { ok: true });
+    try {
+      const service = getMetricsService();
+      service.reset();
+      respond(true, { ok: true });
+    } catch (err) {
+      console.error("[Metrics] Reset error:", err);
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INVALID_REQUEST,
+          err instanceof Error ? err.message : "Failed to reset metrics",
+        ),
+      );
+    }
   },
 };

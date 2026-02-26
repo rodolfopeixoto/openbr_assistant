@@ -17,6 +17,7 @@ import "../components/resizable-divider";
 import "../components/ThinkingIndicator";
 import type { ThinkingStep, ThinkingLevel } from "../components/ThinkingIndicator";
 import "../../components/ScrollToBottomButton";
+import "../../components/ScrollToTopButton";
 
 // Quick commands definition
 interface QuickCommand {
@@ -133,6 +134,13 @@ export type ChatProps = {
   showScrollToBottom?: boolean;
   newMessageCount?: number;
   onScrollToBottom?: () => void;
+  // Scroll-to-top button props
+  showScrollToTop?: boolean;
+  onScrollToTop?: () => void;
+  // Voice recorder props
+  voiceRecorderOpen?: boolean;
+  onToggleVoiceRecorder?: () => void;
+  onVoiceTranscription?: (text: string) => void;
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
@@ -476,6 +484,10 @@ export function renderChat(props: ChatProps) {
         >
           ${thread}
         
+        <scroll-to-top-button
+          ?visible=${props.showScrollToTop ?? false}
+          @scroll-to-top=${props.onScrollToTop}
+        ></scroll-to-top-button>
         <scroll-to-bottom-button
           ?visible=${props.showScrollToBottom ?? false}
           .newMessageCount=${props.newMessageCount ?? 0}
@@ -551,6 +563,16 @@ export function renderChat(props: ChatProps) {
             >
               ${icons.paperclip} Attach
             </button>
+            <button 
+              class="chat-input-toolbar__btn ${props.voiceRecorderOpen ? 'active' : ''}" 
+              title="Voice input"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                props.onToggleVoiceRecorder?.();
+              }}
+            >
+              ${icons.mic} Voice
+            </button>
           <button 
             class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
             title="Quick commands"
@@ -581,6 +603,19 @@ export function renderChat(props: ChatProps) {
           </div>
           
           ${props.commandsMenuOpen ? renderCommandsMenu(props) : nothing}
+          
+          <!-- Voice Recorder -->
+          ${props.voiceRecorderOpen ? html`
+            <voice-recorder
+              .onTranscription=${(text: string) => {
+                props.onVoiceTranscription?.(text);
+                props.onToggleVoiceRecorder?.();
+              }}
+              .onCancel=${() => {
+                props.onToggleVoiceRecorder?.();
+              }}
+            ></voice-recorder>
+          ` : nothing}
           
           <!-- Hidden file input -->
           <input 

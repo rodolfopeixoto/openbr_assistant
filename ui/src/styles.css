@@ -10,6 +10,8 @@
 @import "./styles/branding.css";
 @import "./styles/debug.css";
 @import "./styles/cron.css";
+@import "./styles/ollama.css";
+@import "./styles/toast.css";
 @import "./styles/nodes.css";
 @import "./styles/chat.css";
 @import "./styles/env.css";

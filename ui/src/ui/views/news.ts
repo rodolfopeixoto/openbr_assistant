@@ -14,7 +14,7 @@ export interface NewsItem {
 }
 
 export function renderNewsView(state: AppViewState) {
-  const items = state.newsItems || [];
+  const items = (state.newsItems || []) as NewsItem[];
   const filteredItems = filterNews(items, state);
   
   return html`
@@ -31,7 +31,7 @@ export function renderNewsView(state: AppViewState) {
             Search
           </h3>
           <div class="search-input-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.3-4.3"/>
             </svg>
@@ -79,14 +79,14 @@ export function renderNewsView(state: AppViewState) {
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                .checked="${state.newsSelectedSources?.includes(source)}"
+                .checked="${state.newsSelectedSources?.includes(source.id)}"
                 @change="${(e: Event) => {
                   const target = e.target as HTMLInputElement;
-                  state.handleNewsSourceToggle(source, target.checked);
+                  state.handleNewsSourceToggle(source.id, target.checked);
                 }}"
               />
-              ${source}
-              <span class="checkbox-count">${getSourceCount(items, source)}</span>
+              ${source.name}
+              <span class="checkbox-count">${source.itemCount || 0}</span>
             </label>
           `)}
         </div>
@@ -148,7 +148,7 @@ export function renderNewsView(state: AppViewState) {
         `}
       </main>
 
-      ${state.newsSelectedItem ? renderNewsModal(state.newsSelectedItem, state) : null}
+      ${state.newsSelectedItem ? renderNewsModal(state.newsSelectedItem as NewsItem, state) : null}
     </div>
   `;
 }

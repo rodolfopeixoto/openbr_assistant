@@ -11,19 +11,27 @@ import { chatHandlers } from "./server-methods/chat.js";
 import { complianceHandlers } from "./server-methods/compliance.js";
 import { configHandlers } from "./server-methods/config.js";
 import { connectHandlers } from "./server-methods/connect.js";
+import { containersHandlers } from "./server-methods/containers.js";
 import { cronHandlers } from "./server-methods/cron.js";
 import { deviceHandlers } from "./server-methods/devices.js";
 import { envHandlers } from "./server-methods/env.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
+import { featuresHandlers } from "./server-methods/features.js";
 import { healthHandlers } from "./server-methods/health.js";
+import { llamaHandlers } from "./server-methods/llama.js";
 import { logsHandlers } from "./server-methods/logs.js";
+import { mcpHandlers } from "./server-methods/mcp.js";
+import { memoryHandlers } from "./server-methods/memory.js";
 import { metricsHandlers } from "./server-methods/metrics.js";
 import { modelRoutingHandlers } from "./server-methods/model-routing.js";
 import { modelsHandlers } from "./server-methods/models.js";
+import { newsHandlers } from "./server-methods/news.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
 import { ollamaHandlers } from "./server-methods/ollama.js";
 import { onboardWizardHandlers } from "./server-methods/onboard-wizard.js";
+import { opencodeHandlers } from "./server-methods/opencode.js";
 import { rateLimitsHandlers } from "./server-methods/rate-limits.js";
+import { securityHandlers } from "./server-methods/security.js";
 import { sendHandlers } from "./server-methods/send.js";
 import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
@@ -93,6 +101,10 @@ const READ_METHODS = new Set([
   "workspace.resetToTemplate",
   "env.list",
   "env.get",
+  "news.list",
+  "news.sources",
+  "news.get",
+  "news.stats",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -114,6 +126,7 @@ const WRITE_METHODS = new Set([
   "workspace.discardDraft",
   "env.set",
   "env.delete",
+  "news.refresh",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -187,15 +200,18 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
 
 export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...connectHandlers,
+  ...containersHandlers,
   ...logsHandlers,
   ...voicewakeHandlers,
   ...healthHandlers,
   ...channelsHandlers,
   ...chatHandlers,
+  ...memoryHandlers,
   ...cronHandlers,
   ...deviceHandlers,
   ...envHandlers,
   ...execApprovalsHandlers,
+  ...featuresHandlers,
   ...webHandlers,
   ...modelsHandlers,
   ...modelRoutingHandlers,
@@ -218,10 +234,15 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...complianceHandlers,
   ...onboardWizardHandlers,
   ...ollamaHandlers,
+  ...llamaHandlers,
   ...rateLimitsHandlers,
+  ...securityHandlers,
   ...budgetHandlers,
   ...metricsHandlers,
   ...cacheHandlers,
+  ...mcpHandlers,
+  ...newsHandlers,
+  ...opencodeHandlers,
 };
 
 export async function handleGatewayRequest(
