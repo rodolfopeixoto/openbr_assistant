@@ -33,7 +33,15 @@ export function loadSettings(): UiSettings {
     chatShowTools: false,
     splitRatio: 0.6,
     navCollapsed: false,
-    navGroupsCollapsed: {},
+    navGroupsCollapsed: {
+      "Chat": false,
+      "Control": false,
+      "Intelligence": false,
+      "Agent": false,
+      "AI": false,
+      "System": false,
+      "Settings": false,
+    },
   };
 
   try {
