@@ -2,6 +2,7 @@ import { html, nothing } from "lit";
 import type { AppViewState } from "./app-view-state";
 import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway";
 import type { UiSettings } from "./storage";
+import { resetAllSettings } from "./storage";
 import type { ThemeMode } from "./theme";
 import type { ThemeTransitionContext } from "./theme-transition";
 import type {
@@ -219,6 +220,18 @@ export function renderApp(state: AppViewState) {
               <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
               <span class="nav-item__text">Docs</span>
             </a>
+            <button
+              class="nav-item"
+              @click=${() => {
+                if (confirm("Reset all settings to defaults? This will reload the page.")) {
+                  resetAllSettings();
+                }
+              }}
+              title="Reset all settings to defaults"
+            >
+              <span class="nav-item__icon" aria-hidden="true">${icons.refreshCw}</span>
+              <span class="nav-item__text">Reset Settings</span>
+            </button>
           </div>
         </div>
       </aside>
