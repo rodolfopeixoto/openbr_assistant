@@ -414,11 +414,7 @@ function renderSkillCard(skill: SkillStatusEntry, props: SkillsProps) {
     >
       <!-- Card Header -->
       <div class="skill-card__header">
-<<<<<<< HEAD
-        <div class="skill-card__emoji">${skill.emoji || "🔧"}</div>
-=======
          <div class="skill-card__emoji">${skill.emoji || html`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}</div>
->>>>>>> develop
         <div class="skill-card__info">
           <h3 class="skill-card__name">${skill.name}</h3>
           <span class="skill-card__source">${skill.source}</span>
@@ -566,11 +562,7 @@ function renderSkillDetailModal(props: SkillsProps) {
       <div class="modal modal--large" @click=${(e: Event) => e.stopPropagation()}>
         <header class="modal__header">
           <div class="modal__header-content">
-<<<<<<< HEAD
-            <span class="modal__emoji">${skill.emoji || "🔧"}</span>
-=======
             <span class="modal__emoji">${skill.emoji || html`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}</span>
->>>>>>> develop
             <div class="modal__header-text">
               <h2 class="modal__title">${skill.name}</h2>
               <span class="modal__source">${skill.source}</span>
