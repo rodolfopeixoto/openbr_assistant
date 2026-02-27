@@ -21,23 +21,48 @@ export function renderNewsView(state: AppViewState) {
     (state.newsFilter && state.newsFilter !== 'all');
   
   return html`
-    <div class="news-page-layout">
-      <!-- Sidebar with Filters -->
-      <aside class="news-sidebar">
+    <section class="content-header">
+      <div>
+        <div class="page-title">News</div>
+        <div class="page-sub">News and intelligence aggregation from ${state.newsSources?.length || 0} sources</div>
+      </div>
+      <div class="page-meta">
+        ${hasActiveFilters ? html`
+          <button class="btn-secondary btn-small" @click="${() => clearFilters(state)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+            Clear Filters
+          </button>
+        ` : null}
+        <button 
+          class="btn-secondary btn-small ${state.newsRefreshing ? 'refreshing' : ''}" 
+          @click="${() => state.handleNewsRefresh()}"
+          ?disabled="${state.newsRefreshing}"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="${state.newsRefreshing ? 'animation: spin 1s linear infinite;' : ''}">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          ${state.newsRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+    </section>
+
+    <!-- News Content with Sidebar Layout -->
+    <div class="news-container">
+      <!-- Filters Sidebar -->
+      <aside class="news-filters">
         <!-- Search -->
-        <div class="sidebar-section">
-          <h3>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="filter-section">
+          <h4 class="filter-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.3-4.3"/>
             </svg>
             Search
-          </h3>
-          <div class="search-input-wrapper">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.3-4.3"/>
-            </svg>
+          </h4>
+          <div class="search-box">
             <input
               type="text"
               class="search-input"
@@ -52,42 +77,37 @@ export function renderNewsView(state: AppViewState) {
         </div>
 
         <!-- Time Range -->
-        <div class="sidebar-section">
-          <h3>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="filter-section">
+          <h4 class="filter-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
             Time Range
-          </h3>
-          <div class="toggle-group">
-            ${renderTimeToggle('all', 'All Time', state)}
-            ${renderTimeToggle('today', 'Today', state)}
-            ${renderTimeToggle('week', 'This Week', state)}
-            ${renderTimeToggle('month', 'This Month', state)}
+          </h4>
+          <div class="filter-options">
+            ${renderFilterOption('all', 'All Time', state)}
+            ${renderFilterOption('today', 'Today', state)}
+            ${renderFilterOption('week', 'This Week', state)}
+            ${renderFilterOption('month', 'This Month', state)}
           </div>
         </div>
 
         <!-- Sources -->
-        <div class="sidebar-section">
-          <h3>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="filter-section">
+          <h4 class="filter-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2L2 7l10 5 10-5-10-5z"/>
               <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
             </svg>
-            Sources
-            <span class="source-count">${(state.newsSources || []).length}</span>
-          </h3>
+            Sources (${state.newsSources?.length || 0})
+          </h4>
           ${!state.newsSources || state.newsSources.length === 0 ? html`
-            <div class="sources-loading">
-              <div class="mini-spinner"></div>
-              <span>Loading sources...</span>
-            </div>
+            <div class="loading-small">Loading sources...</div>
           ` : html`
-            <div class="sources-list">
-              ${(state.newsSources || []).slice(0, 8).map(source => html`
-                <label class="checkbox-label">
+            <div class="filter-checkboxes">
+              ${state.newsSources.slice(0, 10).map(source => html`
+                <label class="filter-checkbox">
                   <input
                     type="checkbox"
                     .checked="${state.newsSelectedSources?.includes(source.id)}"
@@ -96,97 +116,86 @@ export function renderNewsView(state: AppViewState) {
                       state.handleNewsSourceToggle(source.id, target.checked);
                     }}"
                   />
-                  <span class="source-name">${source.name}</span>
-                  <span class="checkbox-count">${source.itemCount || 0}</span>
+                  <span class="checkbox-text">${source.name}</span>
+                  <span class="checkbox-badge">${source.itemCount || 0}</span>
                 </label>
               `)}
-              ${state.newsSources.length > 8 ? html`
-                <div class="sources-more">+${state.newsSources.length - 8} more sources</div>
-              ` : null}
             </div>
           `}
         </div>
 
-        <!-- Categories -->
-        <div class="sidebar-section">
-          <h3>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 7l-8-4-8 4v10l8 4 8-4V7z"/>
-              <path d="M4 7l8 4 8-4"/>
-              <path d="M12 11v10"/>
+        <!-- Sentiment Filter -->
+        <div class="filter-section">
+          <h4 class="filter-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
             </svg>
-            Categories
-          </h3>
-          <div class="chip-group">
-            ${renderCategoryChip('all', 'All', state)}
-            ${renderCategoryChip('technology', 'Technology', state)}
-            ${renderCategoryChip('ai', 'AI', state)}
-            ${renderCategoryChip('business', 'Business', state)}
+            Sentiment
+          </h4>
+          <div class="sentiment-filters">
+            <button 
+              class="sentiment-btn positive ${state.newsSelectedSentiment === 'positive' ? 'active' : ''}"
+              @click="${() => state.handleNewsSentimentChange(state.newsSelectedSentiment === 'positive' ? null : 'positive')}"
+            >
+              <span class="sentiment-dot positive"></span>
+              Positive
+            </button>
+            <button 
+              class="sentiment-btn neutral ${state.newsSelectedSentiment === 'neutral' ? 'active' : ''}"
+              @click="${() => state.handleNewsSentimentChange(state.newsSelectedSentiment === 'neutral' ? null : 'neutral')}"
+            >
+              <span class="sentiment-dot neutral"></span>
+              Neutral
+            </button>
+            <button 
+              class="sentiment-btn negative ${state.newsSelectedSentiment === 'negative' ? 'active' : ''}"
+              @click="${() => state.handleNewsSentimentChange(state.newsSelectedSentiment === 'negative' ? null : 'negative')}"
+            >
+              <span class="sentiment-dot negative"></span>
+              Negative
+            </button>
           </div>
         </div>
       </aside>
 
-      <!-- Main Content -->
-      <main class="news-main">
-        <div class="news-header">
-          <div class="header-left">
-            <h1>News & Intelligence</h1>
-            <p class="subtitle">AI-powered news aggregation from various sources</p>
-          </div>
-          <div class="header-actions">
-            ${hasActiveFilters ? html`
-              <button class="btn-clear-filters" @click="${() => clearFilters(state)}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                </svg>
-                Clear Filters
-              </button>
-            ` : null}
-            <button 
-              class="btn-refresh ${state.newsRefreshing ? 'refreshing' : ''}" 
-              @click="${() => state.handleNewsRefresh()}"
-              ?disabled="${state.newsRefreshing}"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 4 23 10 17 10"/>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-              </svg>
-              ${state.newsRefreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
-          </div>
-        </div>
-
+      <!-- Main News List -->
+      <main class="news-content">
         <!-- Stats Bar -->
         ${!state.newsLoading && !state.newsError && items.length > 0 ? html`
-          <div class="news-stats-bar">
-            <div class="stat-item">
-              <span class="stat-value">${filteredItems.length}</span>
+          <div class="news-stats">
+            <div class="stat">
+              <span class="stat-number">${filteredItems.length}</span>
               <span class="stat-label">articles</span>
             </div>
             <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-value">${state.newsSources?.length || 0}</span>
+            <div class="stat">
+              <span class="stat-number">${state.newsSources?.length || 0}</span>
               <span class="stat-label">sources</span>
             </div>
-            <div class="stat-divider"></div>
-            <div class="sentiment-stats">
-              <span class="sentiment-dot positive"></span>
-              <span>${items.filter(i => i.sentiment === 'positive').length}</span>
-              <span class="sentiment-dot neutral"></span>
-              <span>${items.filter(i => i.sentiment === 'neutral').length}</span>
-              <span class="sentiment-dot negative"></span>
-              <span>${items.filter(i => i.sentiment === 'negative').length}</span>
+            <div class="stat-sentiments">
+              <span class="sentiment-stat positive" title="Positive">
+                <span class="sentiment-dot"></span>${items.filter(i => i.sentiment === 'positive').length}
+              </span>
+              <span class="sentiment-stat neutral" title="Neutral">
+                <span class="sentiment-dot"></span>${items.filter(i => i.sentiment === 'neutral').length}
+              </span>
+              <span class="sentiment-stat negative" title="Negative">
+                <span class="sentiment-dot"></span>${items.filter(i => i.sentiment === 'negative').length}
+              </span>
             </div>
           </div>
         ` : null}
 
         ${state.newsLoading && items.length === 0 ? html`
-          <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading latest news...</p>
+          <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading news...</p>
           </div>
         ` : state.newsError ? html`
-          <div class="error-state">
+          <div class="error-container">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/>
@@ -196,7 +205,7 @@ export function renderNewsView(state: AppViewState) {
             <button @click="${() => state.handleNewsLoad()}" class="btn-primary">Retry</button>
           </div>
         ` : filteredItems.length === 0 ? html`
-          <div class="empty-state">
+          <div class="empty-container">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Z"/>
               <path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h8"/>
@@ -208,117 +217,107 @@ export function renderNewsView(state: AppViewState) {
             ` : null}
           </div>
         ` : html`
-          <div class="news-list">
-            ${filteredItems.map(item => renderNewsCard(item, state))}
+          <div class="articles-list">
+            ${filteredItems.map(item => renderArticleCard(item, state))}
           </div>
           
           ${state.newsHasMore ? html`
-            <div class="load-more-container">
+            <div class="load-more">
               <button 
-                class="btn-load-more" 
+                class="btn-secondary" 
                 @click="${() => state.handleNewsLoad()}"
                 ?disabled="${state.newsLoading}"
               >
-                ${state.newsLoading ? html`
-                  <div class="mini-spinner"></div>
-                  Loading...
-                ` : 'Load More'}
+                ${state.newsLoading ? 'Loading...' : 'Load More'}
               </button>
             </div>
           ` : null}
         `}
       </main>
-
-      ${state.newsSelectedItem ? renderNewsModal(state.newsSelectedItem as NewsItem, state) : null}
     </div>
+
+    ${state.newsSelectedItem ? renderArticleModal(state.newsSelectedItem as NewsItem, state) : null}
   `;
 }
 
 function clearFilters(state: AppViewState) {
   state.handleNewsSearchChange('');
   state.newsSelectedSources = [];
+  state.handleNewsSentimentChange(null);
   state.handleNewsFilterChange('all');
 }
 
-function renderTimeToggle(value: string, label: string, state: AppViewState) {
+function renderFilterOption(value: string, label: string, state: AppViewState) {
   const isActive = state.newsFilter === value;
   return html`
     <button
-      class="toggle-btn ${isActive ? 'active' : ''}"
+      class="filter-option ${isActive ? 'active' : ''}"
       @click="${() => state.handleNewsFilterChange(value as 'all' | 'today' | 'week' | 'month')}" >
       ${label}
     </button>
   `;
 }
 
-function renderCategoryChip(value: string, label: string, state: AppViewState) {
-  // For now, category filtering is not implemented in state
-  // Just showing the UI
-  return html`
-    <span class="chip">${label}</span>
-  `;
-}
-
-function renderNewsCard(item: NewsItem, state: AppViewState) {
+function renderArticleCard(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
   
   return html`
     <article
-      class="news-card ${sentiment}"
+      class="article-card ${sentiment}"
       @click="${() => state.handleNewsSelectItem(item)}"
     >
-      <div class="card-content">
-        <div class="card-meta">
-          <span class="source-badge">${item.source}</span>
-          <span class="time-badge">${formatDate(item.publishedAt)}</span>
-          <span class="sentiment-icon">${getSentimentIcon(sentiment)}</span>
-        </div>
-        
-        <h3 class="card-title">${item.title}</h3>
-        
-        ${item.summary ? html`
-          <p class="card-summary">${item.summary}</p>
+      <div class="article-header">
+        <span class="article-source">${item.source}</span>
+        <span class="article-time">${formatDate(item.publishedAt)}</span>
+        <span class="article-sentiment" title="${sentiment}">
+          ${getSentimentIcon(sentiment)}
+        </span>
+      </div>
+      
+      <h3 class="article-title">${item.title}</h3>
+      
+      ${item.summary ? html`
+        <p class="article-summary">${item.summary}</p>
+      ` : null}
+      
+      <div class="article-footer">
+        ${item.tags?.length ? html`
+          <div class="article-tags">
+            ${item.tags.slice(0, 3).map(tag => html`<span class="article-tag">${tag}</span>`)}
+          </div>
         ` : null}
         
-        <div class="card-footer">
-          ${item.tags?.length ? html`
-            <div class="tags">
-              ${item.tags.slice(0, 3).map(tag => html`<span class="tag">${tag}</span>`)}
-            </div>
-          ` : html`<div></div>`}
-          
-          <button class="read-more-btn" @click="${(e: Event) => { e.stopPropagation(); state.handleNewsSelectItem(item); }}">
-            Read More
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m9 18 6-6-6-6"/>
-            </svg>
-          </button>
-        </div>
+        <button class="btn-text" @click="${(e: Event) => { e.stopPropagation(); state.handleNewsSelectItem(item); }}">
+          Read More
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
       </div>
     </article>
   `;
 }
 
-function renderNewsModal(item: NewsItem, state: AppViewState) {
+function renderArticleModal(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
   
   return html`
-    <div class="news-detail-modal" @click="${(e: Event) => {
+    <div class="modal-overlay" @click="${(e: Event) => {
       if (e.target === e.currentTarget) {
         state.handleNewsSelectItem(null);
       }
     }}">
-      <div class="modal-content">
-        <button class="close-btn" @click="${() => state.handleNewsSelectItem(null)}">
+      <div class="modal-panel">
+        <button class="modal-close" @click="${() => state.handleNewsSelectItem(null)}">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
           </svg>
         </button>
         
-        <article class="news-detail">
-          <div class="detail-header">
-            <span class="source-badge">${item.source}</span>
-            <span class="time-badge">${formatDate(item.publishedAt)}</span>
+        <div class="modal-body">
+          <div class="article-detail-header">
+            <span class="article-source">${item.source}</span>
+            <span class="article-time">${formatDate(item.publishedAt)}</span>
             <span class="sentiment-badge ${sentiment}">
               ${getSentimentIcon(sentiment)}
               ${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
@@ -328,37 +327,35 @@ function renderNewsModal(item: NewsItem, state: AppViewState) {
           <h2>${item.title}</h2>
           
           ${item.summary ? html`
-            <div class="detail-section">
-              <h4>AI Summary</h4>
-              <div class="detail-summary">${item.summary}</div>
+            <div class="article-summary-box">
+              <h4>Summary</h4>
+              <p>${item.summary}</p>
             </div>
           ` : null}
           
-          <div class="detail-section">
-            <a
-              href="${item.url}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="read-original-btn"
-            >
-              Read Original Article
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-            </a>
-          </div>
+          <a
+            href="${item.url}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary"
+          >
+            Read Original Article
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </a>
           
           ${item.tags?.length ? html`
-            <div class="detail-section">
+            <div class="article-tags-section">
               <h4>Tags</h4>
-              <div class="tags">
-                ${item.tags.map(tag => html`<span class="tag">${tag}</span>`)}
+              <div class="article-tags">
+                ${item.tags.map(tag => html`<span class="article-tag">${tag}</span>`)}
               </div>
             </div>
           ` : null}
-        </article>
+        </div>
       </div>
     </div>
   `;
@@ -387,10 +384,6 @@ function getSentimentIcon(sentiment: string) {
     default:
       return html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
   }
-}
-
-function getSourceCount(items: NewsItem[], source: string): number {
-  return items.filter(item => item.source === source).length;
 }
 
 function filterNews(items: NewsItem[], state: AppViewState): NewsItem[] {
@@ -432,6 +425,11 @@ function filterNews(items: NewsItem[], state: AppViewState): NewsItem[] {
   // Filter by sources
   if (state.newsSelectedSources?.length > 0) {
     filtered = filtered.filter(item => state.newsSelectedSources?.includes(item.source));
+  }
+  
+  // Filter by sentiment
+  if (state.newsSelectedSentiment) {
+    filtered = filtered.filter(item => item.sentiment === state.newsSelectedSentiment);
   }
   
   return filtered;
