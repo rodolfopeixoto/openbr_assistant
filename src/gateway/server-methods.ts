@@ -14,6 +14,7 @@ import { configHandlers } from "./server-methods/config.js";
 import { connectHandlers } from "./server-methods/connect.js";
 import { containersHandlers } from "./server-methods/containers.js";
 import { cronHandlers } from "./server-methods/cron.js";
+import { databaseHandlers } from "./server-methods/database.js";
 import { deviceHandlers } from "./server-methods/devices.js";
 import { envHandlers } from "./server-methods/env.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
@@ -224,6 +225,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...authHandlers,
   ...configHandlers,
   ...configManagerHandlers,
+  ...databaseHandlers,
   ...wizardHandlers,
   ...talkHandlers,
   ...ttsHandlers,
