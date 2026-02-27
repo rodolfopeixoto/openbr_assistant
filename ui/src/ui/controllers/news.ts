@@ -46,17 +46,14 @@ export async function loadNews(state: AppViewState): Promise<void> {
       await loadNewsSources(state);
     }
 
-    const result = await state.client.request({
-      method: "news.list",
-      params: {
-        source: state.newsSelectedSource || undefined,
-        category: state.newsSelectedCategory || undefined,
-        timeRange: state.newsTimeRange,
-        search: state.newsSearchQuery || undefined,
-        sentiment: state.newsSelectedSentiment || undefined,
-        limit: state.newsLimit,
-        offset: state.newsOffset,
-      },
+    const result = await state.client.request("news.list", {
+      source: state.newsSelectedSource || undefined,
+      category: state.newsSelectedCategory || undefined,
+      timeRange: state.newsTimeRange,
+      search: state.newsSearchQuery || undefined,
+      sentiment: state.newsSelectedSentiment || undefined,
+      limit: state.newsLimit,
+      offset: state.newsOffset,
     }) as { 
       items: NewsItem[]; 
       total: number; 
@@ -116,9 +113,7 @@ export async function refreshNews(state: AppViewState): Promise<void> {
   state.newsRefreshing = true;
 
   try {
-    await state.client.request({
-      method: "news.refresh",
-    });
+    await state.client.request("news.refresh");
 
     // Reload news after refresh
     state.newsOffset = 0;
@@ -136,13 +131,12 @@ export async function loadNewsSources(state: AppViewState): Promise<void> {
   }
 
   try {
-    const result = await state.client.request({
-      method: "news.sources",
-    }) as { sources: NewsSource[] };
+    const result = await state.client.request("news.sources") as { sources: NewsSource[] };
 
     state.newsSources = result.sources;
   } catch (err) {
     console.error("[News] Failed to load sources:", err);
+    state.newsSources = [];
   }
 }
 
@@ -157,14 +151,11 @@ export async function addNewsSource(
   }
 
   try {
-    await state.client.request({
-      method: "news.source.add",
-      params: {
-        name,
-        type: "rss",
-        url,
-        categories,
-      },
+    await state.client.request("news.source.add", {
+      name,
+      type: "rss",
+      url,
+      categories,
     });
 
     await loadNewsSources(state);
@@ -180,10 +171,7 @@ export async function removeNewsSource(state: AppViewState, sourceId: string): P
   }
 
   try {
-    await state.client.request({
-      method: "news.source.remove",
-      params: { sourceId },
-    });
+    await state.client.request("news.source.remove", { sourceId });
 
     await loadNewsSources(state);
     await loadNews(state);
