@@ -40,8 +40,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  color: white;
   flex-shrink: 0;
+}
+
+.title-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .header-title h1 {
@@ -151,7 +156,17 @@
 }
 
 .feature-flag-icon {
-  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.feature-flag-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .feature-flag-warning {
@@ -224,9 +239,16 @@
 }
 
 .disabled-icon {
-  font-size: 64px;
+  width: 80px;
+  height: 80px;
   margin-bottom: 20px;
-  opacity: 0.7;
+  opacity: 0.5;
+  color: var(--muted);
+}
+
+.disabled-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .disabled-state h2 {
@@ -263,8 +285,18 @@
 }
 
 .benefit-icon {
-  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
   flex-shrink: 0;
+}
+
+.benefit-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .benefit-item > div strong {
@@ -327,7 +359,17 @@
 }
 
 .status-icon {
-  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.status-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .status-title {
@@ -387,7 +429,17 @@
 }
 
 .resource-icon {
-  font-size: 24px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.resource-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .resource-info {
@@ -432,6 +484,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.section-header h2 svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
 }
 
 .model-count {
@@ -846,8 +904,18 @@ button:disabled {
 }
 
 .metric-icon {
-  font-size: 22px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
   flex-shrink: 0;
+}
+
+.metric-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .metric-info {
@@ -946,7 +1014,17 @@ button:disabled {
 }
 
 .hardware-icon {
-  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.hardware-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .hardware-title {

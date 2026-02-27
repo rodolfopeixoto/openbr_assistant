@@ -3,36 +3,55 @@ import type { AppViewState } from "../app-view-state.js";
 import type { LlamaFullStatus, DownloadProgress } from "../controllers/llama.js";
 import { PRIMARY_MODEL, ALTERNATIVE_MODELS } from "../controllers/llama.js";
 
-// Icons
-const icons: Record<string, string> = {
-  server: "🖥️",
-  download: "⬇️",
-  trash: "🗑️",
-  play: "▶️",
-  stop: "⏹️",
-  check: "✓",
-  warning: "⚠️",
-  cpu: "🧠",
-  memory: "💾",
-  gpu: "🎮",
-  star: "⭐",
-  recommended: "🏆",
-  package: "📦",
-  settings: "⚙️",
-  refresh: "🔄",
-  power: "⏻",
-  rocket: "🚀",
-  bolt: "⚡",
-  brain: "🧠",
-  chip: "💻",
+// Status indicators using text/checkmarks instead of emojis
+const STATUS_INDICATORS = {
+  installed: "",
+  notInstalled: "",
+  running: "",
+  stopped: "",
+  check: "",
+  warning: "",
+};
+
+// SVG Icons for professional look
+const ICONS = {
+  server: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6" y2="6"/><line x1="6" y1="18" x2="6" y2="18"/></svg>`,
+  download: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  trash: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  play: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+  stop: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`,
+  refresh: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+  settings: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  power: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>`,
+  cpu: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>`,
+  memory: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/></svg>`,
+  gpu: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1"/><line x1="3" y1="11" x2="7" y2="11"/><line x1="17" y1="11" x2="21" y2="11"/></svg>`,
+  brain: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>`,
+  lightning: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  chip: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 6v-3"/><path d="M15 6v-3"/><path d="M9 21v-3"/><path d="M15 21v-3"/><path d="M6 9h-3"/><path d="M6 15h-3"/><path d="M21 9h-3"/><path d="M21 15h-3"/></svg>`,
+  star: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  trophy: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
+  package: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  search: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  bolt: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  check: html`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`,
+  warning: html`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  apple: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>`,
+  nvidia: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/></svg>`,
+  metrics: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  clock: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  speed: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  timer: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  chart: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
 };
 
 export function renderOllamaView(state: AppViewState) {
-  const status = state.ollamaStatus as LlamaFullStatus | undefined;
+  const status = (state.ollamaStatus as unknown as LlamaFullStatus | undefined | null) ?? undefined;
 
   return html`
     <div class="ollama-view">
-      ${renderHeader(status, state)} ${status?.enabled ? renderEnabledContent(status, state) : renderDisabledState(state)}
+      ${renderHeader(status, state)}
+      ${status?.enabled ? renderEnabledContent(status, state) : renderDisabledState(state)}
     </div>
   `;
 }
@@ -45,27 +64,29 @@ function renderHeader(status: LlamaFullStatus | undefined, state: AppViewState) 
     <div class="view-header">
       <div class="header-title">
         <div class="title-row">
-          <div class="title-icon">${icons.brain}</div>
-          <h1>Llama 3.2:3b</h1>
+          <div class="title-icon">${ICONS.brain}</div>
+          <h1>Local LLM</h1>
           <span class="status-badge ${isRunning ? 'running' : 'stopped'}">
-            ${isRunning ? icons.check + ' Running' : icons.warning + ' Stopped'}
+            ${isRunning 
+              ? html`${ICONS.check}<span>Running</span>` 
+              : html`${ICONS.warning}<span>Stopped</span>`}
           </span>
         </div>
-        <p class="subtitle">Direct llama.cpp integration - Optimized & lightweight</p>
+        <p class="subtitle">Run AI models locally with llama.cpp integration</p>
       </div>
 
       <div class="header-actions">
-        <button class="btn-icon" @click="${() => state.handleOllamaLoad()}" title="Refresh">
-          ${icons.refresh}
+        <button class="btn-icon" @click="${() => state.handleOllamaLoad()}" title="Refresh status">
+          ${ICONS.refresh}
         </button>
       </div>
     </div>
 
-    ${renderFeatureFlagSection(status, state)}
+    ${renderFeatureToggleSection(status, state)}
   `;
 }
 
-function renderFeatureFlagSection(status: LlamaFullStatus | undefined, state: AppViewState) {
+function renderFeatureToggleSection(status: LlamaFullStatus | undefined, state: AppViewState) {
   const isEnabled = status?.enabled || false;
   const ramUsage = status?.featureFlag?.ramUsage || "~1.8GB RAM";
 
@@ -74,11 +95,12 @@ function renderFeatureFlagSection(status: LlamaFullStatus | undefined, state: Ap
       <div class="feature-flag-content">
         <div class="feature-flag-info">
           <div class="feature-flag-title">
-            <span class="feature-flag-icon">${isEnabled ? icons.rocket : icons.power}</span>
+            <span class="feature-flag-icon">${isEnabled ? ICONS.bolt : ICONS.power}</span>
             <span>Local LLM Feature</span>
           </div>          
           <div class="feature-flag-warning">
-            ${icons.warning} ${ramUsage} when enabled (saves ~700MB vs Ollama)
+            ${ICONS.warning}
+            <span>${ramUsage} required when enabled</span>
           </div>
         </div>
 
@@ -102,32 +124,32 @@ function renderFeatureFlagSection(status: LlamaFullStatus | undefined, state: Ap
 function renderDisabledState(state: AppViewState) {
   return html`
     <div class="disabled-state">
-      <div class="disabled-icon">${icons.brain}</div>
+      <div class="disabled-icon">${ICONS.brain}</div>
       <h2>Local LLM is Disabled</h2>
-      <p>Enable the feature toggle above to run Llama 3.2:3b locally and save on API costs.</p>
+      <p>Enable the feature toggle above to run AI models locally and reduce API costs.</p>
       
       <div class="benefits-grid">
         <div class="benefit-item">
-          <span class="benefit-icon">${icons.bolt}</span>
+          <span class="benefit-icon">${ICONS.lightning}</span>
           <div>
             <strong>Zero API Costs</strong>
-            <p>Run models locally for free</p>
+            <p>Run models locally without external API fees</p>
           </div>
         </div>
         
         <div class="benefit-item">
-          <span class="benefit-icon">${icons.memory}</span>
+          <span class="benefit-icon">${ICONS.memory}</span>
           <div>
-            <strong>~1.8GB RAM</strong>
-            <p>Efficient memory usage</p>
+            <strong>Efficient Memory Usage</strong>
+            <p>Optimized for ~1.8GB RAM consumption</p>
           </div>
         </div>
         
         <div class="benefit-item">
-          <span class="benefit-icon">${icons.star}</span>
+          <span class="benefit-icon">${ICONS.star}</span>
           <div>
-            <strong>Private & Secure</strong>
-            <p>Data stays on your machine</p>
+            <strong>Private and Secure</strong>
+            <p>All data processing stays on your machine</p>
           </div>
         </div>
       </div>
@@ -148,22 +170,21 @@ function renderEnabledContent(status: LlamaFullStatus, state: AppViewState) {
 }
 
 function renderHardwareConfigSection(status: LlamaFullStatus, state: AppViewState) {
-  // Check if hardware config is available
   const hwConfig = (status as unknown as Record<string, unknown>)?.hardwareConfig as Record<string, unknown> | undefined;
   
   return html`
     <section class="hardware-section">
       <div class="section-header">
-        <h2>${icons.settings} Hardware Configuration</h2>
+        <h2>${ICONS.settings} Hardware Configuration</h2>
         <button class="btn-secondary btn-sm" @click="${() => state.handleOllamaDetectHardware?.()}">
-          🔍 Auto-Detect
+          ${ICONS.search} Auto-Detect
         </button>
       </div>
       
       <div class="hardware-grid">
         <div class="hardware-card">
           <div class="hardware-header">
-            <span class="hardware-icon">🖥️</span>
+            <span class="hardware-icon">${ICONS.gpu}</span>
             <span class="hardware-title">GPU Acceleration</span>
           </div>
           <div class="hardware-controls">
@@ -199,7 +220,7 @@ function renderHardwareConfigSection(status: LlamaFullStatus, state: AppViewStat
 
         <div class="hardware-card">
           <div class="hardware-header">
-            <span class="hardware-icon">⚙️</span>
+            <span class="hardware-icon">${ICONS.cpu}</span>
             <span class="hardware-title">CPU Settings</span>
           </div>
           <div class="hardware-controls">
@@ -223,7 +244,7 @@ function renderHardwareConfigSection(status: LlamaFullStatus, state: AppViewStat
         ${hwConfig?.useMetal ? html`
           <div class="hardware-card">
             <div class="hardware-header">
-              <span class="hardware-icon">🍎</span>
+              <span class="hardware-icon">${ICONS.apple}</span>
               <span class="hardware-title">Metal (Apple Silicon)</span>
             </div>
             <div class="hardware-controls">
@@ -246,7 +267,7 @@ function renderHardwareConfigSection(status: LlamaFullStatus, state: AppViewStat
         ${hwConfig?.useCUDA ? html`
           <div class="hardware-card">
             <div class="hardware-header">
-              <span class="hardware-icon">🎮</span>
+              <span class="hardware-icon">${ICONS.nvidia}</span>
               <span class="hardware-title">CUDA (NVIDIA)</span>
             </div>
             <div class="hardware-controls">
@@ -276,10 +297,10 @@ function renderMetricsSection(status: LlamaFullStatus) {
     return html`
       <section class="metrics-section">
         <div class="section-header">
-          <h2>${icons.bolt} Performance Metrics</h2>
+          <h2>${ICONS.metrics} Performance Metrics</h2>
         </div>
         <div class="metrics-placeholder">
-          <p>No usage data yet. Start chatting to see metrics!</p>
+          <p>No usage data available. Start using the local LLM to see metrics.</p>
         </div>
       </section>
     `;
@@ -292,32 +313,32 @@ function renderMetricsSection(status: LlamaFullStatus) {
   return html`
     <section class="metrics-section">
       <div class="section-header">
-        <h2>${icons.bolt} Performance Metrics</h2>
+        <h2>${ICONS.metrics} Performance Metrics</h2>
       </div>
       <div class="metrics-grid">
         <div class="metric-card">
-          <span class="metric-icon">⚡</span>
+          <span class="metric-icon">${ICONS.speed}</span>
           <div class="metric-info">
             <span class="metric-value">${metrics.tokensPerSecond.toFixed(1)}</span>
             <span class="metric-label">Tokens/sec</span>
           </div>
         </div>
         <div class="metric-card">
-          <span class="metric-icon">⏱️</span>
+          <span class="metric-icon">${ICONS.timer}</span>
           <div class="metric-info">
             <span class="metric-value">${metrics.avgResponseTime}ms</span>
             <span class="metric-label">Avg Response</span>
           </div>
         </div>
         <div class="metric-card">
-          <span class="metric-icon">📊</span>
+          <span class="metric-icon">${ICONS.chart}</span>
           <div class="metric-info">
             <span class="metric-value">${metrics.totalRequests}</span>
             <span class="metric-label">Total Requests</span>
           </div>
         </div>
         <div class="metric-card">
-          <span class="metric-icon">🕐</span>
+          <span class="metric-icon">${ICONS.clock}</span>
           <div class="metric-info">
             <span class="metric-value">${lastRequestTime}</span>
             <span class="metric-label">Last Request</span>
@@ -338,26 +359,30 @@ function renderStatusOverview(status: LlamaFullStatus, state: AppViewState) {
       <div class="status-grid">
         <div class="status-card">
           <div class="status-header">
-            <span class="status-icon">${icons.server}</span>
-            <span class="status-title">Status</span>
+            <span class="status-icon">${ICONS.server}</span>
+            <span class="status-title">Server Status</span>
           </div>          
           <div class="status-details">
             <div class="status-row">
               <span class="label">llama.cpp:</span>
               <span class="value ${isInstalled ? 'success' : 'warning'}">
-                ${isInstalled ? icons.check + ' Installed' : icons.warning + ' Not Installed'}
+                ${isInstalled 
+                  ? html`${ICONS.check}<span>Installed</span>` 
+                  : html`${ICONS.warning}<span>Not Installed</span>`}
               </span>
             </div>
             <div class="status-row">
               <span class="label">Server:</span>
               <span class="value ${isRunning ? 'success' : 'warning'}">
-                ${isRunning ? icons.check + ' Running' : icons.warning + ' Stopped'}
+                ${isRunning 
+                  ? html`${ICONS.check}<span>Running</span>` 
+                  : html`${ICONS.warning}<span>Stopped</span>`}
               </span>
             </div>
             ${currentModel
               ? html`
                   <div class="status-row">
-                    <span class="label">Model:</span>
+                    <span class="label">Current Model:</span>
                     <span class="value">${currentModel}</span>
                   </div>
                 `
@@ -368,21 +393,21 @@ function renderStatusOverview(status: LlamaFullStatus, state: AppViewState) {
             ${!isInstalled
               ? html`
                   <button class="btn-primary" @click="${() => state.handleOllamaInstall()}">
-                    ${icons.download} Install llama.cpp
+                    ${ICONS.download} Install llama.cpp
                   </button>
                 `
               : nothing} 
             ${isInstalled && !isRunning
               ? html`
                   <button class="btn-success" @click="${() => state.handleOllamaStart()}">
-                    ${icons.play} Start Server
+                    ${ICONS.play} Start Server
                   </button>
                 `
               : nothing} 
             ${isRunning
               ? html`
                   <button class="btn-danger" @click="${() => state.handleOllamaStop()}">
-                    ${icons.stop} Stop Server
+                    ${ICONS.stop} Stop Server
                   </button>
                 `
               : nothing}
@@ -393,12 +418,12 @@ function renderStatusOverview(status: LlamaFullStatus, state: AppViewState) {
           ? html`
               <div class="status-card resources">
                 <div class="status-header">
-                  <span class="status-icon">${icons.memory}</span>
+                  <span class="status-icon">${ICONS.memory}</span>
                   <span class="status-title">Memory Usage</span>
                 </div>                
                 <div class="resource-grid">
                   <div class="resource-item">
-                    <span class="resource-icon">${icons.chip}</span>
+                    <span class="resource-icon">${ICONS.chip}</span>
                     <div class="resource-info">
                       <span class="resource-value">${status.resources.memoryGB}</span>
                       <span class="resource-label">RAM</span>
@@ -422,11 +447,11 @@ function renderPrimaryModelSection(status: LlamaFullStatus, state: AppViewState)
   return html`
     <section class="primary-model-section">
       <div class="section-header">
-        <h2>${icons.recommended} Primary Model</h2>
+        <h2>${ICONS.trophy} Recommended Model</h2>
       </div>
 
       <div class="primary-model-card">
-        <div class="recommended-badge">${icons.recommended} Recommended</div>
+        <div class="recommended-badge">${ICONS.trophy} Recommended</div>
         
         <div class="primary-header">
           <div class="primary-info">
@@ -435,7 +460,7 @@ function renderPrimaryModelSection(status: LlamaFullStatus, state: AppViewState)
           </div>
           <div class="primary-status">
             ${isInstalled
-              ? html`<span class="status-badge enabled">${icons.check} Installed</span>`
+              ? html`<span class="status-badge enabled">${ICONS.check} Installed</span>`
               : html`<span class="status-badge disabled">Not Installed</span>`}
           </div>
         </div>
@@ -465,7 +490,7 @@ function renderPrimaryModelSection(status: LlamaFullStatus, state: AppViewState)
                       class="btn-primary btn-large" 
                       @click="${() => state.handleOllamaPullModel(primary.name)}"
                     >
-                      ${icons.download} Download Llama 3.2:3b
+                      ${ICONS.download} Download Model
                     </button>
                   `
                 : html`
@@ -473,7 +498,7 @@ function renderPrimaryModelSection(status: LlamaFullStatus, state: AppViewState)
                       class="btn-danger" 
                       @click="${() => state.handleOllamaRemoveModel(primary.name)}"
                     >
-                      ${icons.trash} Remove Model
+                      ${ICONS.trash} Remove Model
                     </button>
                   `}
             `}
@@ -489,7 +514,7 @@ function renderAlternativeModelsSection(status: LlamaFullStatus, state: AppViewS
   return html`
     <section class="alternative-models-section">
       <div class="section-header">
-        <h2>${icons.package} Alternative Models</h2>
+        <h2>${ICONS.package} Alternative Models</h2>
       </div>
 
       <div class="models-grid">
@@ -527,7 +552,7 @@ function renderAlternativeModelsSection(status: LlamaFullStatus, state: AppViewS
                             class="btn-secondary" 
                             @click="${() => state.handleOllamaPullModel(model.name)}"
                           >
-                            ${icons.download} Download
+                            ${ICONS.download} Download
                           </button>
                         `
                       : html`
@@ -536,7 +561,7 @@ function renderAlternativeModelsSection(status: LlamaFullStatus, state: AppViewS
                             @click="${() => state.handleOllamaRemoveModel(model.name)}"
                             title="Remove model"
                           >
-                            ${icons.trash}
+                            ${ICONS.trash}
                           </button>
                         `}
                   `}
