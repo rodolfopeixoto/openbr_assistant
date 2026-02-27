@@ -327,9 +327,141 @@ const NEWS_SOURCES: NewsSource[] = [
   },
 ];
 
-// In-memory cache
-let newsCache: NewsItem[] = [];
-let lastFetchTime: Date | null = null;
+// Sample/mock data for demonstration
+const SAMPLE_NEWS: NewsItem[] = [
+  {
+    id: "sample-1",
+    title: "OpenAI Releases GPT-5 with Multimodal Capabilities",
+    url: "https://openai.com/blog/gpt-5",
+    summary:
+      "OpenAI announces GPT-5, featuring unprecedented multimodal capabilities including native image, audio, and video understanding alongside text generation.",
+    content: "OpenAI has unveiled GPT-5, their most advanced AI model to date...",
+    source: "openai-blog",
+    sourceName: "OpenAI Blog",
+    sourceUrl: "https://openai.com/blog",
+    categories: ["ai", "openai", "breakthrough"],
+    sentiment: "positive",
+    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "OpenAI Team",
+  },
+  {
+    id: "sample-2",
+    title: "Google DeepMind Achieves New Milestone in Protein Folding",
+    url: "https://deepmind.google/discover/blog/",
+    summary:
+      "DeepMind's AlphaFold3 accurately predicts protein structures with 95% accuracy, accelerating drug discovery and biological research.",
+    content: "In a groundbreaking development, DeepMind researchers have...",
+    source: "deepmind-blog",
+    sourceName: "DeepMind Blog",
+    sourceUrl: "https://deepmind.google",
+    categories: ["ai", "research", "deepmind"],
+    sentiment: "positive",
+    publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "DeepMind Research",
+  },
+  {
+    id: "sample-3",
+    title: "Tech Layoffs Continue: Major Companies Cut 10,000 Jobs",
+    url: "https://techcrunch.com/2024/01/15/tech-layoffs/",
+    summary:
+      "Several major technology companies announced significant workforce reductions this week, citing economic pressures and AI automation.",
+    content: "The technology sector continues to face headwinds as companies...",
+    source: "techcrunch",
+    sourceName: "TechCrunch",
+    sourceUrl: "https://techcrunch.com",
+    categories: ["technology", "business", "startups"],
+    sentiment: "negative",
+    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Sarah Johnson",
+  },
+  {
+    id: "sample-4",
+    title: "New JavaScript Framework Promises 10x Performance",
+    url: "https://dev.to/javascript/new-framework",
+    summary:
+      "Developers are excited about a new JavaScript framework that claims to render applications 10 times faster than current solutions.",
+    content: "A team of developers has released a new JavaScript framework...",
+    source: "devto",
+    sourceName: "Dev.to",
+    sourceUrl: "https://dev.to",
+    categories: ["technology", "programming", "javascript"],
+    sentiment: "positive",
+    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Dev Community",
+  },
+  {
+    id: "sample-5",
+    title: "AI Regulation Bill Passes in European Parliament",
+    url: "https://www.theverge.com/2024/1/14/ai-regulation",
+    summary:
+      "The European Parliament has passed comprehensive AI regulation, setting standards for transparency, safety, and ethical AI development.",
+    content: "In a landmark decision, the European Parliament has approved...",
+    source: "theverge",
+    sourceName: "The Verge",
+    sourceUrl: "https://www.theverge.com",
+    categories: ["technology", "policy", "ai"],
+    sentiment: "neutral",
+    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Tech Policy Team",
+  },
+  {
+    id: "sample-6",
+    title: "Quantum Computing Breakthrough: 1000 Qubits Achieved",
+    url: "https://arstechnica.com/science/2024/01/quantum-breakthrough/",
+    summary:
+      "IBM announces a major milestone in quantum computing with a 1000-qubit processor, bringing practical quantum applications closer to reality.",
+    content: "IBM researchers have achieved a significant breakthrough...",
+    source: "arstechnica",
+    sourceName: "Ars Technica",
+    sourceUrl: "https://arstechnica.com",
+    categories: ["technology", "science", "quantum"],
+    sentiment: "positive",
+    publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Science Desk",
+  },
+  {
+    id: "sample-7",
+    title: "Cybersecurity Threat: New Vulnerability Affects Millions of Devices",
+    url: "https://news.ycombinator.com/item?id=39012345",
+    summary:
+      "Security researchers have discovered a critical vulnerability affecting millions of IoT devices worldwide. Patches are being released.",
+    content: "A new cybersecurity threat has emerged affecting...",
+    source: "hackernews",
+    sourceName: "Hacker News",
+    sourceUrl: "https://news.ycombinator.com",
+    categories: ["technology", "security", "programming"],
+    sentiment: "negative",
+    publishedAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Security Researcher",
+  },
+  {
+    id: "sample-8",
+    title: "Microsoft Integrates GPT-5 into Office 365 Suite",
+    url: "https://blogs.microsoft.com/ai/2024/01/office-gpt5/",
+    summary:
+      "Microsoft announces deep integration of GPT-5 into Word, Excel, and PowerPoint, transforming how users create and edit documents.",
+    content: "Microsoft is bringing the power of GPT-5 to Office 365...",
+    source: "microsoft-ai",
+    sourceName: "Microsoft AI Blog",
+    sourceUrl: "https://blogs.microsoft.com/ai",
+    categories: ["ai", "microsoft", "enterprise"],
+    sentiment: "positive",
+    publishedAt: new Date(Date.now() - 28 * 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+    author: "Microsoft AI Team",
+  },
+];
+
+// In-memory cache - initialized with sample data
+let newsCache: NewsItem[] = [...SAMPLE_NEWS];
+let lastFetchTime: Date | null = new Date();
 let fetchInProgress = false;
 
 /**
@@ -338,7 +470,12 @@ let fetchInProgress = false;
 export function initializeNewsAggregator(): void {
   log.info("Initializing News Aggregator");
 
-  // Initial fetch
+  // Update source counts with sample data
+  for (const source of NEWS_SOURCES) {
+    source.itemCount = SAMPLE_NEWS.filter((item) => item.source === source.id).length;
+  }
+
+  // Initial fetch (will add real data to the sample data)
   fetchAllNews().catch((err) => {
     log.error("Initial news fetch failed", { error: String(err) });
   });
