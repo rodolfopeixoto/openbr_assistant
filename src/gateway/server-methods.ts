@@ -9,6 +9,7 @@ import { cacheHandlers } from "./server-methods/cache.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
 import { complianceHandlers } from "./server-methods/compliance.js";
+import { configManagerHandlers } from "./server-methods/config-manager.js";
 import { configHandlers } from "./server-methods/config.js";
 import { connectHandlers } from "./server-methods/connect.js";
 import { containersHandlers } from "./server-methods/containers.js";
@@ -222,6 +223,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...modelRoutingHandlers,
   ...authHandlers,
   ...configHandlers,
+  ...configManagerHandlers,
   ...wizardHandlers,
   ...talkHandlers,
   ...ttsHandlers,

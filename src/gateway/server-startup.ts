@@ -18,6 +18,7 @@ import { loadInternalHooks } from "../hooks/loader.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { type PluginServicesHandle, startPluginServices } from "../plugins/services.js";
 import { initializeAuditLogging } from "../security/index.js";
+import { initializeConfigManager } from "../services/config/manager.js";
 import { getOllamaService } from "../services/ollama-integrated.js";
 import { startBrowserControlServerIfEnabled } from "./server-browser.js";
 import {
@@ -44,6 +45,14 @@ export async function startGatewaySidecars(params: {
   const { logger: auditLogger, enabled: auditEnabled } = initializeAuditLogging(params.cfg);
   if (auditEnabled) {
     params.logHooks.info("audit logging initialized");
+  }
+
+  // Initialize configuration manager
+  try {
+    initializeConfigManager(params.defaultWorkspaceDir);
+    params.logHooks.info("configuration manager initialized");
+  } catch (err) {
+    params.logHooks.error(`configuration manager initialization failed: ${String(err)}`);
   }
 
   // Start OpenClaw browser control server (unless disabled via config).
