@@ -87,6 +87,7 @@ export function renderNewsView(state: AppViewState) {
           </h4>
           <div class="filter-options">
             ${renderFilterOption('all', 'All Time', state)}
+            ${renderFilterOption('48h', 'Last 48h', state)}
             ${renderFilterOption('today', 'Today', state)}
             ${renderFilterOption('week', 'This Week', state)}
             ${renderFilterOption('month', 'This Month', state)}
@@ -252,7 +253,7 @@ function renderFilterOption(value: string, label: string, state: AppViewState) {
   return html`
     <button
       class="filter-option ${isActive ? 'active' : ''}"
-      @click="${() => state.handleNewsFilterChange(value as 'all' | 'today' | 'week' | 'month')}" >
+      @click="${() => state.handleNewsFilterChange(value as 'all' | '48h' | 'today' | 'week' | 'month')}" >
       ${label}
     </button>
   `;
@@ -262,23 +263,27 @@ function renderArticleCard(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
   
   return html`
-    <article
-      class="article-card ${sentiment}"
-      @click="${() => state.handleNewsSelectItem(item)}"
-    >
-      <div class="article-header">
-        <span class="article-source">${item.source}</span>
-        <span class="article-time">${formatDate(item.publishedAt)}</span>
-        <span class="article-sentiment" title="${sentiment}">
-          ${getSentimentIcon(sentiment)}
-        </span>
-      </div>
-      
-      <h3 class="article-title">${item.title}</h3>
-      
-      ${item.summary ? html`
-        <p class="article-summary">${item.summary}</p>
-      ` : null}
+    <article class="article-card ${sentiment}">
+      <a 
+        href="${item.url}" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        class="article-link"
+      >
+        <div class="article-header">
+          <span class="article-source">${item.source}</span>
+          <span class="article-time">${formatDate(item.publishedAt)}</span>
+          <span class="article-sentiment" title="${sentiment}">
+            ${getSentimentIcon(sentiment)}
+          </span>
+        </div>
+        
+        <h3 class="article-title">${item.title}</h3>
+        
+        ${item.summary ? html`
+          <p class="article-summary">${item.summary}</p>
+        ` : null}
+      </a>
       
       <div class="article-footer">
         ${item.tags?.length ? html`
@@ -405,6 +410,10 @@ function filterNews(items: NewsItem[], state: AppViewState): NewsItem[] {
     const itemDate = (dateStr: string) => new Date(dateStr);
     
     switch (state.newsFilter) {
+      case '48h':
+        const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+        filtered = filtered.filter(item => itemDate(item.publishedAt) >= twoDaysAgo);
+        break;
       case 'today':
         filtered = filtered.filter(item => {
           const date = itemDate(item.publishedAt);

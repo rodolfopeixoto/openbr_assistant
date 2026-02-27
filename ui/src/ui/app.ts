@@ -129,7 +129,7 @@ export class OpenClawApp extends LitElement {
   @state() newsOffset = 0;
   @state() newsSources: Array<{ id: string; name: string; type: string; url: string; enabled: boolean; itemCount: number }> = [];
   @state() newsSelectedSources: string[] = [];
-  @state() newsFilter: 'all' | 'today' | 'week' | 'month' = 'all';
+  @state() newsFilter: 'all' | '48h' | 'today' | 'week' | 'month' = 'all';
   @state() newsSelectedItem: unknown | null = null;
   @state() newsModalOpen = false;
   @state() newsRefreshing = false;
@@ -1367,7 +1367,7 @@ export class OpenClawApp extends LitElement {
     await this.handleNewsLoad();
   }
 
-  handleNewsFilterChange(filter: 'all' | 'today' | 'week' | 'month') {
+  handleNewsFilterChange(filter: 'all' | '48h' | 'today' | 'week' | 'month') {
     this.newsFilter = filter;
   }
 

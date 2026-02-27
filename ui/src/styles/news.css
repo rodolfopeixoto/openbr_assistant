@@ -367,11 +367,19 @@
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px;
-  cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.article-link {
+  display: block;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
 }
 
 .article-card::before {

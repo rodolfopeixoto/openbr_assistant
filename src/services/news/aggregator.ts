@@ -3,9 +3,18 @@
  * Fetches and aggregates news from multiple sources with AI summarization
  */
 
+import Parser from "rss-parser";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 
 const log = createSubsystemLogger("news:aggregator");
+
+// Initialize RSS parser
+const rssParser = new Parser({
+  timeout: 10000,
+  headers: {
+    "User-Agent": "OpenClaw-NewsBot/1.0",
+  },
+});
 
 // News item structure
 export interface NewsItem {
@@ -40,6 +49,8 @@ export interface NewsSource {
   itemCount: number;
   categories: string[];
   fetchInterval: number; // minutes
+  status?: "ok" | "error" | "loading";
+  errorMessage?: string;
 }
 
 // Configuration for news sources
@@ -509,8 +520,12 @@ export async function fetchAllNews(): Promise<{ added: number; errors: string[] 
 
     const enabledSources = NEWS_SOURCES.filter((s) => s.enabled);
 
-    for (const source of enabledSources) {
+    for (let i = 0; i < enabledSources.length; i++) {
+      const source = enabledSources[i];
+      source.status = "loading";
+
       try {
+        log.info(`[${i + 1}/${enabledSources.length}] Fetching from ${source.name}...`);
         const items = await fetchFromSource(source);
 
         // Add new items to cache
@@ -524,12 +539,21 @@ export async function fetchAllNews(): Promise<{ added: number; errors: string[] 
         // Update source metadata
         source.lastFetchedAt = new Date().toISOString();
         source.itemCount = newsCache.filter((i) => i.source === source.id).length;
+        source.status = "ok";
+        source.errorMessage = undefined;
 
-        log.info(`Fetched ${items.length} items from ${source.name}`);
+        log.info(`✓ Fetched ${items.length} items from ${source.name}`);
       } catch (err) {
         const errorMsg = `Failed to fetch from ${source.name}: ${err}`;
         log.error(errorMsg);
         errors.push(errorMsg);
+        source.status = "error";
+        source.errorMessage = err instanceof Error ? err.message : String(err);
+      }
+
+      // Add delay between requests to avoid overwhelming servers (500ms)
+      if (i < enabledSources.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
@@ -684,46 +708,67 @@ async function fetchReddit(source: NewsSource): Promise<NewsItem[]> {
  * Fetch from RSS feed
  */
 async function fetchRSS(source: NewsSource): Promise<NewsItem[]> {
-  // Use a CORS proxy or RSS-to-JSON service
-  const rssToJsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}`;
+  try {
+    log.info(`Fetching RSS from ${source.name}`);
 
-  const response = await fetch(rssToJsonUrl);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    // Use rss-parser library for direct RSS parsing
+    const feed = await rssParser.parseURL(source.url);
+
+    const items: NewsItem[] = [];
+
+    for (const item of (feed.items || []).slice(0, 20)) {
+      const publishedAt =
+        item.pubDate || item.isoDate
+          ? new Date(item.pubDate || item.isoDate!).toISOString()
+          : new Date().toISOString();
+
+      // Extract image from various possible fields
+      let imageUrl: string | undefined;
+      if (item.enclosure?.url && item.enclosure.type?.startsWith("image/")) {
+        imageUrl = item.enclosure.url;
+      } else {
+        // Check for media content in extensions
+        const mediaContent = (item as Record<string, unknown>)["media:content"];
+        if (mediaContent && typeof mediaContent === "object" && "url" in mediaContent) {
+          imageUrl = String(mediaContent.url);
+        }
+        const mediaThumbnail = (item as Record<string, unknown>)["media:thumbnail"];
+        if (
+          !imageUrl &&
+          mediaThumbnail &&
+          typeof mediaThumbnail === "object" &&
+          "url" in mediaThumbnail
+        ) {
+          imageUrl = String(mediaThumbnail.url);
+        }
+      }
+
+      items.push({
+        id: `${source.id}-${item.guid || item.link || Math.random().toString(36).substring(7)}`,
+        title: item.title || "Untitled",
+        url: item.link || source.url,
+        summary: generateSummary(item.title || "", item.contentSnippet || item.content || null),
+        content: item.content || item.contentSnippet,
+        source: source.id,
+        sourceName: source.name,
+        sourceUrl: feed.link || source.url,
+        categories: [...source.categories, ...(item.categories || [])],
+        sentiment: analyzeSentiment((item.title || "") + " " + (item.contentSnippet || "")),
+        publishedAt,
+        fetchedAt: new Date().toISOString(),
+        author: item.creator || item.author,
+        imageUrl,
+      });
+    }
+
+    log.info(`Fetched ${items.length} items from ${source.name}`);
+    return items;
+  } catch (error) {
+    log.error(
+      `Failed to fetch RSS from ${source.name}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    throw error;
   }
-
-  const data = await response.json();
-
-  if (data.status !== "ok") {
-    throw new Error(`RSS parse error: ${data.message || "Unknown error"}`);
-  }
-
-  const items: NewsItem[] = [];
-
-  for (const item of (data.items || []).slice(0, 20)) {
-    const publishedAt = item.pubDate
-      ? new Date(item.pubDate).toISOString()
-      : new Date().toISOString();
-
-    items.push({
-      id: `${source.id}-${item.guid || item.link || Math.random().toString(36)}`,
-      title: item.title,
-      url: item.link,
-      summary: generateSummary(item.title, item.description),
-      content: item.content || item.description,
-      source: source.id,
-      sourceName: source.name,
-      sourceUrl: data.feed?.link || source.url,
-      categories: [...source.categories, ...(item.categories || [])],
-      sentiment: analyzeSentiment(item.title + " " + (item.description || "")),
-      publishedAt,
-      fetchedAt: new Date().toISOString(),
-      author: item.author,
-      imageUrl: item.thumbnail || item.enclosure?.link,
-    });
-  }
-
-  return items;
 }
 
 /**

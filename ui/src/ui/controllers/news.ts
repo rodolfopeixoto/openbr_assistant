@@ -75,6 +75,9 @@ export async function loadNews(state: AppViewState): Promise<void> {
       items = items.filter(item => {
         const itemDate = new Date(item.publishedAt);
         switch (state.newsFilter) {
+          case '48h':
+            const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+            return itemDate >= twoDaysAgo;
           case 'today':
             return itemDate.toDateString() === now.toDateString();
           case 'week':
@@ -201,7 +204,7 @@ export function searchNews(state: AppViewState, query: string): void {
 
 export function setNewsTimeRange(
   state: AppViewState,
-  range: 'all' | 'today' | 'week' | 'month'
+  range: 'all' | '48h' | 'today' | 'week' | 'month'
 ): void {
   state.newsTimeRange = range;
   state.newsOffset = 0;

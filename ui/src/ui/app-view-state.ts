@@ -355,7 +355,7 @@ export type AppViewState = {
   newsSelectedSource: string | null;
   newsSelectedCategory: string | null;
   newsTimeRange: string;
-  newsFilter: 'all' | 'today' | 'week' | 'month';
+  newsFilter: 'all' | '48h' | 'today' | 'week' | 'month';
   newsSearchQuery: string;
   newsSelectedSentiment: string | null;
   newsLimit: number;
@@ -368,7 +368,7 @@ export type AppViewState = {
   handleNewsSourceToggle: (source: string, checked: boolean) => void;
   handleNewsCategoryChange: (category: string | null) => void;
   handleNewsTimeRangeChange: (range: string) => void;
-  handleNewsFilterChange: (filter: 'all' | 'today' | 'week' | 'month') => void;
+  handleNewsFilterChange: (filter: 'all' | '48h' | 'today' | 'week' | 'month') => void;
   handleNewsSearchChange: (query: string) => void;
   handleNewsSentimentChange: (sentiment: string | null) => void;
   handleNewsLimitChange: (limit: number) => void;
