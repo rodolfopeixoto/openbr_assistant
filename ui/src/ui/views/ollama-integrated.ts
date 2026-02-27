@@ -10,11 +10,10 @@ const ICONS = {
   power: html`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>`,
   chip: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 6v-3"/><path d="M15 6v-3"/><path d="M9 21v-3"/><path d="M15 21v-3"/><path d="M6 9h-3"/><path d="M6 15h-3"/><path d="M21 9h-3"/><path d="M21 15h-3"/></svg>`,
   warning: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-  terminal: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
-  refresh: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+  info: html`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
 };
 
-// Modelos Ollama configurados
+// Modelos configurados
 const OLLAMA_MODELS = {
   llama3_2: {
     name: "llama3.2:3b",
@@ -42,26 +41,20 @@ const OLLAMA_MODELS = {
   },
 };
 
-export function renderOllamaView(state: AppViewState) {
+export function renderOllamaIntegratedView(state: AppViewState) {
   const status = state.ollamaIntegratedStatus as any;
-  const logs = state.ollamaLogs || [];
 
   return html`
     <div class="ollama-view">
-      ${renderHeader(status, state)}
-      
-      <div class="ollama-content">
-        ${status?.available 
-          ? renderModelsPanel(status, state)
-          : renderSetupPanel(status, state)}
-        
-        ${renderLogsPanel(logs)}
-      </div>
+      ${renderHeader(status)}
+      ${status?.available 
+        ? renderModelsPanel(status, state)
+        : renderSetupPanel(status, state)}
     </div>
   `;
 }
 
-function renderHeader(status: any, state: AppViewState) {
+function renderHeader(status: any) {
   const isAvailable = status?.available || false;
   const isRunning = status?.running || false;
 
@@ -79,19 +72,12 @@ function renderHeader(status: any, state: AppViewState) {
         </div>
         <p class="subtitle">Run AI models locally. No data leaves your machine.</p>
       </div>
-      
-      <div class="header-actions">
-        <button class="btn-icon" @click="${() => state.handleOllamaIntegratedRefresh()}" title="Refresh">
-          ${ICONS.refresh}
-        </button>
-      </div>
     </div>
   `;
 }
 
 function renderSetupPanel(status: any, state: AppViewState) {
   const isInstalled = status?.installed || false;
-  const error = status?.error;
 
   if (!isInstalled) {
     return html`
@@ -104,24 +90,16 @@ function renderSetupPanel(status: any, state: AppViewState) {
           <div class="install-option">
             <strong>macOS/Linux</strong>
             <code>curl -fsSL https://ollama.com/install.sh | sh</code>
-            <button class="btn-secondary btn-small" @click="${() => copyToClipboard('curl -fsSL https://ollama.com/install.sh | sh')}">Copy</button>
           </div>          
           <div class="install-option">
             <strong>Windows</strong>
-            <a href="https://ollama.com/download/windows" target="_blank" class="btn-link">Download from ollama.com →</a>
+            <a href="https://ollama.com/download/windows" target="_blank">Download from ollama.com</a>
           </div>
         </div>
 
-        <button class="btn-primary" @click="${() => state.handleOllamaIntegratedRefresh()}">
-          ${ICONS.refresh} Check Again
+        <button class="btn-secondary" @click="${() => state.handleOllamaIntegratedRefresh()}">
+          Check Again
         </button>
-        
-        ${error ? html`
-          <div class="error-box">
-            <strong>Error</strong>
-            <p>${error}</p>
-          </div>
-        ` : nothing}
       </div>
     `;
   }
@@ -132,45 +110,29 @@ function renderSetupPanel(status: any, state: AppViewState) {
       <h2>Ollama Installed but Not Running</h2>
       <p>Start Ollama to begin using local AI models.</p>
       
-      <button class="btn-primary btn-large" @click="${() => state.handleOllamaIntegratedStart()}"
-        ?disabled="${state.ollamaLoading}"
-      >
-        ${state.ollamaLoading 
-          ? 'Starting...' 
-          : html`${ICONS.power} Start Ollama`}
+      <button class="btn-primary btn-large" @click="${() => state.handleOllamaIntegratedStart()}">
+        ${ICONS.power} Start Ollama
       </button>
-      
-      ${error ? html`
-        <div class="error-box">
-          <strong>Error</strong>
-          <p>${error}</p>
-        </div>
-      ` : nothing}
     </div>
   `;
 }
 
 function renderModelsPanel(status: any, state: AppViewState) {
   const models = status?.models || [];
-  const version = status?.version;
-  const pullProgress = state.ollamaPullProgress;
 
   return html`
     <div class="models-panel">
       <div class="panel-header">
-        <div>
-          <h2>Available Models</h2>
-          ${version ? html`<span class="version-badge">Ollama ${version}</span>` : nothing}
-        </div>
+        <h2>Available Models</h2>
+        <button class="btn-icon" @click="${() => state.handleOllamaIntegratedRefresh()}" title="Refresh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
       </div>
 
       <div class="models-list">
         ${Object.entries(OLLAMA_MODELS).map(([key, model]) => {
-          const installedModel = models.find((m: any) => 
-            m.name === model.name || m.name.startsWith(model.name.split(":")[0])
-          );
+          const installedModel = models.find((m: any) => m.name === model.name || m.name.startsWith(model.name.split(":")[0]));
           const isInstalled = installedModel?.installed || false;
-          const isPulling = pullProgress?.model === key;
           
           return html`
             <div class="model-card ${model.recommended ? 'recommended' : ''} ${isInstalled ? 'installed' : ''}">
@@ -179,7 +141,7 @@ function renderModelsPanel(status: any, state: AppViewState) {
               <div class="model-info">
                 <div class="model-header">
                   <h3>${model.displayName}</h3>
-                  <span class="model-size">${isInstalled && installedModel?.size ? installedModel.size : model.size}</span>
+                  <span class="model-size">${model.size}</span>
                 </div>                
                 <p class="model-description">${model.description}</p>
                 <div class="model-tags">
@@ -191,75 +153,26 @@ function renderModelsPanel(status: any, state: AppViewState) {
                 ${isInstalled 
                   ? html`
                     <span class="installed-badge">${ICONS.check} Installed</span>
-                    <button 
-                      class="btn-icon danger" 
-                      @click="${() => state.handleOllamaIntegratedDelete(key)}" 
-                      title="Remove model"
-                      ?disabled="${state.ollamaLoading}"
-                    >
+                    <button class="btn-icon danger" @click="${() => state.handleOllamaIntegratedDelete(key)}" title="Remove">
                       ${ICONS.trash}
                     </button>
                   `
-                  : isPulling
-                    ? html`
-                      <div class="download-progress">
-                        <div class="progress-bar">
-                          <div class="progress-fill" style="width: ${pullProgress?.progress?.percent || 0}%"></div>
-                        </div>
-                        <span class="progress-text">${pullProgress?.progress?.status || 'Downloading...'}</span>
-                      </div>
-                    `
-                    : html`
-                      <button 
-                        class="btn-primary" 
-                        @click="${() => state.handleOllamaIntegratedPull(key)}"
-                        ?disabled="${state.ollamaLoading}"
-                      >
-                        ${ICONS.download} Download
-                      </button>
-                    `}
+                  : html`
+                    <button class="btn-primary" @click="${() => state.handleOllamaIntegratedPull(key)}">
+                      ${ICONS.download} Download
+                    </button>
+                  `}
               </div>
             </div>
           `;
         })}
       </div>
+
+      ${status?.version ? html`
+        <div class="version-info">
+          Ollama ${status.version}
+        </div>
+      ` : nothing}
     </div>
   `;
-}
-
-function renderLogsPanel(logs: string[]) {
-  if (!logs || logs.length === 0) {
-    return html`
-      <div class="logs-panel">
-        <div class="logs-header">
-          ${ICONS.terminal}<span>Logs</span>
-        </div>
-        <div class="logs-content">
-          <div class="logs-empty">No activity yet. Start Ollama or download a model to see logs.</div>
-        </div>
-      </div>
-    `;
-  }
-
-  return html`
-    <div class="logs-panel">
-      <div class="logs-header">
-        ${ICONS.terminal}
-        <span>Activity Logs</span>
-      </div>
-      <div class="logs-content">
-        ${logs.slice(-20).map((log) => html`
-          <div class="logs-line ${log.includes('ERROR') ? 'error' : log.includes('WARN') ? 'warning' : ''}">
-            ${log}
-          </div>
-        `)}
-      </div>
-    </div>
-  `;
-}
-
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text).then(() => {
-    // Toast notification could be added here
-  });
 }

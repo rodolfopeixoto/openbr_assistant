@@ -473,6 +473,8 @@ export type AppViewState = {
     model: string;
     progress: { status: string; completed?: number; total?: number; percent?: number };
   } | null;
+  ollamaIntegratedStatus: Record<string, unknown> | null;
+  ollamaLogs: string[];
   // Toast notifications
   toasts: Array<{ id: string; message: string; type: 'error' | 'success' | 'info'; duration?: number }>;
   addToast: (message: string, type: 'error' | 'success' | 'info', duration?: number) => void;
@@ -486,6 +488,11 @@ export type AppViewState = {
   handleOllamaRemoveModel: (model: string) => Promise<void>;
   handleOllamaDetectHardware: () => Promise<void>;
   handleOllamaConfigureHardware: (config: Record<string, unknown>) => Promise<void>;
+  // Ollama Integrated
+  handleOllamaIntegratedRefresh: () => Promise<void>;
+  handleOllamaIntegratedStart: () => Promise<void>;
+  handleOllamaIntegratedPull: (model: string) => Promise<void>;
+  handleOllamaIntegratedDelete: (model: string) => Promise<void>;
   // Rate Limits
   rateLimitsLoading: boolean;
   rateLimitsError: string | null;

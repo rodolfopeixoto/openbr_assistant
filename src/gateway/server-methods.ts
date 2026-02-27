@@ -27,6 +27,7 @@ import { modelRoutingHandlers } from "./server-methods/model-routing.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { newsHandlers } from "./server-methods/news.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
+import { ollamaIntegratedHandlers } from "./server-methods/ollama-integrated.js";
 import { ollamaHandlers } from "./server-methods/ollama.js";
 import { onboardWizardHandlers } from "./server-methods/onboard-wizard.js";
 import { opencodeHandlers } from "./server-methods/opencode.js";
@@ -238,6 +239,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...complianceHandlers,
   ...onboardWizardHandlers,
   ...ollamaHandlers,
+  ...ollamaIntegratedHandlers,
   ...llamaHandlers,
   ...rateLimitsHandlers,
   ...securityHandlers,
