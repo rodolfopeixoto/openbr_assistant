@@ -520,4 +520,21 @@ export type AppViewState = {
   voiceRecorderOpen: boolean;
   handleToggleVoiceRecorder: () => void;
   handleVoiceTranscription: (text: string) => void;
+  // Config Manager
+  configManagerLoading: boolean;
+  configManagerSaving: boolean;
+  configManagerState: {
+    config: Record<string, unknown> | null;
+    history: Array<{ timestamp: number; comment?: string }>;
+    validationErrors: string[];
+    validationWarnings: string[];
+    editMode: 'form' | 'json';
+    selectedTab: string;
+  };
+  handleConfigManagerLoad: () => Promise<void>;
+  handleConfigManagerUpdate: (config: Record<string, unknown>, comment?: string) => Promise<void>;
+  handleConfigManagerRollback: (index: number) => Promise<void>;
+  handleConfigManagerExport: () => Promise<void>;
+  handleConfigManagerImport: (json: string) => Promise<void>;
+  handleConfigManagerReset: () => Promise<void>;
 };
