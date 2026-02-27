@@ -373,8 +373,8 @@ export class LlamaCppService {
 
     try {
       // Map platform/arch to correct binary
-      // Usando versão b8168 (mais recente e estável)
-      const version = "b8168";
+      // Usando versão b8173 (mais recente e estável)
+      const version = "b8173";
       let downloadUrl: string;
       let binaryName: string;
       let isTarGz = false;
