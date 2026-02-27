@@ -22,6 +22,7 @@ import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { featuresHandlers } from "./server-methods/features.js";
 import { healthHandlers } from "./server-methods/health.js";
 import { llamaHandlers } from "./server-methods/llama.js";
+import { loggingHandlers } from "./server-methods/logging-service.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { mcpHandlers } from "./server-methods/mcp.js";
 import { memoryHandlers } from "./server-methods/memory.js";
@@ -112,6 +113,10 @@ const READ_METHODS = new Set([
   "news.get",
   "news.stats",
   "features.dashboard",
+  "logging.query",
+  "logging.stats",
+  "logging.sources",
+  "logging.recent",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -186,6 +191,7 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
   }
   if (
+    method.startsWith("logging.") ||
     method.startsWith("config.") ||
     method.startsWith("wizard.") ||
     method.startsWith("update.") ||
@@ -255,6 +261,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...mcpHandlers,
   ...newsHandlers,
   ...opencodeHandlers,
+  ...loggingHandlers,
 };
 
 export async function handleGatewayRequest(
