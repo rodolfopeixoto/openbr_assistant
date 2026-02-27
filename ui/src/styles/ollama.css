@@ -11,6 +11,10 @@
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
 }
 
 .header-title {
@@ -703,34 +707,326 @@
   color: #ef4444;
 }
 
+/* Main Content Layout */
+.ollama-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Setup Panel */
+.setup-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.setup-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  color: var(--accent);
+}
+
+.setup-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.setup-panel h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0 0 12px 0;
+}
+
+.setup-panel > p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 24px 0;
+}
+
+.install-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.install-option {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.install-option strong {
+  display: block;
+  color: var(--text-strong);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.install-option code {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.btn-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+/* Models Panel */
+.models-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.panel-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.version-badge {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--bg-elevated);
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-left: 12px;
+}
+
+.models-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.models-list .model-card {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+}
+
+.models-list .model-card.recommended {
+  border-color: var(--accent);
+}
+
+.models-list .model-card.installed {
+  background: rgba(34, 197, 94, 0.05);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.models-list .model-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.models-list .model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.models-list .model-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.models-list .model-description {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.models-list .model-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.models-list .model-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.download-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.download-progress .progress-bar {
+  height: 6px;
+  background: var(--card);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* Logs Panel */
+.logs-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.logs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.logs-header svg {
+  width: 16px;
+  height: 16px;
+}
+
+.logs-content {
+  padding: 16px 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.logs-empty {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px;
+}
+
+.logs-line {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 2px 0;
+}
+
+.logs-line.error {
+  color: #ef4444;
+}
+
+.logs-line.warning {
+  color: #f59e0b;
+}
+
+/* Button danger variant */
+.btn-icon.danger {
+  color: #ef4444;
+}
+
+.btn-icon.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Status badge warning */
+.status-badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .ollama-view {
     padding: 16px;
   }
-  
+
   .wizard-steps {
     padding: 12px 8px;
   }
-  
+
   .step-line {
     width: 30px;
   }
-  
+
   .step span {
     font-size: 10px;
   }
-  
+
   .alternative-models-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .benefits-row {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .status-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* New responsive styles */
+  .setup-panel {
+    padding: 24px;
+  }
+
+  .models-list .model-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .models-list .model-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .view-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
   }
 }
