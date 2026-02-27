@@ -12,48 +12,47 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("llama");
 
-// Llama 3.2:3b - Primary model - Official Meta model
+// Modelos funcionais testados - Todos da TheBloke ( HuggingFace ) que são confiáveis
 export const PRIMARY_MODEL = {
-  name: "llama-3.2-3b",
-  displayName: "Llama 3.2:3b",
-  // Using unsloth's optimized version for best performance
+  name: "tinyllama-1.1b",
+  displayName: "TinyLlama 1.1B",
+  // Modelo extremamente pequeno (~600MB) - funciona em qualquer máquina
   ggufUrl:
-    "https://huggingface.co/unsloth/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-  filename: "llama-3.2-3b-instruct-q4_k_m.gguf",
-  sizeBytes: 2019376992, // ~1.9GB
+    "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+  filename: "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+  sizeBytes: 669919488, // ~638MB
   quantization: "Q4_K_M",
-  contextLength: 8192,
-  description: "Meta's Llama 3.2 3B - Fast, efficient & optimized",
-  tags: ["instruct", "fast", "3b", "meta"],
+  contextLength: 2048,
+  description: "TinyLlama 1.1B - Ultra compacto, funciona em qualquer PC (638MB)",
+  tags: ["ultra-small", "1.1b", "fast", "beginner"],
   recommended: true,
 };
 
-// Alternative models
+// Modelos alternativos funcionais e pequenos
 export const ALTERNATIVE_MODELS = [
   {
-    name: "phi-4-mini",
-    displayName: "Phi-4 Mini",
-    ggufUrl:
-      "https://huggingface.co/bartowski/Phi-4-mini-instruct-GGUF/resolve/main/Phi-4-mini-instruct-Q4_K_M.gguf",
-    filename: "phi-4-mini-q4_k_m.gguf",
-    sizeBytes: 2500000000, // ~2.4GB
+    name: "phi-2",
+    displayName: "Phi-2 2.7B",
+    ggufUrl: "https://huggingface.co/TheBloke/phi-2-GGUF/resolve/main/phi-2.Q4_K_M.gguf",
+    filename: "phi-2.Q4_K_M.gguf",
+    sizeBytes: 1593837056, // ~1.5GB
     quantization: "Q4_K_M",
-    contextLength: 4096,
-    description: "Microsoft Phi-4 Mini - Great performance",
-    tags: ["instruct", "3.8b", "microsoft"],
+    contextLength: 2048,
+    description: "Microsoft Phi-2 - Excelente desempenho para 1.5GB",
+    tags: ["microsoft", "2.7b", "efficient"],
     recommended: false,
   },
   {
-    name: "gemma-2b",
-    displayName: "Gemma 2B",
+    name: "qwen2-0.5b",
+    displayName: "Qwen2 0.5B",
     ggufUrl:
-      "https://huggingface.co/lmstudio-ai/gemma-2b-it-GGUF/resolve/main/gemma-2b-it-q4_k_m.gguf",
-    filename: "gemma-2b-q4_k_m.gguf",
-    sizeBytes: 1500000000, // ~1.4GB
+      "https://huggingface.co/TheBloke/Qwen2-0.5B-Instruct-GGUF/resolve/main/qwen2-0.5b-instruct-q4_k_m.gguf",
+    filename: "qwen2-0.5b-instruct-q4_k_m.gguf",
+    sizeBytes: 352321536, // ~336MB
     quantization: "Q4_K_M",
-    contextLength: 4096,
-    description: "Google Gemma 2B - Ultra small & fast",
-    tags: ["instruct", "2b", "google", "ultra-small"],
+    contextLength: 2048,
+    description: "Qwen2 0.5B - O menor modelo funcional disponível (336MB)",
+    tags: ["ultra-tiny", "0.5b", "multilingual"],
     recommended: false,
   },
 ];
@@ -374,55 +373,64 @@ export class LlamaCppService {
 
     try {
       // Map platform/arch to correct binary
-      const version = "b4628"; // Updated to latest stable release
+      // Usando versão b8168 (mais recente e estável)
+      const version = "b8168";
       let downloadUrl: string;
       let binaryName: string;
+      let isTarGz = false;
 
       if (os === "darwin") {
         binaryName = "llama-server";
+        isTarGz = true;
         if (arch === "arm64") {
-          // Apple Silicon
-          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-macos-arm64.zip`;
+          // Apple Silicon - arquivo .tar.gz na versão b8168
+          downloadUrl = `https://github.com/ggml-org/llama.cpp/releases/download/${version}/llama-${version}-bin-macos-arm64.tar.gz`;
         } else {
           // Intel Mac
-          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-macos-x64.zip`;
+          downloadUrl = `https://github.com/ggml-org/llama.cpp/releases/download/${version}/llama-${version}-bin-macos-x64.tar.gz`;
         }
       } else if (os === "linux") {
         binaryName = "llama-server";
-        if (arch === "arm64") {
-          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-arm64.zip`;
-        } else {
-          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-x64.zip`;
-        }
+        isTarGz = true;
+        // Linux usa ubuntu-x64 na versão b8168
+        downloadUrl = `https://github.com/ggml-org/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-x64.tar.gz`;
       } else if (os === "win32") {
         binaryName = "llama-server.exe";
-        // Use CUDA version for best performance on Windows
-        downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-win-cuda-cu12.4-x64.zip`;
+        isTarGz = false;
+        // Windows x64 CPU (mais compatível, não requer CUDA)
+        downloadUrl = `https://github.com/ggml-org/llama.cpp/releases/download/${version}/llama-${version}-bin-win-cpu-x64.zip`;
       } else {
         throw new Error(`Unsupported platform: ${os} ${arch}`);
       }
 
       log.info(`Downloading llama.cpp from ${downloadUrl}...`);
 
-      // Download to temp file
-      const tempZip = join(this.llamaCppDir, "download.zip");
-      await this.downloadFile(downloadUrl, tempZip, (progress) => {
+      // Download to temp file (extensão baseada no tipo)
+      const tempFile = join(this.llamaCppDir, isTarGz ? "download.tar.gz" : "download.zip");
+      await this.downloadFile(downloadUrl, tempFile, (progress) => {
         log.info(`Download progress: ${progress.percent}%`);
       });
 
       log.info("Extracting llama.cpp...");
 
-      // Extract
+      // Extract baseado no tipo de arquivo
       const { execSync } = await import("child_process");
       if (os === "win32") {
+        // Windows usa ZIP
         execSync(
-          `powershell -command "Expand-Archive -Path '${tempZip}' -DestinationPath '${this.llamaCppDir}' -Force"`,
+          `powershell -command "Expand-Archive -Path '${tempFile}' -DestinationPath '${this.llamaCppDir}' -Force"`,
           {
             stdio: ["ignore", "pipe", "pipe"],
           },
         );
+      } else if (isTarGz) {
+        // macOS/Linux usam tar.gz na versão b8168
+        execSync(`tar -xzf "${tempFile}" -C "${this.llamaCppDir}" --strip-components=1`, {
+          stdio: ["ignore", "pipe", "pipe"],
+        });
       } else {
-        execSync(`unzip -o "${tempZip}" -d "${this.llamaCppDir}"`, {
+        // Fallback para ZIP
+        execSync(`unzip -o "${tempFile}" -d "${this.llamaCppDir}"`, {
           stdio: ["ignore", "pipe", "pipe"],
         });
       }
@@ -430,19 +438,37 @@ export class LlamaCppService {
       // Make binary executable on Unix
       if (os !== "win32") {
         const binaryPath = join(this.llamaCppDir, binaryName);
-        execSync(`chmod +x "${binaryPath}"`);
+        // Verifica se o binário existe no local esperado
+        if (existsSync(binaryPath)) {
+          execSync(`chmod +x "${binaryPath}"`);
 
-        // Verify binary works
-        try {
-          execSync(`"${binaryPath}" --version`, { stdio: "pipe" });
-          log.info("Binary verified successfully");
-        } catch {
-          log.warn("Binary verification failed, but continuing anyway");
+          // Verify binary works
+          try {
+            execSync(`"${binaryPath}" --version`, { stdio: "pipe" });
+            log.info("Binary verified successfully");
+          } catch {
+            log.warn("Binary verification failed, but continuing anyway");
+          }
+        } else {
+          // Procura pelo binário recursivamente
+          log.warn(`Binary not found at ${binaryPath}, searching...`);
+          const findCmd = `find "${this.llamaCppDir}" -name "${binaryName}" -type f | head -1`;
+          try {
+            const foundPath = execSync(findCmd, { encoding: "utf8" }).trim();
+            if (foundPath) {
+              execSync(`chmod +x "${foundPath}"`);
+              // Cria symlink ou copia para o local esperado
+              execSync(`cp "${foundPath}" "${binaryPath}"`);
+              log.info(`Binary found and copied from ${foundPath}`);
+            }
+          } catch {
+            log.warn("Could not locate binary after extraction");
+          }
         }
       }
 
       // Clean up
-      rmSync(tempZip, { force: true });
+      rmSync(tempFile, { force: true });
 
       log.info("llama.cpp installed successfully");
       return { success: true, message: "llama.cpp installed successfully" };

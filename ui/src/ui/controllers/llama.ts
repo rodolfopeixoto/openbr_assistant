@@ -57,35 +57,35 @@ export interface DownloadProgress {
   eta?: string;
 }
 
-// Primary model: Llama 3.2:3b
+// Modelos funcionais testados - Todos pequenos e funcionais
 export const PRIMARY_MODEL = {
-  name: "llama-3.2-3b",
-  displayName: "Llama 3.2:3b",
-  size: "1.9 GB",
-  sizeBytes: 2019376992,
-  description: "Fast & efficient - Recommended for most tasks",
-  tags: ["instruct", "3B params", "Q4_K_M", "fast"],
+  name: "tinyllama-1.1b",
+  displayName: "TinyLlama 1.1B",
+  size: "638 MB",
+  sizeBytes: 669919488,
+  description: "Ultra compacto (638MB) - Funciona em qualquer PC",
+  tags: ["ultra-small", "1.1b", "fast", "beginner"],
   recommended: true,
 };
 
-// Alternative models
+// Modelos alternativos funcionais e pequenos
 export const ALTERNATIVE_MODELS = [
   {
-    name: "phi-4-mini",
-    displayName: "Phi-4 Mini",
-    size: "2.4 GB",
-    sizeBytes: 2500000000,
-    description: "Microsoft Phi-4 Mini - Great performance",
-    tags: ["instruct", "3.8B params", "Q4_K_M"],
+    name: "phi-2",
+    displayName: "Phi-2 2.7B",
+    size: "1.5 GB",
+    sizeBytes: 1593837056,
+    description: "Microsoft Phi-2 - Excelente desempenho para 1.5GB",
+    tags: ["microsoft", "2.7b", "efficient"],
     recommended: false,
   },
   {
-    name: "gemma-2b",
-    displayName: "Gemma 2B",
-    size: "1.4 GB",
-    sizeBytes: 1500000000,
-    description: "Google Gemma 2B - Ultra small & fast",
-    tags: ["instruct", "2B params", "ultra-small"],
+    name: "qwen2-0.5b",
+    displayName: "Qwen2 0.5B",
+    size: "336 MB",
+    sizeBytes: 352321536,
+    description: "Qwen2 0.5B - O menor modelo funcional (336MB)",
+    tags: ["ultra-tiny", "0.5b", "multilingual"],
     recommended: false,
   },
 ];
