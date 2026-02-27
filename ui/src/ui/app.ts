@@ -1357,12 +1357,14 @@ export class OpenClawApp extends LitElement {
     this.newsOffset = offset;
   }
 
-  handleNewsSourceToggle(source: string, checked: boolean) {
+  async handleNewsSourceToggle(source: string, checked: boolean) {
     if (checked) {
       this.newsSelectedSources = [...this.newsSelectedSources, source];
     } else {
       this.newsSelectedSources = this.newsSelectedSources.filter((s) => s !== source);
     }
+    // Reload news with new source filters
+    await this.handleNewsLoad();
   }
 
   handleNewsFilterChange(filter: 'all' | 'today' | 'week' | 'month') {

@@ -16,6 +16,9 @@ export interface NewsItem {
 export function renderNewsView(state: AppViewState) {
   const items = (state.newsItems || []) as NewsItem[];
   const filteredItems = filterNews(items, state);
+  const hasActiveFilters = state.newsSearchQuery || 
+    (state.newsSelectedSources?.length > 0) || 
+    (state.newsFilter && state.newsFilter !== 'all');
   
   return html`
     <div class="news-page-layout">
@@ -74,21 +77,34 @@ export function renderNewsView(state: AppViewState) {
               <path d="M2 12l10 5 10-5"/>
             </svg>
             Sources
+            <span class="source-count">${(state.newsSources || []).length}</span>
           </h3>
-          ${(state.newsSources || []).map(source => html`
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                .checked="${state.newsSelectedSources?.includes(source.id)}"
-                @change="${(e: Event) => {
-                  const target = e.target as HTMLInputElement;
-                  state.handleNewsSourceToggle(source.id, target.checked);
-                }}"
-              />
-              ${source.name}
-              <span class="checkbox-count">${source.itemCount || 0}</span>
-            </label>
-          `)}
+          ${!state.newsSources || state.newsSources.length === 0 ? html`
+            <div class="sources-loading">
+              <div class="mini-spinner"></div>
+              <span>Loading sources...</span>
+            </div>
+          ` : html`
+            <div class="sources-list">
+              ${(state.newsSources || []).slice(0, 8).map(source => html`
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    .checked="${state.newsSelectedSources?.includes(source.id)}"
+                    @change="${(e: Event) => {
+                      const target = e.target as HTMLInputElement;
+                      state.handleNewsSourceToggle(source.id, target.checked);
+                    }}"
+                  />
+                  <span class="source-name">${source.name}</span>
+                  <span class="checkbox-count">${source.itemCount || 0}</span>
+                </label>
+              `)}
+              ${state.newsSources.length > 8 ? html`
+                <div class="sources-more">+${state.newsSources.length - 8} more sources</div>
+              ` : null}
+            </div>
+          `}
         </div>
 
         <!-- Categories -->
@@ -113,11 +129,58 @@ export function renderNewsView(state: AppViewState) {
       <!-- Main Content -->
       <main class="news-main">
         <div class="news-header">
-          <h1>News & Intelligence</h1>
-          <p class="subtitle">AI-powered news aggregation from various sources</p>
+          <div class="header-left">
+            <h1>News & Intelligence</h1>
+            <p class="subtitle">AI-powered news aggregation from various sources</p>
+          </div>
+          <div class="header-actions">
+            ${hasActiveFilters ? html`
+              <button class="btn-clear-filters" @click="${() => clearFilters(state)}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                </svg>
+                Clear Filters
+              </button>
+            ` : null}
+            <button 
+              class="btn-refresh ${state.newsRefreshing ? 'refreshing' : ''}" 
+              @click="${() => state.handleNewsRefresh()}"
+              ?disabled="${state.newsRefreshing}"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              ${state.newsRefreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
 
-        ${state.newsLoading ? html`
+        <!-- Stats Bar -->
+        ${!state.newsLoading && !state.newsError && items.length > 0 ? html`
+          <div class="news-stats-bar">
+            <div class="stat-item">
+              <span class="stat-value">${filteredItems.length}</span>
+              <span class="stat-label">articles</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">${state.newsSources?.length || 0}</span>
+              <span class="stat-label">sources</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="sentiment-stats">
+              <span class="sentiment-dot positive"></span>
+              <span>${items.filter(i => i.sentiment === 'positive').length}</span>
+              <span class="sentiment-dot neutral"></span>
+              <span>${items.filter(i => i.sentiment === 'neutral').length}</span>
+              <span class="sentiment-dot negative"></span>
+              <span>${items.filter(i => i.sentiment === 'negative').length}</span>
+            </div>
+          </div>
+        ` : null}
+
+        ${state.newsLoading && items.length === 0 ? html`
           <div class="loading-state">
             <div class="spinner"></div>
             <p>Loading latest news...</p>
@@ -139,18 +202,42 @@ export function renderNewsView(state: AppViewState) {
               <path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h8"/>
             </svg>
             <h3>No news found</h3>
-            <p>Try adjusting your filters or check back later for new content.</p>
+            <p>${hasActiveFilters ? 'Try adjusting your filters to see more results.' : 'Check back later for new content.'}</p>
+            ${hasActiveFilters ? html`
+              <button @click="${() => clearFilters(state)}" class="btn-primary">Clear Filters</button>
+            ` : null}
           </div>
         ` : html`
           <div class="news-list">
             ${filteredItems.map(item => renderNewsCard(item, state))}
           </div>
+          
+          ${state.newsHasMore ? html`
+            <div class="load-more-container">
+              <button 
+                class="btn-load-more" 
+                @click="${() => state.handleNewsLoad()}"
+                ?disabled="${state.newsLoading}"
+              >
+                ${state.newsLoading ? html`
+                  <div class="mini-spinner"></div>
+                  Loading...
+                ` : 'Load More'}
+              </button>
+            </div>
+          ` : null}
         `}
       </main>
 
       ${state.newsSelectedItem ? renderNewsModal(state.newsSelectedItem as NewsItem, state) : null}
     </div>
   `;
+}
+
+function clearFilters(state: AppViewState) {
+  state.handleNewsSearchChange('');
+  state.newsSelectedSources = [];
+  state.handleNewsFilterChange('all');
 }
 
 function renderTimeToggle(value: string, label: string, state: AppViewState) {

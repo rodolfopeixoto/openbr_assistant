@@ -41,6 +41,11 @@ export async function loadNews(state: AppViewState): Promise<void> {
   state.newsError = null;
 
   try {
+    // Load sources first if not loaded
+    if (!state.newsSources || state.newsSources.length === 0) {
+      await loadNewsSources(state);
+    }
+
     const result = await state.client.request({
       method: "news.list",
       params: {
@@ -60,13 +65,40 @@ export async function loadNews(state: AppViewState): Promise<void> {
       limit: number;
     };
 
-    if (state.newsOffset === 0) {
-      state.newsItems = result.items;
-    } else {
-      state.newsItems = [...state.newsItems, ...result.items];
+    let items = result.items;
+    
+    // Apply client-side source filtering if sources are selected
+    if (state.newsSelectedSources && state.newsSelectedSources.length > 0) {
+      items = items.filter(item => state.newsSelectedSources?.includes(item.source));
     }
     
-    state.newsTotalCount = result.total;
+    // Apply client-side time range filtering
+    if (state.newsFilter && state.newsFilter !== 'all') {
+      const now = new Date();
+      items = items.filter(item => {
+        const itemDate = new Date(item.publishedAt);
+        switch (state.newsFilter) {
+          case 'today':
+            return itemDate.toDateString() === now.toDateString();
+          case 'week':
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return itemDate >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return itemDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+
+    if (state.newsOffset === 0) {
+      state.newsItems = items;
+    } else {
+      state.newsItems = [...state.newsItems, ...items];
+    }
+    
+    state.newsTotalCount = items.length;
     state.newsHasMore = result.hasMore;
   } catch (err) {
     state.newsError = err instanceof Error ? err.message : "Failed to load news";
