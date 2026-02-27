@@ -374,7 +374,7 @@ export class LlamaCppService {
 
     try {
       // Map platform/arch to correct binary
-      const version = "b3748";
+      const version = "b4628"; // Updated to latest stable release
       let downloadUrl: string;
       let binaryName: string;
 
@@ -390,7 +390,7 @@ export class LlamaCppService {
       } else if (os === "linux") {
         binaryName = "llama-server";
         if (arch === "arm64") {
-          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-aarch64.zip`;
+          downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-arm64.zip`;
         } else {
           downloadUrl = `https://github.com/ggerganov/llama.cpp/releases/download/${version}/llama-${version}-bin-ubuntu-x64.zip`;
         }
