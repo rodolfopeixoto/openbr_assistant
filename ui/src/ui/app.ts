@@ -133,6 +133,11 @@ export class OpenClawApp extends LitElement {
   @state() newsSelectedItem: unknown | null = null;
   @state() newsModalOpen = false;
   @state() newsRefreshing = false;
+  // News Analysis
+  @state() newsAnalyzing = false;
+  @state() newsAnalysisQuery = "";
+  @state() newsAnalysisResult: string | null = null;
+  @state() newsAnalysisType = "";
   // Features
   @state() featuresLoading = false;
   @state() featuresError: string | null = null;
@@ -1394,6 +1399,32 @@ export class OpenClawApp extends LitElement {
     } finally {
       this.newsLoading = false;
     }
+  }
+
+  // News Analysis methods
+  async handleNewsAnalyze(type: string) {
+    this.newsAnalyzing = true;
+    this.newsAnalysisType = type;
+    
+    try {
+      const { analyzeNews } = await import('./controllers/news.js');
+      const result = await analyzeNews(this, type, this.newsAnalysisQuery);
+      this.newsAnalysisResult = result;
+    } catch (err) {
+      this.newsAnalysisResult = `Error analyzing news: ${err instanceof Error ? err.message : String(err)}`;
+    } finally {
+      this.newsAnalyzing = false;
+    }
+  }
+
+  handleNewsAnalysisQueryChange(query: string) {
+    this.newsAnalysisQuery = query;
+  }
+
+  handleClearNewsAnalysis() {
+    this.newsAnalysisResult = null;
+    this.newsAnalysisType = '';
+    this.newsAnalysisQuery = '';
   }
 
   // Features methods

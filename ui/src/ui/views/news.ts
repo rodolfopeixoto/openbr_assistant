@@ -188,6 +188,108 @@ export function renderNewsView(state: AppViewState) {
               </span>
             </div>
           </div>
+
+          <!-- AI News Analyzer -->
+          <div class="news-analyzer">
+            <h3 class="analyzer-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+              AI News Analyzer
+            </h3>
+            <div class="analyzer-actions">
+              <button 
+                class="analyzer-btn" 
+                @click="${() => state.handleNewsAnalyze('summary')}"
+                ?disabled="${state.newsAnalyzing}"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Summarize
+              </button>
+              <button 
+                class="analyzer-btn" 
+                @click="${() => state.handleNewsAnalyze('trends')}"
+                ?disabled="${state.newsAnalyzing}"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Trends
+              </button>
+              <button 
+                class="analyzer-btn" 
+                @click="${() => state.handleNewsAnalyze('key-insights')}"
+                ?disabled="${state.newsAnalyzing}"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                Key Insights
+              </button>
+              <button 
+                class="analyzer-btn" 
+                @click="${() => state.handleNewsAnalyze('roadmap')}"
+                ?disabled="${state.newsAnalyzing}"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                Generate Script
+              </button>
+            </div>
+            
+            <!-- Chat Input for Custom Questions -->
+            <div class="analyzer-chat">
+              <input
+                type="text"
+                class="analyzer-input"
+                placeholder="Ask about the news (e.g., 'What are the main AI breakthroughs this week?')"
+                .value="${state.newsAnalysisQuery || ''}"
+                @input="${(e: InputEvent) => state.handleNewsAnalysisQueryChange((e.target as HTMLInputElement).value)}"
+                @keydown="${(e: KeyboardEvent) => e.key === 'Enter' && state.handleNewsAnalyze('custom')}"
+              />
+              <button 
+                class="analyzer-submit"
+                @click="${() => state.handleNewsAnalyze('custom')}"
+                ?disabled="${state.newsAnalyzing || !state.newsAnalysisQuery}"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Analysis Results -->
+            ${state.newsAnalysisResult ? html`
+              <div class="analysis-result">
+                <div class="analysis-header">
+                  <span class="analysis-type">${state.newsAnalysisType}</span>
+                  <button class="analysis-close" @click="${() => state.handleClearNewsAnalysis()}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="analysis-content">${state.newsAnalysisResult}</div>
+              </div>
+            ` : null}
+
+            ${state.newsAnalyzing ? html`
+              <div class="analysis-loading">
+                <div class="loading-spinner-small"></div>
+                <span>Analyzing news with AI...</span>
+              </div>
+            ` : null}
+          </div>
         ` : null}
 
         ${state.newsLoading && items.length === 0 ? html`

@@ -376,6 +376,14 @@ export type AppViewState = {
   handleNewsSelectItem: (item: unknown | null) => void;
   handleNewsRefresh: () => Promise<void>;
   handleLoadMore: () => Promise<void>;
+  // News Analysis
+  newsAnalyzing: boolean;
+  newsAnalysisQuery: string;
+  newsAnalysisResult: string | null;
+  newsAnalysisType: string;
+  handleNewsAnalyze: (type: string) => Promise<void>;
+  handleNewsAnalysisQueryChange: (query: string) => void;
+  handleClearNewsAnalysis: () => void;
   // Features Dashboard
   featuresLoading: boolean;
   featuresError: string | null;

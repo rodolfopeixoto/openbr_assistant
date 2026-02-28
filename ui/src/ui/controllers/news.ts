@@ -98,7 +98,7 @@ export async function loadNews(state: AppViewState): Promise<void> {
       state.newsItems = [...state.newsItems, ...items];
     }
     
-    state.newsTotalCount = items.length;
+    state.newsTotalCount = result.total;
     state.newsHasMore = result.hasMore;
   } catch (err) {
     state.newsError = err instanceof Error ? err.message : "Failed to load news";
@@ -222,4 +222,36 @@ export function selectNewsItem(
 ): void {
   state.newsSelectedItem = item;
   state.newsModalOpen = item !== null;
+}
+
+export async function analyzeNews(
+  state: AppViewState,
+  type: string,
+  customQuery?: string
+): Promise<string> {
+  if (!state.client?.connected) {
+    throw new Error("Not connected to gateway");
+  }
+
+  // Get current filtered items for analysis context
+  const items = state.newsItems || [];
+  
+  try {
+    const result = await state.client.request("news.analyze", {
+      type,
+      query: customQuery,
+      itemCount: items.length,
+      filters: {
+        search: state.newsSearchQuery,
+        filter: state.newsFilter,
+        sources: state.newsSelectedSources,
+        sentiment: state.newsSelectedSentiment,
+      },
+    }) as { analysis: string };
+
+    return result.analysis;
+  } catch (err) {
+    console.error("[News] Failed to analyze:", err);
+    throw err;
+  }
 }

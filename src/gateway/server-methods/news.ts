@@ -189,4 +189,199 @@ export const newsHandlers: GatewayRequestHandlers = {
       );
     }
   },
+
+  "news.analyze": ({ params, respond }) => {
+    ensureInitialized();
+
+    try {
+      const typedParams = params as {
+        type: string;
+        query?: string;
+        itemCount?: number;
+        filters?: Record<string, unknown>;
+      };
+
+      const { items } = getNewsItems({ limit: 50 });
+      const analysis = generateNewsAnalysis(items, typedParams.type, typedParams.query);
+
+      respond(true, { analysis });
+    } catch (err) {
+      log.error("Failed to analyze news", { error: String(err) });
+      respond(
+        false,
+        undefined,
+        errorShape(
+          ErrorCodes.INTERNAL_ERROR,
+          `Failed to analyze: ${err instanceof Error ? err.message : String(err)}`,
+        ),
+      );
+    }
+  },
 };
+
+function generateNewsAnalysis(items: unknown[], type: string, customQuery?: string): string {
+  if (items.length === 0) {
+    return "No news items available for analysis.";
+  }
+
+  const newsItems = items as Array<{
+    title: string;
+    source: string;
+    summary?: string;
+    sentiment?: string;
+    publishedAt: string;
+    categories?: string[];
+  }>;
+
+  switch (type) {
+    case "summary":
+      return generateSummaryAnalysis(newsItems);
+    case "trends":
+      return generateTrendsAnalysis(newsItems);
+    case "key-insights":
+      return generateKeyInsightsAnalysis(newsItems);
+    case "roadmap":
+      return generateRoadmapAnalysis(newsItems);
+    case "custom":
+      return generateCustomAnalysis(newsItems, customQuery || "");
+    default:
+      return generateSummaryAnalysis(newsItems);
+  }
+}
+
+function generateSummaryAnalysis(
+  items: Array<{ title: string; source: string; summary?: string; sentiment?: string }>,
+): string {
+  const total = items.length;
+  const sources = [...new Set(items.map((i) => i.source))];
+  const positive = items.filter((i) => i.sentiment === "positive").length;
+  const negative = items.filter((i) => i.sentiment === "negative").length;
+  const neutral = items.filter((i) => i.sentiment === "neutral" || !i.sentiment).length;
+
+  let analysis = `## News Summary\n\n`;
+  analysis += `**Total Articles:** ${total}\n`;
+  analysis += `**Sources:** ${sources.length} (${sources.join(", ")})\n`;
+  analysis += `**Sentiment:** ${positive} positive, ${negative} negative, ${neutral} neutral\n\n`;
+
+  analysis += `### Top Stories\n\n`;
+  items.slice(0, 5).forEach((item, index) => {
+    const emoji =
+      item.sentiment === "positive" ? "🟢" : item.sentiment === "negative" ? "🔴" : "⚪";
+    analysis += `${index + 1}. ${emoji} **${item.title}**\n   Source: ${item.source}\n\n`;
+  });
+
+  return analysis;
+}
+
+function generateTrendsAnalysis(
+  items: Array<{ title: string; categories?: string[]; source: string }>,
+): string {
+  const categoryCount: Record<string, number> = {};
+  const sourceCount: Record<string, number> = {};
+
+  items.forEach((item) => {
+    item.categories?.forEach((cat) => {
+      categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+    });
+    sourceCount[item.source] = (sourceCount[item.source] || 0) + 1;
+  });
+
+  const topCategories = Object.entries(categoryCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  let analysis = `## Trending Topics\n\n`;
+  analysis += `### Top Categories\n\n`;
+  topCategories.forEach(([cat, count]) => {
+    analysis += `- **${cat}**: ${count} articles\n`;
+  });
+
+  analysis += `\n### Most Active Sources\n\n`;
+  Object.entries(sourceCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .forEach(([source, count]) => {
+      analysis += `- **${source}**: ${count} articles\n`;
+    });
+
+  return analysis;
+}
+
+function generateKeyInsightsAnalysis(
+  items: Array<{ title: string; summary?: string; sentiment?: string; source: string }>,
+): string {
+  const positive = items.filter((i) => i.sentiment === "positive");
+  const negative = items.filter((i) => i.sentiment === "negative");
+
+  let analysis = `## Key Insights\n\n`;
+
+  analysis += `### Positive Developments (${positive.length})\n\n`;
+  positive.slice(0, 3).forEach((item) => {
+    analysis += `- **${item.title}**\n  ${item.summary || "No summary available"}\n\n`;
+  });
+
+  analysis += `### Areas of Concern (${negative.length})\n\n`;
+  negative.slice(0, 3).forEach((item) => {
+    analysis += `- **${item.title}**\n  ${item.summary || "No summary available"}\n\n`;
+  });
+
+  return analysis;
+}
+
+function generateRoadmapAnalysis(
+  items: Array<{ title: string; categories?: string[]; source: string }>,
+): string {
+  let analysis = `## Strategic Roadmap Based on News\n\n`;
+
+  analysis += `### Technology Trends to Watch\n\n`;
+  analysis += `Based on the latest news from ${items.length} articles:\n\n`;
+
+  const categories = [...new Set(items.flatMap((i) => i.categories || []))];
+  categories.slice(0, 5).forEach((cat) => {
+    const catItems = items.filter((i) => i.categories?.includes(cat));
+    analysis += `#### ${cat.charAt(0).toUpperCase() + cat.slice(1)}\n`;
+    analysis += `- ${catItems.length} recent developments\n`;
+    analysis += `- Key players: ${[...new Set(catItems.map((i) => i.source))].slice(0, 3).join(", ")}\n\n`;
+  });
+
+  analysis += `### Recommended Actions\n\n`;
+  analysis += `1. Monitor developments in ${categories.slice(0, 3).join(", ")}\n`;
+  analysis += `2. Follow updates from leading sources\n`;
+  analysis += `3. Stay informed on sentiment shifts\n`;
+
+  return analysis;
+}
+
+function generateCustomAnalysis(
+  items: Array<{ title: string; summary?: string; source: string; categories?: string[] }>,
+  query: string,
+): string {
+  const queryLower = query.toLowerCase();
+
+  // Filter relevant items based on query
+  const relevant = items.filter(
+    (item) =>
+      item.title.toLowerCase().includes(queryLower) ||
+      item.summary?.toLowerCase().includes(queryLower) ||
+      item.categories?.some((c) => c.toLowerCase().includes(queryLower)),
+  );
+
+  if (relevant.length === 0) {
+    return `## Analysis for: "${query}"\n\nNo articles found matching your query. Try different keywords or broader terms.`;
+  }
+
+  let analysis = `## Analysis for: "${query}"\n\n`;
+  analysis += `**Found ${relevant.length} relevant articles**\n\n`;
+
+  analysis += `### Key Findings\n\n`;
+  relevant.slice(0, 5).forEach((item, index) => {
+    analysis += `${index + 1}. **${item.title}**\n`;
+    analysis += `   Source: ${item.source}\n`;
+    if (item.summary) {
+      analysis += `   ${item.summary.substring(0, 150)}...\n`;
+    }
+    analysis += `\n`;
+  });
+
+  return analysis;
+}
