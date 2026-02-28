@@ -55,9 +55,7 @@ export async function loadFeaturesDashboard(state: AppViewState): Promise<void> 
 
   try {
     console.log("[Features] Loading dashboard...");
-    const result = (await state.client.request({
-      method: "features.dashboard",
-    })) as FeaturesDashboardResponse;
+    const result = (await state.client.request("features.dashboard")) as FeaturesDashboardResponse;
 
     console.log("[Features] Dashboard response:", result);
     console.log("[Features] Categories:", result?.categories?.length);
@@ -89,10 +87,7 @@ export async function toggleFeature(
   }
 
   try {
-    await state.client.request({
-      method: "features.toggle",
-      params: { featureId, enabled },
-    });
+    await state.client.request("features.toggle", { featureId, enabled });
 
     // Reload dashboard to reflect changes
     await loadFeaturesDashboard(state);
@@ -112,10 +107,7 @@ export async function configureFeature(
   }
 
   try {
-    await state.client.request({
-      method: "features.configure",
-      params: { featureId, config },
-    });
+    await state.client.request("features.configure", { featureId, config });
 
     // Reload dashboard to reflect changes
     await loadFeaturesDashboard(state);
