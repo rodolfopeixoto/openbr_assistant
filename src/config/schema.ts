@@ -11,6 +11,36 @@ export type ConfigUiHint = {
   sensitive?: boolean;
   placeholder?: string;
   itemTemplate?: unknown;
+
+  // Enhanced UI fields for improved UX
+  widget?:
+    | "select"
+    | "autocomplete"
+    | "toggle"
+    | "number"
+    | "text"
+    | "password"
+    | "textarea"
+    | "json"
+    | "segmented";
+  options?: Array<{ value: string | number | boolean; label: string; description?: string }>;
+  autocomplete?: {
+    source: "agents" | "models" | "channels" | "skills" | "tools" | "profiles" | "custom";
+    searchEndpoint?: string;
+    minChars?: number;
+    maxResults?: number;
+    allowCreate?: boolean;
+  };
+  validation?: {
+    required?: boolean;
+    pattern?: string;
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    format?: "email" | "url" | "duration" | "path" | "color";
+    customMessage?: string;
+  };
 };
 
 export type ConfigUiHints = Record<string, ConfigUiHint>;
@@ -987,6 +1017,179 @@ function stripChannelSchema(schema: ConfigSchema): ConfigSchema {
   return next;
 }
 
+/**
+ * Analyzes schema and generates enhanced UI hints for enum fields and other types
+ * This automatically creates select widgets, validation rules, etc.
+ */
+function generateEnhancedWidgetHints(
+  schema: ConfigSchema,
+  baseHints: ConfigUiHints,
+): ConfigUiHints {
+  const enhanced: ConfigUiHints = { ...baseHints };
+
+  // Known enum fields mapping
+  const enumFieldMappings: Record<
+    string,
+    {
+      options: Array<{ value: string | number | boolean; label: string; description?: string }>;
+      widget?: "select" | "segmented";
+    }
+  > = {
+    "gateway.bind": {
+      widget: "select",
+      options: [
+        { value: "auto", label: "Auto", description: "Automatically detect best interface" },
+        { value: "lan", label: "LAN", description: "Bind to all LAN interfaces" },
+        { value: "loopback", label: "Loopback", description: "Localhost only" },
+        { value: "custom", label: "Custom", description: "Specify custom interface" },
+        { value: "tailnet", label: "Tailnet", description: "Bind to Tailscale interface" },
+      ],
+    },
+    "gateway.auth.mode": {
+      widget: "segmented",
+      options: [
+        { value: "token", label: "Token" },
+        { value: "password", label: "Password" },
+      ],
+    },
+    "gateway.tailscale.mode": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "serve", label: "Serve" },
+        { value: "funnel", label: "Funnel" },
+      ],
+    },
+    "gateway.reload.mode": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "restart", label: "Restart" },
+        { value: "hot", label: "Hot" },
+        { value: "hybrid", label: "Hybrid" },
+      ],
+    },
+    "logging.level": {
+      widget: "select",
+      options: [
+        { value: "silent", label: "Silent" },
+        { value: "fatal", label: "Fatal" },
+        { value: "error", label: "Error" },
+        { value: "warn", label: "Warn" },
+        { value: "info", label: "Info" },
+        { value: "debug", label: "Debug" },
+        { value: "trace", label: "Trace" },
+      ],
+    },
+    "logging.consoleStyle": {
+      widget: "segmented",
+      options: [
+        { value: "pretty", label: "Pretty" },
+        { value: "compact", label: "Compact" },
+        { value: "json", label: "JSON" },
+      ],
+    },
+    "update.channel": {
+      widget: "segmented",
+      options: [
+        { value: "stable", label: "Stable" },
+        { value: "beta", label: "Beta" },
+        { value: "dev", label: "Dev" },
+      ],
+    },
+    "agents.defaults.thinkingDefault": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "minimal", label: "Minimal" },
+        { value: "low", label: "Low" },
+        { value: "medium", label: "Medium" },
+        { value: "high", label: "High" },
+        { value: "xhigh", label: "XHigh" },
+      ],
+    },
+    "agents.defaults.typingMode": {
+      widget: "select",
+      options: [
+        { value: "never", label: "Never" },
+        { value: "instant", label: "Instant" },
+        { value: "thinking", label: "Thinking" },
+        { value: "message", label: "Message" },
+      ],
+    },
+    "agents.defaults.sandbox.mode": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "non-main", label: "Non-Main" },
+        { value: "all", label: "All" },
+      ],
+    },
+    "tools.exec.security": {
+      widget: "select",
+      options: [
+        { value: "deny", label: "Deny" },
+        { value: "allowlist", label: "Allowlist" },
+        { value: "full", label: "Full" },
+      ],
+    },
+  };
+
+  // Apply enum mappings
+  for (const [path, config] of Object.entries(enumFieldMappings)) {
+    enhanced[path] = {
+      ...enhanced[path],
+      widget: config.widget || "select",
+      options: config.options,
+    };
+  }
+
+  // Autocomplete fields
+  const autocompleteFields: Record<
+    string,
+    {
+      source: "agents" | "models" | "channels" | "skills" | "tools" | "profiles";
+      minChars?: number;
+      maxResults?: number;
+    }
+  > = {
+    "agents.defaults.model": { source: "models", minChars: 1, maxResults: 20 },
+    "agents.list.*.model": { source: "models", minChars: 1, maxResults: 20 },
+    "bindings.*.agentId": { source: "agents", minChars: 0, maxResults: 50 },
+    "bindings.*.channel": { source: "channels", minChars: 0, maxResults: 20 },
+  };
+
+  for (const [path, config] of Object.entries(autocompleteFields)) {
+    enhanced[path] = {
+      ...enhanced[path],
+      widget: "autocomplete",
+      autocomplete: config,
+    };
+  }
+
+  // Validation rules for specific fields
+  const validationFields: Record<string, ConfigUiHint["validation"]> = {
+    "gateway.port": {
+      min: 1024,
+      max: 65535,
+      customMessage: "Port must be between 1024 and 65535",
+    },
+    "channels.telegram.botToken": {
+      pattern: "^\\d+:[\\w-]+$",
+      customMessage: "Formato inválido. Use: números:letras",
+    },
+  };
+
+  for (const [path, validation] of Object.entries(validationFields)) {
+    enhanced[path] = {
+      ...enhanced[path],
+      validation,
+    };
+  }
+
+  return enhanced;
+}
+
 function buildBaseConfigSchema(): ConfigSchemaResponse {
   if (cachedBase) {
     return cachedBase;
@@ -996,10 +1199,11 @@ function buildBaseConfigSchema(): ConfigSchemaResponse {
     unrepresentable: "any",
   });
   schema.title = "OpenClawConfig";
-  const hints = applySensitiveHints(buildBaseHints());
+  const baseHints = applySensitiveHints(buildBaseHints());
+  const enhancedHints = generateEnhancedWidgetHints(schema, baseHints);
   const next = {
     schema: stripChannelSchema(schema),
-    uiHints: hints,
+    uiHints: enhancedHints,
     version: VERSION,
     generatedAt: new Date().toISOString(),
   };

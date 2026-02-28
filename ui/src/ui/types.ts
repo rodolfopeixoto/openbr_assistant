@@ -290,6 +290,27 @@ export type ConfigUiHint = {
   sensitive?: boolean;
   placeholder?: string;
   itemTemplate?: unknown;
+  
+  // Enhanced UI fields for improved UX
+  widget?: 'select' | 'autocomplete' | 'toggle' | 'number' | 'text' | 'password' | 'textarea' | 'json' | 'segmented';
+  options?: Array<{ value: string | number | boolean; label: string; description?: string }>;
+  autocomplete?: {
+    source: 'agents' | 'models' | 'channels' | 'skills' | 'tools' | 'profiles' | 'custom';
+    searchEndpoint?: string;
+    minChars?: number;
+    maxResults?: number;
+    allowCreate?: boolean;
+  };
+  validation?: {
+    required?: boolean;
+    pattern?: string;
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    format?: 'email' | 'url' | 'duration' | 'path' | 'color';
+    customMessage?: string;
+  };
 };
 
 export type ConfigUiHints = Record<string, ConfigUiHint>;

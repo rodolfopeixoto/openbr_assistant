@@ -10,6 +10,8 @@ import {
   type JsonSchema,
 } from "./config-form.shared";
 import "../components/field-tooltip";
+import { renderSelectField, renderSegmentedField } from "../components/select-field";
+import { renderAutocompleteField, AutocompleteFieldController } from "../components/autocomplete-field";
 
 const META_KEYS = new Set(["title", "description", "default", "nullable"]);
 
@@ -134,6 +136,53 @@ export function renderNode(params: {
         </div>
       </div>
     `;
+  }
+
+  // Check for enhanced widget hints
+  if (hint?.widget) {
+    switch (hint.widget) {
+      case 'select':
+        if (hint.options && hint.options.length > 0) {
+          return renderSelectField({
+            label,
+            value: value as string | number | boolean | undefined,
+            options: hint.options,
+            placeholder: hint.placeholder,
+            help,
+            disabled,
+            onChange: (val) => onPatch(path, val),
+          });
+        }
+        break;
+      case 'segmented':
+        if (hint.options && hint.options.length > 0 && hint.options.length <= 5) {
+          return renderSegmentedField({
+            label,
+            value: value as string | number | boolean | undefined,
+            options: hint.options,
+            placeholder: hint.placeholder,
+            help,
+            disabled,
+            onChange: (val) => onPatch(path, val),
+          });
+        }
+        break;
+      case 'autocomplete':
+        if (hint.autocomplete) {
+          // Note: This would need to be connected to the actual API
+          // For now, render as text input with note
+          return renderEnhancedAutocompleteField({
+            label,
+            value: value as string | undefined,
+            config: hint.autocomplete,
+            placeholder: hint.placeholder,
+            help: help ? `${help} (Autocomplete: ${hint.autocomplete.source})` : `Autocomplete: ${hint.autocomplete.source}`,
+            disabled,
+            onChange: (val) => onPatch(path, val),
+          });
+        }
+        break;
+    }
   }
 
   // Handle anyOf/oneOf unions
@@ -791,6 +840,39 @@ function renderMapField(params: {
         </div>
       `
       }
+    </div>
+  `;
+}
+
+// Enhanced Autocomplete Field (simplified version without full state management)
+function renderEnhancedAutocompleteField(props: {
+  label: string;
+  value: string | undefined;
+  config: { source: string; minChars?: number; maxResults?: number };
+  placeholder?: string;
+  help?: string;
+  disabled?: boolean;
+  onChange: (value: string | undefined) => void;
+}): TemplateResult {
+  const { label, value, config, placeholder, help, disabled = false, onChange } = props;
+
+  return html`
+    <div class="cfg-field" ?data-disabled=${disabled}>
+      <label class="cfg-field__label">${label}</label>
+      ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
+      <div class="cfg-input-wrap">
+        <input
+          type="text"
+          class="cfg-input"
+          placeholder=${placeholder || `Search ${config.source}...`}
+          .value=${value || ''}
+          ?disabled=${disabled}
+          @change=${(e: Event) => onChange((e.target as HTMLInputElement).value || undefined)}
+        />
+      </div>
+      <div class="cfg-field__note">
+        <small>💡 Enhanced autocomplete available (source: ${config.source})</small>
+      </div>
     </div>
   `;
 }

@@ -413,4 +413,163 @@ export const configHandlers: GatewayRequestHandlers = {
       undefined,
     );
   },
+
+  // Enhanced UI endpoints for improved config UX
+  "config.autocomplete": async ({ params, respond }) => {
+    const typedParams = params as { source?: string; query?: string; limit?: number };
+
+    if (!typedParams.source || typeof typedParams.source !== "string") {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "source is required"));
+      return;
+    }
+
+    const query = typedParams.query?.toLowerCase() || "";
+    const limit = Math.min(typedParams.limit || 10, 50);
+
+    // Load current config to get available values
+    const cfg = loadConfig();
+    const results: Array<{
+      value: string;
+      label: string;
+      description?: string;
+      category?: string;
+    }> = [];
+
+    switch (typedParams.source) {
+      case "agents": {
+        const agents = cfg.agents?.list || [];
+        for (const agent of agents) {
+          if (!agent.id) continue;
+          if (query && !agent.id.toLowerCase().includes(query)) continue;
+          results.push({
+            value: agent.id,
+            label: agent.name || agent.id,
+            description: agent.model ? String(agent.model).slice(0, 50) : undefined,
+            category: "Agents",
+          });
+        }
+        break;
+      }
+      case "models": {
+        const providers = cfg.models?.providers || {};
+        for (const [providerId, provider] of Object.entries(providers)) {
+          const p = provider as { models?: Array<{ id?: string; name?: string }> };
+          for (const model of p.models || []) {
+            const modelId = `${providerId}/${model.id}`;
+            if (
+              query &&
+              !modelId.toLowerCase().includes(query) &&
+              !model.name?.toLowerCase().includes(query)
+            )
+              continue;
+            results.push({
+              value: modelId,
+              label: model.name || model.id || modelId,
+              description: providerId,
+              category: providerId,
+            });
+          }
+        }
+        break;
+      }
+      case "channels": {
+        const channelIds = [
+          "whatsapp",
+          "telegram",
+          "discord",
+          "slack",
+          "signal",
+          "imessage",
+          "googlechat",
+        ];
+        for (const ch of channelIds) {
+          if (query && !ch.toLowerCase().includes(query)) continue;
+          results.push({
+            value: ch,
+            label: ch.charAt(0).toUpperCase() + ch.slice(1),
+            category: "Channels",
+          });
+        }
+        break;
+      }
+      case "skills": {
+        const skills = cfg.skills?.entries || {};
+        for (const [skillId, skill] of Object.entries(skills)) {
+          if (query && !skillId.toLowerCase().includes(query)) continue;
+          results.push({
+            value: skillId,
+            label: skillId,
+            category: "Skills",
+          });
+        }
+        break;
+      }
+      default:
+        respond(
+          false,
+          undefined,
+          errorShape(ErrorCodes.INVALID_REQUEST, `Unknown source: ${typedParams.source}`),
+        );
+        return;
+    }
+
+    respond(
+      true,
+      {
+        results: results.slice(0, limit),
+        hasMore: results.length > limit,
+        total: results.length,
+      },
+      undefined,
+    );
+  },
+
+  "config.validate": async ({ params, respond }) => {
+    const typedParams = params as {
+      path?: string[];
+      value?: unknown;
+      currentConfig?: Record<string, unknown>;
+    };
+
+    if (!typedParams.path || !Array.isArray(typedParams.path)) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "path is required"));
+      return;
+    }
+
+    const errors: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> =
+      [];
+    const value = typedParams.value;
+    const path = typedParams.path;
+
+    // Simple validation based on path patterns
+    if (path[path.length - 1] === "port") {
+      const num = Number(value);
+      if (isNaN(num) || num < 1024 || num > 65535) {
+        errors.push({
+          message: "Port must be between 1024 and 65535",
+          code: "INVALID_PORT",
+          severity: "error",
+        });
+      }
+    }
+
+    if (path.includes("botToken") || path[path.length - 1] === "botToken") {
+      if (typeof value === "string" && !value.match(/^\d+:[\w-]+$/)) {
+        errors.push({
+          message: "Invalid bot token format. Expected: numbers:letters",
+          code: "INVALID_BOT_TOKEN",
+          severity: "error",
+        });
+      }
+    }
+
+    respond(
+      true,
+      {
+        valid: errors.length === 0,
+        errors: errors.length > 0 ? errors : undefined,
+      },
+      undefined,
+    );
+  },
 };
