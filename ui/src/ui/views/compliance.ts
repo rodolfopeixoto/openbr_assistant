@@ -1,5 +1,6 @@
 import { html, nothing } from "lit";
 import type { ComplianceStatus, ComplianceReport, ComplianceViolation, ComplianceFramework } from "../types";
+import { icons } from "../icons";
 
 export type ComplianceProps = {
   loading: boolean;
@@ -115,7 +116,7 @@ function renderLoading() {
 function renderError(error: string) {
   return html`
     <div class="compliance-error">
-      <div class="compliance-error__icon">⚠️</div>
+      <div class="compliance-error__icon">${icons.alertTriangle}</div>
       <h3>Error Loading Compliance Data</h3>
       <p>${error}</p>
     </div>
@@ -142,15 +143,15 @@ function renderActiveTab(props: ComplianceProps) {
 function renderOverview(props: ComplianceProps) {
   const status = props.status;
   if (!status) {
-    return html`
-      <div class="compliance-empty">
-        <div class="compliance-empty__icon">📊</div>
-        <p>No compliance data available. Run a scan to get started.</p>
-        <button class="btn btn--primary" @click=${() => props.onGenerateReport("gdpr")}>
-          Run First Scan
-        </button>
-      </div>
-    `;
+  return html`
+    <div class="compliance-empty">
+      <div class="compliance-empty__icon">${icons.barChart}</div>
+      <p>No compliance data available. Run a scan to get started.</p>
+      <button class="btn btn--primary" @click=${() => props.onGenerateReport("gdpr")}>
+        Run First Scan
+      </button>
+    </div>
+  `;
   }
 
   return html`
@@ -158,9 +159,9 @@ function renderOverview(props: ComplianceProps) {
       <!-- Summary cards -->
       <div class="compliance-cards">
         ${renderSummaryCard("Overall Status", status.overallStatus, getFrameworkIcon(status.overallStatus))}
-        ${renderSummaryCard("Active Violations", status.violationsCount.toString(), "⚠️")}
-        ${renderSummaryCard("Last Scan", formatDate(status.lastScanAt), "🕐")}
-        ${renderSummaryCard("Next Audit", formatDate(status.nextAuditAt), "📅")}
+        ${renderSummaryCard("Active Violations", status.violationsCount.toString(), icons.alertTriangle)}
+        ${renderSummaryCard("Last Scan", formatDate(status.lastScanAt), icons.clock)}
+        ${renderSummaryCard("Next Audit", formatDate(status.nextAuditAt), icons.calendar)}
       </div>
 
       <!-- Framework status grid -->
@@ -194,7 +195,7 @@ function renderOverview(props: ComplianceProps) {
         <div class="compliance-actions">
           <button class="compliance-action-card" @click=${() => props.onGenerateReport("gdpr")}>
             <div class="compliance-action-card__icon" style="background: ${FRAMEWORKS.gdpr.color}">
-              📝
+              ${icons.fileText}
             </div>
             <div class="compliance-action-card__content">
               <h3>GDPR Report</h3>
@@ -203,7 +204,7 @@ function renderOverview(props: ComplianceProps) {
           </button>
           <button class="compliance-action-card" @click=${() => props.onGenerateReport("soc2")}>
             <div class="compliance-action-card__icon" style="background: ${FRAMEWORKS.soc2.color}">
-              🔒
+              ${icons.lock}
             </div>
             <div class="compliance-action-card__content">
               <h3>SOC 2 Report</h3>
@@ -212,7 +213,7 @@ function renderOverview(props: ComplianceProps) {
           </button>
           <button class="compliance-action-card" @click=${() => props.onGenerateReport("hipaa")}>
             <div class="compliance-action-card__icon" style="background: ${FRAMEWORKS.hipaa.color}">
-              🏥
+              ${icons.heart}
             </div>
             <div class="compliance-action-card__content">
               <h3>HIPAA Audit</h3>
@@ -221,7 +222,7 @@ function renderOverview(props: ComplianceProps) {
           </button>
           <button class="compliance-action-card" @click=${() => props.onExportData()}>
             <div class="compliance-action-card__icon" style="background: #6366f1">
-              📥
+              ${icons.download}
             </div>
             <div class="compliance-action-card__content">
               <h3>Export Data</h3>
@@ -234,7 +235,7 @@ function renderOverview(props: ComplianceProps) {
   `;
 }
 
-function renderSummaryCard(label: string, value: string, icon: string) {
+function renderSummaryCard(label: string, value: string, icon: string | ReturnType<typeof html>) {
   const statusColor = STATUS_COLORS[value] || STATUS_COLORS.pending;
   return html`
     <div class="compliance-summary-card">
@@ -427,7 +428,7 @@ function renderViolations(props: ComplianceProps) {
 
       ${filteredViolations.length === 0 ? html`
         <div class="compliance-empty">
-          <div class="compliance-empty__icon">✅</div>
+          <div class="compliance-empty__icon">${icons.check}</div>
           <p>No violations found! Your system is compliant.</p>
         </div>
       ` : html`
@@ -600,12 +601,12 @@ function renderSettings(props: ComplianceProps) {
 
 // ==================== HELPERS ====================
 
-function getFrameworkIcon(status: string): string {
+function getFrameworkIcon(status: string): ReturnType<typeof html> {
   switch (status) {
-    case "compliant": return "✅";
-    case "at-risk": return "⚠️";
-    case "non-compliant": return "❌";
-    default: return "⏳";
+    case "compliant": return icons.checkCircle;
+    case "at-risk": return icons.alertTriangle;
+    case "non-compliant": return icons.x;
+    default: return icons.hourglass;
   }
 }
 
