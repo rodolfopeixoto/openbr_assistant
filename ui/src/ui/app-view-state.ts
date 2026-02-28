@@ -422,7 +422,18 @@ export type AppViewState = {
   opencodeError: string | null;
   opencodeStatus: string | null;
   opencodeTasks: unknown[];
+  opencodeSelectedTask: unknown | null;
+  opencodeTaskInput: string;
+  opencodeTaskCreating: boolean;
   handleOpencodeLoad: () => Promise<void>;
+  handleOpencodeTaskInput: (value: string) => void;
+  handleOpencodeTaskInputChange: (value: string) => void;
+  handleOpencodeTaskCreate: () => Promise<void>;
+  handleOpencodeTaskSelect: (task: unknown | null) => void;
+  handleOpencodeTaskApprove: (taskId: string) => Promise<void>;
+  handleOpencodeTaskCancel: (taskId: string) => Promise<void>;
+  handleOpencodeTaskLogs: (taskId: string) => Promise<void>;
+  handleOpencodeTaskDownload: (taskId: string) => Promise<void>;
   // MCP
   mcpLoading: boolean;
   mcpError: string | null;

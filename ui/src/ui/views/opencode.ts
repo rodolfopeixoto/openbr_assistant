@@ -32,10 +32,39 @@ export function renderOpencodeView(state: AppViewState) {
   const tasks = state.opencodeTasks || [];
   const selectedTask = state.opencodeSelectedTask;
 
+  // Auto-load OpenCode data on first render
+  if (!status && !state.opencodeLoading && !state.opencodeError && state.connected) {
+    console.log("[Opencode View] Auto-loading OpenCode data...");
+    state.handleOpencodeLoad();
+  }
+
+  if (state.opencodeLoading) {
+    return html`
+      <div class="view-loading">
+        <div class="spinner"></div>
+        <p>Loading OpenCode...</p>
+      </div>
+    `;
+  }
+
+  // Handle case where status is null but not loading (initial state or error)
+  if (!status) {
+    return html`
+      <div class="opencode-view">
+        ${renderHeader(null)}
+        <div class="opencode-disabled-state">
+          <div class="disabled-icon">${icons.code}</div>
+          <h2>OpenCode AI</h2>
+          <p>Loading OpenCode configuration...</p>
+        </div>
+      </div>
+    `;
+  }
+
   return html`
     <div class="opencode-view">
       ${renderHeader(status)}
-      ${status?.enabled ? html`
+      ${status.enabled ? html`
         <div class="opencode-content">
           ${renderStatusPanel(status)}
           ${renderTaskCreation(state)}

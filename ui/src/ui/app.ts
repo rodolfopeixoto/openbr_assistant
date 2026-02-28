@@ -158,6 +158,7 @@ export class OpenClawApp extends LitElement {
   @state() opencodeError: string | null = null;
   @state() opencodeStatus: string | null = null;
   @state() opencodeTasks: unknown[] = [];
+  @state() opencodeSelectedTask: unknown | null = null;
   @state() opencodeTaskCreating = false;
   @state() opencodeTaskInput = "";
   @state() opencodeConfigLoading = false;
@@ -168,6 +169,8 @@ export class OpenClawApp extends LitElement {
   @state() opencodeSecurityConfig: Record<string, unknown> = {};
   @state() opencodeSecurityDirty = false;
   @state() opencodeSecuritySaving = false;
+  @state() opencodeAuditLoading = false;
+  @state() opencodeAuditLog: unknown[] = [];
   @state() connected = false;
   @state() theme: ThemeMode = this.settings.theme ?? "system";
   @state() themeResolved: ResolvedTheme = "dark";
@@ -1500,18 +1503,42 @@ export class OpenClawApp extends LitElement {
 
   // Opencode methods
   async handleOpencodeLoad() {
-    const { loadOpencodeStatus } = await import("./controllers/opencode.js");
+    const { loadOpencodeStatus, loadOpencodeTasks } = await import("./controllers/opencode.js");
     await loadOpencodeStatus(this);
+    await loadOpencodeTasks(this);
   }
 
   handleOpencodeTaskInput(value: string) {
     this.opencodeTaskInput = value;
-    console.log("[Opencode] Task input:", value);
   }
 
   async handleOpencodeTaskCreate() {
     const { createOpencodeTask } = await import("./controllers/opencode.js");
     await createOpencodeTask(this, this.opencodeTaskInput);
+  }
+
+  handleOpencodeTaskSelect(task: unknown | null) {
+    this.opencodeSelectedTask = task;
+  }
+
+  async handleOpencodeTaskApprove(taskId: string) {
+    const { approveOpencodeTask } = await import("./controllers/opencode.js");
+    await approveOpencodeTask(this, taskId);
+  }
+
+  async handleOpencodeTaskCancel(taskId: string) {
+    const { cancelOpencodeTask } = await import("./controllers/opencode.js");
+    await cancelOpencodeTask(this, taskId);
+  }
+
+  async handleOpencodeTaskLogs(taskId: string) {
+    console.log("[Opencode] View logs for task:", taskId);
+    // TODO: Implement log viewing
+  }
+
+  async handleOpencodeTaskDownload(taskId: string) {
+    console.log("[Opencode] Download workspace for task:", taskId);
+    // TODO: Implement workspace download
   }
 
   // Security handlers
