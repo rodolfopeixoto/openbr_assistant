@@ -298,6 +298,165 @@ export const modelsHandlers: GatewayRequestHandlers = {
     }
   },
 
+  // NEW: Discover models from a provider
+  "models.discover": async ({ params, respond }) => {
+    const { provider } = params as { provider?: string };
+
+    if (!provider) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "provider is required"));
+      return;
+    }
+
+    try {
+      const { loadAuthProfileStore } = await import("../../agents/auth-profiles/store.js");
+      const store = loadAuthProfileStore();
+
+      // Find credential for this provider
+      const credential = Object.values(store.profiles).find((p: any) => p.provider === provider);
+
+      if (!credential) {
+        respond(
+          false,
+          undefined,
+          errorShape(ErrorCodes.INVALID_REQUEST, `No credentials found for provider: ${provider}`),
+        );
+        return;
+      }
+
+      // Fetch models based on provider
+      let models: Array<{ id: string; name: string; description?: string }> = [];
+
+      switch (provider) {
+        case "openai": {
+          const key = credential.type === "api_key" ? credential.key : null;
+          if (!key) {
+            respond(
+              false,
+              undefined,
+              errorShape(ErrorCodes.INVALID_REQUEST, "API key required for OpenAI"),
+            );
+            return;
+          }
+
+          const response = await fetch("https://api.openai.com/v1/models", {
+            headers: { Authorization: `Bearer ${key}` },
+          });
+
+          if (!response.ok) {
+            const error = await response.text();
+            respond(
+              false,
+              undefined,
+              errorShape(ErrorCodes.UNAVAILABLE, `OpenAI API error: ${response.status} ${error}`),
+            );
+            return;
+          }
+
+          const data = await response.json();
+          models = data.data
+            .filter((m: any) => m.id.startsWith("gpt") || m.id.startsWith("text-"))
+            .map((m: any) => ({
+              id: m.id,
+              name: m.id,
+              description: `Created: ${new Date(m.created * 1000).toLocaleDateString()}`,
+            }));
+          break;
+        }
+
+        case "anthropic": {
+          const key = credential.type === "api_key" ? credential.key : null;
+          if (!key) {
+            respond(
+              false,
+              undefined,
+              errorShape(ErrorCodes.INVALID_REQUEST, "API key required for Anthropic"),
+            );
+            return;
+          }
+
+          const response = await fetch("https://api.anthropic.com/v1/models", {
+            headers: {
+              "x-api-key": key,
+              "anthropic-version": "2023-06-01",
+            },
+          });
+
+          if (!response.ok) {
+            const error = await response.text();
+            respond(
+              false,
+              undefined,
+              errorShape(
+                ErrorCodes.UNAVAILABLE,
+                `Anthropic API error: ${response.status} ${error}`,
+              ),
+            );
+            return;
+          }
+
+          const data = await response.json();
+          models = data.data.map((m: any) => ({
+            id: m.id,
+            name: m.display_name || m.id,
+            description: m.description || "Anthropic Claude model",
+          }));
+          break;
+        }
+
+        case "google": {
+          const key = credential.type === "api_key" ? credential.key : null;
+          if (!key) {
+            respond(
+              false,
+              undefined,
+              errorShape(ErrorCodes.INVALID_REQUEST, "API key required for Google"),
+            );
+            return;
+          }
+
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`,
+          );
+
+          if (!response.ok) {
+            const error = await response.text();
+            respond(
+              false,
+              undefined,
+              errorShape(ErrorCodes.UNAVAILABLE, `Google API error: ${response.status} ${error}`),
+            );
+            return;
+          }
+
+          const data = await response.json();
+          models = data.models
+            .filter((m: any) => m.name.includes("gemini"))
+            .map((m: any) => ({
+              id: m.name.replace("models/", ""),
+              name: m.displayName || m.name,
+              description: m.description || "Google Gemini model",
+            }));
+          break;
+        }
+
+        default:
+          respond(
+            false,
+            undefined,
+            errorShape(
+              ErrorCodes.INVALID_REQUEST,
+              `Provider not supported for discovery: ${provider}`,
+            ),
+          );
+          return;
+      }
+
+      respond(true, { models, provider }, undefined);
+    } catch (err) {
+      respond(false, undefined, errorShape(ErrorCodes.UNAVAILABLE, String(err)));
+    }
+  },
+
   // NEW: Select a model
   "models.select": async ({ params, respond }) => {
     const { sessionKey, providerId, modelId } = params as {

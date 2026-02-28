@@ -34,6 +34,7 @@ const BASE_METHODS = [
   "models.providers",
   "models.configured",
   "models.current",
+  "models.discover",
   "models.select",
   // Environment variables management
   "env.list",
