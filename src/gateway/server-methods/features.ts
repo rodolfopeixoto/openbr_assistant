@@ -473,11 +473,18 @@ export const featuresHandlers: GatewayRequestHandlers = {
 
   "features.dashboard": ({ respond }) => {
     try {
+      console.log("[Features Backend] Loading dashboard...");
       const cfg = loadConfig();
+      console.log("[Features Backend] Config loaded, building dashboard...");
       const dashboard = buildDashboardResponse(cfg);
+      console.log("[Features Backend] Dashboard built:", {
+        categories: dashboard.categories.length,
+        totalFeatures: dashboard.summary.total,
+      });
 
       respond(true, dashboard);
     } catch (err) {
+      console.error("[Features Backend] Error building dashboard:", err);
       respond(
         false,
         undefined,

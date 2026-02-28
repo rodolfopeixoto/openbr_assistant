@@ -460,13 +460,26 @@ export function getFeatureStatus(
 
 // Build complete dashboard response
 export function buildDashboardResponse(config: Record<string, any>): FeaturesDashboardResponse {
+  console.log(
+    "[Feature Registry] Building dashboard with config keys:",
+    Object.keys(config).slice(0, 10),
+  );
+  console.log(
+    "[Feature Registry] FEATURE_REGISTRY keys:",
+    Object.keys(FEATURE_REGISTRY).slice(0, 10),
+  );
+  console.log("[Feature Registry] FEATURE_CATEGORIES:", FEATURE_CATEGORIES.length);
+
   const categories: FeatureCategory[] = FEATURE_CATEGORIES.map((cat) => {
-    const features = Object.values(FEATURE_REGISTRY)
-      .filter((f) => f.category === cat.id)
-      .map((f) => ({
-        ...f,
-        status: getFeatureStatus(f.id, config),
-      }));
+    const registryFeatures = Object.values(FEATURE_REGISTRY).filter((f) => f.category === cat.id);
+    console.log(
+      `[Feature Registry] Category ${cat.id}: found ${registryFeatures.length} features in registry`,
+    );
+
+    const features = registryFeatures.map((f) => ({
+      ...f,
+      status: getFeatureStatus(f.id, config),
+    }));
 
     return {
       ...cat,
@@ -475,6 +488,7 @@ export function buildDashboardResponse(config: Record<string, any>): FeaturesDas
   });
 
   const allFeatures = categories.flatMap((c) => c.features);
+  console.log("[Feature Registry] Total features:", allFeatures.length);
 
   return {
     categories,

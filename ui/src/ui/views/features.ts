@@ -15,8 +15,11 @@ function getIcon(name: string): any {
 export function renderFeaturesView(state: AppViewState) {
   const features = state.featuresList || [];
   
+  console.log("[Features View] Rendering - features count:", features.length, "connected:", state.connected, "loading:", state.featuresLoading, "error:", state.featuresError);
+  
   // Auto-load features on first render
   if (features.length === 0 && !state.featuresLoading && !state.featuresError && state.connected) {
+    console.log("[Features View] Auto-loading features...");
     state.handleFeaturesLoad();
   }
 
@@ -90,7 +93,10 @@ function renderSummaryCards(state: AppViewState) {
 function renderCategories(state: AppViewState) {
   const categories = (state.featuresList || []) as FeatureCategory[];
 
+  console.log("[Features View] renderCategories - categories:", categories.length, "data:", categories);
+
   if (categories.length === 0) {
+    console.log("[Features View] Showing empty state - no categories");
     return html`
       <div class="features-empty">
         <div class="features-empty-icon">${(icons as Record<string, typeof icons.messageSquare>).box}</div>

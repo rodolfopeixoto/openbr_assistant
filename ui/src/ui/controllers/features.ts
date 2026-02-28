@@ -54,9 +54,14 @@ export async function loadFeaturesDashboard(state: AppViewState): Promise<void> 
   state.featuresError = null;
 
   try {
+    console.log("[Features] Loading dashboard...");
     const result = (await state.client.request({
       method: "features.dashboard",
     })) as FeaturesDashboardResponse;
+
+    console.log("[Features] Dashboard response:", result);
+    console.log("[Features] Categories:", result?.categories?.length);
+    console.log("[Features] Summary:", result?.summary);
 
     state.featuresList = result.categories || [];
     state.featuresSummary = result.summary || {
