@@ -1,8 +1,27 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import type { AppViewState } from "../app-view-state";
 
+interface SecurityStatus {
+  score: number;
+  grade?: string;
+  lastScan?: string;
+  summary?: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    info: number;
+  };
+  vulnerabilities?: Array<{
+    id: string;
+    title: string;
+    severity: string;
+    category: string;
+  }>;
+}
+
 export function renderSecurityView(state: AppViewState) {
-  const status = state.securityStatus;
+  const status = state.securityStatus as SecurityStatus | null;
 
   return html`
     <div class="security-view">
@@ -36,14 +55,15 @@ export function renderSecurityView(state: AppViewState) {
                 </svg>
                 <div class="score-info">
                   <h2>Security Score</h2>
-                  <div class="score-value ${status && status.overallScore >= 80 ? 'good' : status && status.overallScore >= 50 ? 'warning' : 'bad'}">
-                    ${status ? status.overallScore : 0}%
+                  <div class="score-value ${status && status.score >= 80 ? 'good' : status && status.score >= 50 ? 'warning' : 'bad'}">
+                    ${status ? status.score : 0}%
                   </div>
+                  ${status && status.grade ? html`<span class="score-grade">Grade ${status.grade}</span>` : nothing}
                 </div>
               </div>
               
               ${status && status.lastScan ? html`
-                <p class="last-scan">Last scan: ${status.lastScan.toLocaleString()}</p>
+                <p class="last-scan">Last scan: ${new Date(status.lastScan).toLocaleString()}</p>
               ` : html`
                 <p class="last-scan">No scan performed yet</p>
               `}
@@ -59,6 +79,19 @@ export function renderSecurityView(state: AppViewState) {
 
             <div class="security-stats">
               <div class="stat-card">
+                <div class="stat-icon critical">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">${status?.summary ? status.summary.critical + status.summary.high : 0}</span>
+                  <span class="stat-label">Critical/High</span>
+                </div>
+              </div>
+              <div class="stat-card">
                 <div class="stat-icon warning">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -67,8 +100,21 @@ export function renderSecurityView(state: AppViewState) {
                   </svg>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-value">${status ? status.vulnerabilities : 0}</span>
-                  <span class="stat-label">Vulnerabilities</span>
+                  <span class="stat-value">${status?.summary ? status.summary.medium + status.summary.low : 0}</span>
+                  <span class="stat-label">Medium/Low</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon info">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">${status?.vulnerabilities?.length ?? 0}</span>
+                  <span class="stat-label">Total Issues</span>
                 </div>
               </div>
             </div>
