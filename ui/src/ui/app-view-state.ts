@@ -550,7 +550,7 @@ export type AppViewState = {
   cacheError: string | null;
   cacheStatus: Record<string, unknown> | null;
   handleCacheLoad: () => Promise<void>;
-  handleCacheClear: () => Promise<void>;
+  handleCacheClear: (cacheName?: string) => Promise<void>;
   // Voice Recorder
   voiceRecorderOpen: boolean;
   handleToggleVoiceRecorder: () => void;
