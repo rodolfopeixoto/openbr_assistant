@@ -519,6 +519,16 @@ export type AppViewState = {
   metricsError: string | null;
   metricsStatus: Record<string, unknown> | null;
   handleMetricsLoad: () => Promise<void>;
+  // Analytics (Unified Budget + Metrics)
+  analyticsLoading: boolean;
+  analyticsError: string | null;
+  analyticsBudget: Record<string, unknown> | null;
+  analyticsMetrics: Record<string, unknown> | null;
+  analyticsPeriod: string;
+  handleAnalyticsLoad: () => Promise<void>;
+  handleAnalyticsPeriodChange: (period: string) => void;
+  handleAnalyticsExport: () => Promise<void>;
+  handleBudgetConfigOpen: () => void;
   // Cache
   cacheLoading: boolean;
   cacheError: string | null;

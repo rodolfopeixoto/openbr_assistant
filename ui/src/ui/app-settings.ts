@@ -235,6 +235,9 @@ export async function refreshActiveTab(host: SettingsHost) {
   if (host.tab === "rateLimits") {
     await (host as unknown as OpenClawApp).handleRateLimitsLoad();
   }
+  if (host.tab === "analytics") {
+    await (host as unknown as OpenClawApp).handleAnalyticsLoad();
+  }
   if (host.tab === "budget") {
     await (host as unknown as OpenClawApp).handleBudgetLoad();
   }

@@ -428,6 +428,13 @@ export class OpenClawApp extends LitElement {
   @state() metricsError: string | null = null;
   @state() metricsStatus: Record<string, unknown> | null = null;
 
+  // Analytics state (Unified Budget + Metrics)
+  @state() analyticsLoading = false;
+  @state() analyticsError: string | null = null;
+  @state() analyticsBudget: Record<string, unknown> | null = null;
+  @state() analyticsMetrics: Record<string, unknown> | null = null;
+  @state() analyticsPeriod = "24h";
+
   // Cache state
   @state() cacheLoading = false;
   @state() cacheError: string | null = null;
@@ -1882,6 +1889,73 @@ export class OpenClawApp extends LitElement {
   async handleMetricsReset() {
     const { resetMetrics } = await import("./controllers/metrics.js");
     await resetMetrics(this as any);
+  }
+
+  // Analytics handlers (Unified Budget + Metrics)
+  async handleAnalyticsLoad() {
+    this.analyticsLoading = true;
+    this.analyticsError = null;
+
+    try {
+      // Load both budget and metrics
+      const [{ loadBudget }, { loadMetrics }] = await Promise.all([
+        import("./controllers/budget.js"),
+        import("./controllers/metrics.js"),
+      ]);
+
+      await Promise.all([
+        loadBudget(this as any),
+        loadMetrics(this as any, this.analyticsPeriod as import("./controllers/metrics").MetricsPeriod),
+      ]);
+
+      // Store results in analytics state
+      this.analyticsBudget = this.budgetStatus;
+      this.analyticsMetrics = this.metricsStatus;
+    } catch (err) {
+      this.analyticsError = err instanceof Error ? err.message : "Failed to load analytics";
+      console.error("[Analytics] Failed to load:", err);
+    } finally {
+      this.analyticsLoading = false;
+    }
+  }
+
+  handleAnalyticsPeriodChange(period: string) {
+    this.analyticsPeriod = period;
+    this.handleAnalyticsLoad();
+  }
+
+  async handleAnalyticsExport() {
+    try {
+      const [{ exportBudgetCSV }, { exportMetrics }] = await Promise.all([
+        import("./controllers/budget.js"),
+        import("./controllers/metrics.js"),
+      ]);
+
+      const [budgetCSV, metricsCSV] = await Promise.all([
+        exportBudgetCSV(this as any),
+        exportMetrics(this as any, "csv"),
+      ]);
+
+      // Combine exports
+      const combined = `Budget Report:\n${budgetCSV || "N/A"}\n\nMetrics Report:\n${metricsCSV || "N/A"}`;
+
+      // Download as file
+      const blob = new Blob([combined], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `analytics-${new Date().toISOString().split("T")[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[Analytics] Failed to export:", err);
+      throw err;
+    }
+  }
+
+  handleBudgetConfigOpen() {
+    // Open budget configuration modal or navigate to budget settings
+    this.setTab("budget");
   }
 
   // Cache handlers

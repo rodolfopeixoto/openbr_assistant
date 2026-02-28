@@ -9,7 +9,7 @@ export const TAB_GROUPS = [
   { label: "Intelligence", tabs: ["news"] },
   { label: "Agent", tabs: ["skills", "nodes", "opencode", "mcp"] },
   { label: "AI", tabs: ["models", "modelRouting", "ollama"] },
-  { label: "System", tabs: ["containers", "security", "rateLimits", "budget", "metrics", "cache"] },
+  { label: "System", tabs: ["containers", "security", "rateLimits", "analytics", "budget", "metrics", "cache"] },
   { label: "Settings", tabs: ["config", "env", "workspace", "compliance", "debug", "logs"] },
 ] as const;
 
@@ -38,6 +38,7 @@ export type Tab =
   | "modelRouting"
   | "ollama"
   | "rateLimits"
+  | "analytics"
   | "budget"
   | "metrics"
   | "cache";
@@ -67,6 +68,7 @@ const TAB_PATHS: Record<Tab, string> = {
   modelRouting: "/model-routing",
   ollama: "/ollama",
   rateLimits: "/rate-limits",
+  analytics: "/analytics",
   budget: "/budget",
   metrics: "/metrics",
   cache: "/cache",
@@ -183,6 +185,8 @@ export function iconForTab(tab: Tab): IconName {
       return "cpu";
     case "rateLimits":
       return "alertCircle";
+    case "analytics":
+      return "barChart";
     case "budget":
       return "star";
     case "metrics":
@@ -244,6 +248,8 @@ export function titleForTab(tab: Tab) {
       return "Local LLM";
     case "rateLimits":
       return "Rate Limits";
+    case "analytics":
+      return "Analytics";
     case "budget":
       return "Budget";
     case "metrics":
@@ -305,6 +311,8 @@ export function subtitleForTab(tab: Tab) {
       return "Direct llama.cpp with Llama 3.2:3b - lightweight local inference";
     case "rateLimits":
       return "Rate limiting and throttling controls.";
+    case "analytics":
+      return "Unified budget tracking and usage metrics.";
     case "budget":
       return "Budget management and cost controls.";
     case "metrics":

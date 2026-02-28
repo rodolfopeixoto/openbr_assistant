@@ -101,6 +101,7 @@ import { renderMcpView } from "./views/mcp";
 import { renderModelRoutingView } from "./views/model-routing";
 import { renderOllamaView } from "./views/ollama";
 import { renderRateLimitsView } from "./views/rate-limits";
+import { renderAnalyticsView } from "./views/analytics";
 import { renderBudgetView } from "./views/budget";
 import { renderMetricsView } from "./views/metrics";
 import { renderCacheView } from "./views/cache";
@@ -771,6 +772,7 @@ export function renderApp(state: AppViewState) {
         ${state.tab === "modelRouting" ? renderModelRoutingView(state) : nothing}
         ${state.tab === "ollama" ? renderOllamaView(state) : nothing}
         ${state.tab === "rateLimits" ? renderRateLimitsView(state) : nothing}
+        ${state.tab === "analytics" ? renderAnalyticsView(state) : nothing}
         ${state.tab === "budget" ? renderBudgetView(state) : nothing}
         ${state.tab === "metrics" ? renderMetricsView(state) : nothing}
         ${state.tab === "cache" ? renderCacheView(state) : nothing}

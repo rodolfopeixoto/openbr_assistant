@@ -652,6 +652,24 @@ export const icons = {
       <circle cx="15" cy="19" r="1" />
     </svg>
   `,
+  wallet: html`
+    <svg viewBox="0 0 24 24">
+      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+      <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+      <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+    </svg>
+  `,
+  activity: html`
+    <svg viewBox="0 0 24 24">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  `,
+  pieChart: html`
+    <svg viewBox="0 0 24 24">
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+    </svg>
+  `,
 } as const;
 
 export type IconName = keyof typeof icons;
