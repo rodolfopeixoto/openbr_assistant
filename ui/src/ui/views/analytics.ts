@@ -6,6 +6,12 @@ export function renderAnalyticsView(state: AppViewState) {
   const budget = state.analyticsBudget;
   const metrics = state.analyticsMetrics;
 
+  // Auto-load analytics data on first render
+  if (!budget && !metrics && !state.analyticsLoading && !state.analyticsError && state.connected) {
+    console.log("[Analytics View] Auto-loading analytics data...");
+    state.handleAnalyticsLoad();
+  }
+
   return html`
     <div class="analytics-view">
       <section class="content-header">

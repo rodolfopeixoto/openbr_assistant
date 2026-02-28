@@ -36,6 +36,12 @@ export function renderRateLimitsView(state: AppViewState) {
   const status = state.rateLimitsStatus as RateLimitStatus | null;
   const config = state.rateLimitsConfig as RateLimitConfig | null;
 
+  // Auto-load rate limits data on first render
+  if (!status && !config && !state.rateLimitsLoading && !state.rateLimitsError && state.connected) {
+    console.log("[RateLimits View] Auto-loading rate limits data...");
+    state.handleRateLimitsLoad();
+  }
+
   return html`
     <div class="rate-limits-view">
       <section class="content-header">
