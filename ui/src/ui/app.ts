@@ -1386,6 +1386,16 @@ export class OpenClawApp extends LitElement {
     }
   }
 
+  async handleLoadMore() {
+    this.newsLoading = true;
+    try {
+      // Load more news (increments offset)
+      await import('./controllers/news.js').then(({ loadMoreNews }) => loadMoreNews(this));
+    } finally {
+      this.newsLoading = false;
+    }
+  }
+
   // Features methods
   async handleFeaturesLoad() {
     const { loadFeaturesDashboard } = await import("./controllers/features.js");

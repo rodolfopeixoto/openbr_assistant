@@ -375,6 +375,7 @@ export type AppViewState = {
   handleNewsOffsetChange: (offset: number) => void;
   handleNewsSelectItem: (item: unknown | null) => void;
   handleNewsRefresh: () => Promise<void>;
+  handleLoadMore: () => Promise<void>;
   // Features Dashboard
   featuresLoading: boolean;
   featuresError: string | null;

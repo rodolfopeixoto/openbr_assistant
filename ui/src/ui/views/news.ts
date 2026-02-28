@@ -224,12 +224,12 @@ export function renderNewsView(state: AppViewState) {
           
           ${state.newsHasMore ? html`
             <div class="load-more">
-              <button 
-                class="btn-secondary" 
-                @click="${() => state.handleNewsLoad()}"
+              <button
+                class="btn-secondary"
+                @click="${() => state.handleLoadMore()}"
                 ?disabled="${state.newsLoading}"
               >
-                ${state.newsLoading ? 'Loading...' : 'Load More'}
+                ${state.newsLoading ? html`<span class="loading-spinner-small"></span> Loading...` : 'Load More'}
               </button>
             </div>
           ` : null}
