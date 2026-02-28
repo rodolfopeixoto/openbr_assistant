@@ -38,6 +38,7 @@ import {
   handleWhatsAppStart as handleWhatsAppStartInternal,
   handleWhatsAppWait as handleWhatsAppWaitInternal,
 } from "./app-channels";
+import { loadChannels } from "./controllers/channels";
 import {
   handleAbortChat as handleAbortChatInternal,
   handleSendChat as handleSendChatInternal,
@@ -171,6 +172,18 @@ export class OpenClawApp extends LitElement {
   @state() opencodeSecuritySaving = false;
   @state() opencodeAuditLoading = false;
   @state() opencodeAuditLog: unknown[] = [];
+  // Channel Wizard
+  @state() channelWizardState: {
+    isOpen: boolean;
+    channelKey: string;
+    channelName: string;
+    currentStep: number;
+    totalSteps: number;
+    config: Record<string, unknown>;
+    isTesting: boolean;
+    testResult: { success: boolean; botInfo?: { username: string; first_name: string; id: number }; error?: string } | null;
+    isSaving: boolean;
+  } | null = null;
   @state() connected = false;
   @state() theme: ThemeMode = this.settings.theme ?? "system";
   @state() themeResolved: ResolvedTheme = "dark";
@@ -625,6 +638,132 @@ export class OpenClawApp extends LitElement {
 
   handleNostrProfileToggleAdvanced() {
     handleNostrProfileToggleAdvancedInternal(this);
+  }
+
+  // Channel Wizard handlers
+  handleChannelWizardOpen(channelKey: string) {
+    this.channelWizardState = {
+      isOpen: true,
+      channelKey,
+      channelName: channelKey === 'telegram' ? 'Telegram' : channelKey.charAt(0).toUpperCase() + channelKey.slice(1),
+      currentStep: 0,
+      totalSteps: 5,
+      config: {},
+      isTesting: false,
+      testResult: null,
+      isSaving: false,
+    };
+  }
+
+  handleChannelWizardClose() {
+    this.channelWizardState = null;
+  }
+
+  handleChannelWizardNext() {
+    if (this.channelWizardState && this.channelWizardState.currentStep < this.channelWizardState.totalSteps - 1) {
+      this.channelWizardState = {
+        ...this.channelWizardState,
+        currentStep: this.channelWizardState.currentStep + 1,
+      };
+    }
+  }
+
+  handleChannelWizardPrev() {
+    if (this.channelWizardState && this.channelWizardState.currentStep > 0) {
+      this.channelWizardState = {
+        ...this.channelWizardState,
+        currentStep: this.channelWizardState.currentStep - 1,
+      };
+    }
+  }
+
+  handleChannelWizardUpdate(config: Partial<Record<string, unknown>>) {
+    if (this.channelWizardState) {
+      this.channelWizardState = {
+        ...this.channelWizardState,
+        config: { ...this.channelWizardState.config, ...config },
+      };
+    }
+  }
+
+  async handleChannelWizardTest() {
+    if (!this.channelWizardState || !this.client) return;
+    
+    this.channelWizardState = {
+      ...this.channelWizardState,
+      isTesting: true,
+      testResult: null,
+    };
+
+    try {
+      const token = this.channelWizardState.config.token as string;
+      
+      // Test connection by calling Telegram API
+      const response = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+      const data = await response.json();
+      
+      if (data.ok) {
+        this.channelWizardState = {
+          ...this.channelWizardState,
+          isTesting: false,
+          testResult: {
+            success: true,
+            botInfo: data.result,
+          },
+        };
+      } else {
+        throw new Error(data.description || 'Token inválido');
+      }
+    } catch (error) {
+      this.channelWizardState = {
+        ...this.channelWizardState,
+        isTesting: false,
+        testResult: {
+          success: false,
+          error: error instanceof Error ? error.message : 'Erro desconhecido',
+        },
+      };
+    }
+  }
+
+  async handleChannelWizardSave() {
+    if (!this.channelWizardState || !this.client) return;
+    
+    this.channelWizardState = {
+      ...this.channelWizardState,
+      isSaving: true,
+    };
+
+    try {
+      const { channelKey, config } = this.channelWizardState;
+      
+      // Save configuration via API
+      await this.client.request('config.patch', {
+        path: ['channels', channelKey],
+        value: {
+          enabled: true,
+          token: config.token,
+          timeoutSeconds: config.timeoutSeconds || 60,
+          allowDMs: config.allowDMs !== false,
+          autoStart: config.autoStart !== false,
+        },
+      });
+
+      // Close wizard
+      this.channelWizardState = null;
+      
+      // Show success message
+      this.addToast?.('Bot configurado com sucesso!', 'success');
+      
+      // Refresh channels
+      await loadChannels(this, true);
+    } catch (error) {
+      this.channelWizardState = {
+        ...this.channelWizardState!,
+        isSaving: false,
+      };
+      this.addToast?.(error instanceof Error ? error.message : 'Erro ao salvar configuração', 'error');
+    }
   }
 
   async handleExecApprovalDecision(decision: "allow-once" | "allow-always" | "deny") {

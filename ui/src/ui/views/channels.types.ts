@@ -13,6 +13,7 @@ import type {
   WhatsAppStatus,
 } from "../types";
 import type { NostrProfileFormState } from "./channels.nostr-profile-form";
+import type { AppViewState } from "../app-view-state";
 
 export type ChannelKey = string;
 
@@ -50,6 +51,7 @@ export type ChannelsProps = {
   onToggleChannel?: (channelKey: string, enabled: boolean) => Promise<void>;
   onChannelSetupOpen?: (channelKey: string) => Promise<void>;
   onNavigate?: (tab: string, params?: Record<string, string>) => void;
+  state?: AppViewState;
 };
 
 export type ChannelsChannelData = {

@@ -3,6 +3,7 @@ import type { ChannelsStatusSnapshot, ChannelAccountSnapshot } from "../types";
 import type { ChannelKey, ChannelsProps } from "./channels.types";
 import { formatAgo } from "../format";
 import { icons } from "../icons";
+import { renderChannelWizard } from "../components/channel-wizard";
 
 // Channel metadata for display
 const CHANNEL_META: Record<ChannelKey, { 
@@ -157,6 +158,10 @@ export function renderChannels(props: ChannelsProps) {
       ` : nothing}
       
       ${renderHealthSection(props)}
+      
+      ${props.state?.channelWizardState?.isOpen 
+        ? renderChannelWizard(props.state) 
+        : nothing}
     </div>
   `;
 }
@@ -414,23 +419,39 @@ function disconnectChannel(key: ChannelKey, props: ChannelsProps) {
 }
 
 function connectChannel(key: ChannelKey, props: ChannelsProps) {
-  // Navigate to config to enable channel
-  props.onNavigate?.('config', { section: 'channels', channel: key });
+  // Open wizard to enable/configure channel
+  if (key === 'telegram') {
+    props.state?.handleChannelWizardOpen(key);
+  } else {
+    props.onNavigate?.('config', { section: 'channels', channel: key });
+  }
 }
 
 function configureChannel(key: ChannelKey, props: ChannelsProps) {
-  // Navigate to config page with channel pre-selected
-  props.onNavigate?.('config', { section: 'channels', channel: key });
+  // Open wizard for Telegram, otherwise navigate to config
+  if (key === 'telegram') {
+    props.state?.handleChannelWizardOpen(key);
+  } else {
+    props.onNavigate?.('config', { section: 'channels', channel: key });
+  }
 }
 
 function setupChannel(key: ChannelKey, props: ChannelsProps) {
-  // Navigate to config page to set up the channel
-  props.onNavigate?.('config', { section: 'channels', channel: key, setup: 'true' });
+  // Open wizard for Telegram, otherwise navigate to config
+  if (key === 'telegram') {
+    props.state?.handleChannelWizardOpen(key);
+  } else {
+    props.onNavigate?.('config', { section: 'channels', channel: key, setup: 'true' });
+  }
 }
 
 function manageChannel(key: ChannelKey, props: ChannelsProps) {
-  // Navigate to config page for management
-  props.onNavigate?.('config', { section: 'channels', channel: key });
+  // Open wizard for Telegram, otherwise navigate to config
+  if (key === 'telegram') {
+    props.state?.handleChannelWizardOpen(key);
+  } else {
+    props.onNavigate?.('config', { section: 'channels', channel: key });
+  }
 }
 
 // Toggle handlers

@@ -327,6 +327,7 @@ export function renderApp(state: AppViewState) {
                     };
                   }
                 },
+                state,
               })
             : nothing
         }

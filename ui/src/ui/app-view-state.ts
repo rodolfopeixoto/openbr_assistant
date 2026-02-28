@@ -573,4 +573,23 @@ export type AppViewState = {
   handleConfigManagerExport: () => Promise<void>;
   handleConfigManagerImport: (json: string) => Promise<void>;
   handleConfigManagerReset: () => Promise<void>;
+  // Channel Wizard
+  channelWizardState: {
+    isOpen: boolean;
+    channelKey: string;
+    channelName: string;
+    currentStep: number;
+    totalSteps: number;
+    config: Record<string, unknown>;
+    isTesting: boolean;
+    testResult: { success: boolean; botInfo?: { username: string; first_name: string; id: number }; error?: string } | null;
+    isSaving: boolean;
+  } | null;
+  handleChannelWizardOpen: (channelKey: string) => void;
+  handleChannelWizardClose: () => void;
+  handleChannelWizardNext: () => void;
+  handleChannelWizardPrev: () => void;
+  handleChannelWizardUpdate: (config: Partial<Record<string, unknown>>) => void;
+  handleChannelWizardTest: () => Promise<void>;
+  handleChannelWizardSave: () => Promise<void>;
 };
