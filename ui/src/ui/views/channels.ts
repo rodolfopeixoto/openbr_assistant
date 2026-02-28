@@ -406,36 +406,31 @@ function renderHealthSection(props: ChannelsProps) {
 }
 
 // Action handlers
-function disconnectChannel(key: ChannelKey, props: ChannelsProps) {
+function disconnectChannel(key: ChannelKey, _props: ChannelsProps) {
   if (confirm(`Disconnect ${CHANNEL_META[key].name}?`)) {
-    props.onToggleChannel?.(key, false);
+    // Navigate to config to disable channel
+    window.location.hash = `config?section=channels&channel=${key}`;
   }
 }
 
-function connectChannel(key: ChannelKey, props: ChannelsProps) {
-  props.onToggleChannel?.(key, true);
+function connectChannel(key: ChannelKey, _props: ChannelsProps) {
+  // Navigate to config to enable channel
+  window.location.hash = `config?section=channels&channel=${key}`;
 }
 
 function configureChannel(key: ChannelKey, _props: ChannelsProps) {
-  if (CHANNEL_META[key].setupUrl) {
-    window.location.hash = CHANNEL_META[key].setupUrl!;
-  }
+  // Navigate to config page with channel pre-selected
+  window.location.hash = `config?section=channels&channel=${key}`;
 }
 
-function setupChannel(key: ChannelKey, props: ChannelsProps) {
-  if (CHANNEL_META[key].setupUrl) {
-    window.location.hash = CHANNEL_META[key].setupUrl!;
-  } else {
-    props.onChannelSetupOpen?.(key);
-  }
+function setupChannel(key: ChannelKey, _props: ChannelsProps) {
+  // Navigate to config page to set up the channel
+  window.location.hash = `config?section=channels&channel=${key}&setup=true`;
 }
 
 function manageChannel(key: ChannelKey, _props: ChannelsProps) {
-  // Navigate to channel-specific management page
-  const setupUrl = CHANNEL_META[key].setupUrl;
-  if (setupUrl) {
-    window.location.hash = setupUrl;
-  }
+  // Navigate to config page for management
+  window.location.hash = `config?section=channels&channel=${key}`;
 }
 
 // Toggle handlers
