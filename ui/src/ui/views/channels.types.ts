@@ -49,6 +49,7 @@ export type ChannelsProps = {
   onNostrProfileToggleAdvanced: () => void;
   onToggleChannel?: (channelKey: string, enabled: boolean) => Promise<void>;
   onChannelSetupOpen?: (channelKey: string) => Promise<void>;
+  onNavigate?: (tab: string, params?: Record<string, string>) => void;
 };
 
 export type ChannelsChannelData = {
