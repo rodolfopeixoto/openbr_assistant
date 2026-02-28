@@ -1,5 +1,6 @@
 import { html } from "lit";
 import type { AppViewState } from "../app-view-state";
+import { icons } from "../icons";
 
 export function renderRateLimitsView(state: AppViewState) {
   return html`
@@ -22,7 +23,7 @@ export function renderRateLimitsView(state: AppViewState) {
                   <div class="status-row">
                     <span class="status-label">Status:</span>
                     <span class="status-value ${state.rateLimitsStatus?.enabled ? 'enabled' : 'disabled'}">
-                      ${state.rateLimitsStatus?.enabled ? '✓ Enabled' : '✗ Disabled'}
+                      ${state.rateLimitsStatus?.enabled ? html`${icons.check} Enabled` : html`${icons.x} Disabled`}
                     </span>
                   </div>
                   <div class="status-row">

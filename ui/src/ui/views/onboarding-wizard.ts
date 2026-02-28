@@ -50,11 +50,11 @@ function renderWelcomeStep(state: AppViewState) {
           <span>Chat inteligente</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">🔒</span>
+          <span class="feature-icon">${icons.lock}</span>
           <span>Privacidade total</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">⚡</span>
+          <span class="feature-icon">${icons.zap}</span>
           <span>Integrações poderosas</span>
         </div>
       </div>
@@ -167,7 +167,7 @@ function renderFeaturesStep(state: AppViewState) {
   
   return html`
     <div class="wizard-step features">
-      <div class="step-icon">⚡</div>
+      <div class="step-icon">${icons.zap}</div>
       <h2>Ative suas Features</h2>
       <p class="step-description">Recomendamos começar com:</p>
       
@@ -202,8 +202,8 @@ function renderFeatureOption(id: string, name: string, description: string, icon
 function renderCompleteStep(state: AppViewState) {
   return html`
     <div class="wizard-step complete">
-      <div class="step-icon success">✓</div>
-      <h1>Tudo Pronto! 🎉</h1>
+      <div class="step-icon success">${icons.check}</div>
+      <h1>Tudo Pronto! ${icons.sparkles}</h1>
       <p class="step-description">Seu OpenClaw está configurado e pronto para usar.</p>
       
       <div class="setup-summary">
@@ -225,7 +225,7 @@ function renderCompleteStep(state: AppViewState) {
         <p>O que fazer agora?</p>
         <ul>
           <li>💬 Comece um chat na aba "Chat"</li>
-          <li>⚙️  Ajuste configurações em "Settings"</li>
+          <li>${icons.settings} Ajuste configurações em "Settings"</li>
           <li>📖 Leia a documentação para mais recursos</li>
         </ul>
       </div>

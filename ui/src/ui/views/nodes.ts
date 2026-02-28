@@ -433,8 +433,8 @@ function renderNodeCard(node: Record<string, unknown>) {
           <div class="node-badges">
             ${paired ? html`<span class="badge">Paired</span>` : html`<span class="badge badge--warning">Unpaired</span>`}
             ${connected 
-              ? html`<span class="badge badge--success">🟢 Connected</span>` 
-              : html`<span class="badge badge--error">🔴 Offline</span>`}
+              ? html`<span class="badge badge--success">${icons.checkCircle} Connected</span>` 
+              : html`<span class="badge badge--error">${icons.x} Offline</span>`}
           </div>
         </div>
       </div>
