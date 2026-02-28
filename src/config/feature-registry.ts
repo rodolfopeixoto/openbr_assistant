@@ -45,8 +45,14 @@ export interface FeaturesDashboardResponse {
   };
 }
 
-// Feature Registry Definition
-export const FEATURE_REGISTRY: Record<string, Omit<DashboardFeature, "status">> = {
+// Feature Registry Definition with optional config paths
+export const FEATURE_REGISTRY: Record<
+  string,
+  Omit<DashboardFeature, "status"> & {
+    configPath?: string[];
+    configFields?: Array<{ key: string; label: string; type: string; required?: boolean }>;
+  }
+> = {
   // Speech & Voice
   voice_recorder: {
     id: "voice_recorder",
@@ -62,6 +68,7 @@ export const FEATURE_REGISTRY: Record<string, Omit<DashboardFeature, "status">> 
       { id: "toggle", label: "Enable/Disable", icon: "power", handler: "toggle" },
       { id: "config", label: "Configure", icon: "settings", handler: "config" },
     ],
+    configPath: ["talk", "speech", "provider"],
   },
   tts: {
     id: "tts",
@@ -77,6 +84,7 @@ export const FEATURE_REGISTRY: Record<string, Omit<DashboardFeature, "status">> 
       { id: "toggle", label: "Enable/Disable", icon: "power", handler: "toggle" },
       { id: "config", label: "Configure", icon: "settings", handler: "config" },
     ],
+    configPath: ["talk", "tts", "enabled"],
   },
   wake_word: {
     id: "wake_word",
@@ -92,6 +100,7 @@ export const FEATURE_REGISTRY: Record<string, Omit<DashboardFeature, "status">> 
       { id: "toggle", label: "Enable/Disable", icon: "power", handler: "toggle" },
       { id: "config", label: "Configure", icon: "settings", handler: "config" },
     ],
+    configPath: ["talk", "voicewake", "enabled"],
   },
 
   // Channels
@@ -389,15 +398,56 @@ export const FEATURE_CATEGORIES: Omit<FeatureCategory, "features">[] = [
   },
 ];
 
+// Helper to get value from nested config path
+function getConfigValue(obj: unknown, path: string[]): unknown {
+  let current: unknown = obj;
+  for (const key of path) {
+    if (current && typeof current === "object" && !Array.isArray(current)) {
+      current = (current as Record<string, unknown>)[key];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+}
+
 // Helper function to get feature status from config
-export function getFeatureStatus(featureId: string, config: Record<string, any>): FeatureStatus {
+export function getFeatureStatus(
+  featureId: string,
+  config: Record<string, unknown>,
+): FeatureStatus {
   const feature = FEATURE_REGISTRY[featureId];
   if (!feature) {
     return "unavailable";
   }
 
-  // Check if feature is explicitly enabled/disabled
-  const featureConfig = config.features?.[featureId];
+  // Use configPath if available, otherwise fallback to legacy logic
+  if (feature.configPath) {
+    const configValue = getConfigValue(config, feature.configPath);
+    const lastKey = feature.configPath[feature.configPath.length - 1];
+
+    // Check if enabled via toggle
+    if (configValue === true || configValue === "true") {
+      return "enabled";
+    }
+
+    // If the last path key is "enabled" and it's undefined/null/false
+    if (lastKey === "enabled") {
+      return configValue === false ? "disabled" : "needs_config";
+    }
+
+    // If has a config value (like token), it's enabled
+    if (configValue && typeof configValue === "string" && configValue.length > 0) {
+      return "enabled";
+    }
+
+    return "needs_config";
+  }
+
+  // Legacy logic for features without configPath
+  const featureConfig = (config.features as Record<string, { enabled?: boolean }> | undefined)?.[
+    featureId
+  ];
   if (featureConfig?.enabled === false) {
     return "disabled";
   }
@@ -405,17 +455,6 @@ export function getFeatureStatus(featureId: string, config: Record<string, any>)
     return "enabled";
   }
 
-  // Check if needs configuration
-  if (feature.requires.length > 0) {
-    const allRequirements = feature.requires.every(
-      (req) => config.features?.[req]?.enabled !== false,
-    );
-    if (!allRequirements) {
-      return "needs_config";
-    }
-  }
-
-  // Default to disabled if not configured
   return "disabled";
 }
 
