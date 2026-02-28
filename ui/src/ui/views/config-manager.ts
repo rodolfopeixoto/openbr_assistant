@@ -280,30 +280,132 @@ function renderAISettings(config: any, state: AppViewState) {
 }
 
 function renderChannelSettings(config: any, state: AppViewState) {
+  const telegramEnabled = config.channels?.telegram?.enabled || false;
+  const telegramToken = config.channels?.telegram?.token || '';
+  const telegramTimeout = config.channels?.telegram?.timeoutSeconds || 500;
+  
   return html`
     <div class="form-section">
       <h3>Channel Configuration</h3>
       
-      <div class="form-group checkbox">
-        <label>
-          <input 
-            type="checkbox"
-            .checked="${config.channels?.whatsapp?.enabled || false}"
-            @change="${(e: InputEvent) => updateConfigValue(state, 'channels.whatsapp.enabled', (e.target as HTMLInputElement).checked)}"
-          />
-          Enable WhatsApp
-        </label>
+      <!-- WhatsApp -->
+      <div class="channel-config-group">
+        <h4>WhatsApp</h4>
+        <div class="form-group checkbox">
+          <label>
+            <input 
+              type="checkbox"
+              .checked="${config.channels?.whatsapp?.enabled || false}"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.whatsapp.enabled', (e.target as HTMLInputElement).checked)}"
+            />
+            Enable WhatsApp
+          </label>
+        </div>
       </div>
       
-      <div class="form-group checkbox">
-        <label>
-          <input 
-            type="checkbox"
-            .checked="${config.channels?.telegram?.enabled || false}"
-            @change="${(e: InputEvent) => updateConfigValue(state, 'channels.telegram.enabled', (e.target as HTMLInputElement).checked)}"
-          />
-          Enable Telegram
-        </label>
+      <!-- Telegram -->
+      <div class="channel-config-group">
+        <h4>Telegram</h4>
+        <div class="form-group checkbox">
+          <label>
+            <input 
+              type="checkbox"
+              .checked="${telegramEnabled}"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.telegram.enabled', (e.target as HTMLInputElement).checked)}"
+            />
+            Enable Telegram
+          </label>
+        </div>
+        
+        ${telegramEnabled ? html`
+          <div class="form-group">
+            <label>Bot Token <span class="required">*</span></label>
+            <input 
+              type="password"
+              .value="${telegramToken}"
+              placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.telegram.token', (e.target as HTMLInputElement).value)}"
+            />
+            <p class="help-text">Get your bot token from @BotFather on Telegram</p>
+          </div>
+          
+          <div class="form-group">
+            <label>Timeout (seconds)</label>
+            <input 
+              type="number"
+              .value="${telegramTimeout}"
+              min="30"
+              max="600"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.telegram.timeoutSeconds', parseInt((e.target as HTMLInputElement).value))}"
+            />
+            <p class="help-text">Request timeout (30-600 seconds)</p>
+          </div>
+          
+          <div class="form-group checkbox">
+            <label>
+              <input 
+                type="checkbox"
+                .checked="${config.channels?.telegram?.dmPolicy === 'open' || !config.channels?.telegram?.dmPolicy}"
+                @change="${(e: InputEvent) => updateConfigValue(state, 'channels.telegram.dmPolicy', (e.target as HTMLInputElement).checked ? 'open' : 'closed')}"
+              />
+              Allow DMs from anyone
+            </label>
+          </div>
+        ` : nothing}
+      </div>
+      
+      <!-- Discord -->
+      <div class="channel-config-group">
+        <h4>Discord</h4>
+        <div class="form-group checkbox">
+          <label>
+            <input 
+              type="checkbox"
+              .checked="${config.channels?.discord?.enabled || false}"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.discord.enabled', (e.target as HTMLInputElement).checked)}"
+            />
+            Enable Discord
+          </label>
+        </div>
+        
+        ${config.channels?.discord?.enabled ? html`
+          <div class="form-group">
+            <label>Bot Token <span class="required">*</span></label>
+            <input 
+              type="password"
+              .value="${config.channels?.discord?.token || ''}"
+              placeholder="YOUR_DISCORD_BOT_TOKEN"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.discord.token', (e.target as HTMLInputElement).value)}"
+            />
+          </div>
+        ` : nothing}
+      </div>
+      
+      <!-- Slack -->
+      <div class="channel-config-group">
+        <h4>Slack</h4>
+        <div class="form-group checkbox">
+          <label>
+            <input 
+              type="checkbox"
+              .checked="${config.channels?.slack?.enabled || false}"
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.slack.enabled', (e.target as HTMLInputElement).checked)}"
+            />
+            Enable Slack
+          </label>
+        </div>
+        
+        ${config.channels?.slack?.enabled ? html`
+          <div class="form-group">
+            <label>Bot Token <span class="required">*</span></label>
+            <input 
+              type="password"
+              .value="${config.channels?.slack?.botToken || ''}"
+              placeholder="xoxb-..."
+              @change="${(e: InputEvent) => updateConfigValue(state, 'channels.slack.botToken', (e.target as HTMLInputElement).value)}"
+            />
+          </div>
+        ` : nothing}
       </div>
     </div>
   `;
