@@ -23,5 +23,6 @@
 @import "./styles/design-system.css";
 @import "./styles/icon-fixes.css";
 @import "./styles/cache.css";
+@import "./styles/containers.css";
 @import "./styles/components/cards.css";
 @import "./styles/components/forms.css";

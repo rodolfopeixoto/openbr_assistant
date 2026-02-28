@@ -1501,6 +1501,11 @@ export class OpenClawApp extends LitElement {
     return await getContainerLogs(this, containerId);
   }
 
+  async handleContainerRemove(containerId: string) {
+    const { removeContainer } = await import("./controllers/containers.js");
+    await removeContainer(this, containerId);
+  }
+
   // Opencode methods
   async handleOpencodeLoad() {
     const { loadOpencodeStatus, loadOpencodeTasks } = await import("./controllers/opencode.js");

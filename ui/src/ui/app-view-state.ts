@@ -411,6 +411,7 @@ export type AppViewState = {
   handleContainerStop: (containerId: string) => Promise<void>;
   handleContainerRestart: (containerId: string) => Promise<void>;
   handleContainerLogs: (containerId: string) => Promise<string>;
+  handleContainerRemove: (containerId: string) => Promise<void>;
   // Security
   securityLoading: boolean;
   securityError: string | null;

@@ -89,3 +89,22 @@ export async function getContainerLogs(state: AppViewState, containerId: string)
     return "";
   }
 }
+
+export async function removeContainer(state: AppViewState, containerId: string): Promise<void> {
+  if (!state.client?.connected) {
+    return;
+  }
+
+  state.containersLoading = true;
+
+  try {
+    await state.client.request("system.container.remove", { containerId });
+    await loadContainers(state);
+  } catch (err) {
+    state.containersError = err instanceof Error ? err.message : "Failed to remove container";
+    console.error(`[Containers] Failed to remove ${containerId}:`, err);
+    throw err;
+  } finally {
+    state.containersLoading = false;
+  }
+}
