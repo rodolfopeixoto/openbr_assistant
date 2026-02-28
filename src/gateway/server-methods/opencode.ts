@@ -12,8 +12,17 @@ import { ErrorCodes, errorShape } from "../protocol/index.js";
 export const opencodeHandlers: GatewayRequestHandlers = {
   "opencode.status": async ({ respond }) => {
     try {
-      const status = openCodeRuntime.getStatus();
-      respond(true, { status });
+      const rawStatus = openCodeRuntime.getStatus();
+      // Map backend status format to frontend expected format
+      const status = {
+        enabled: rawStatus.enabled,
+        runtimeAvailable: rawStatus.initialized && !!rawStatus.runtime,
+        runtimeType: rawStatus.runtime as "docker" | "podman" | "apple" | null,
+        activeTasks: rawStatus.activeTasks,
+        totalTasks: rawStatus.totalTasks,
+        pendingApprovals: 0, // TODO: Calculate pending approvals
+      };
+      respond(true, status);
     } catch (err) {
       respond(
         false,
@@ -252,13 +261,25 @@ export const opencodeHandlers: GatewayRequestHandlers = {
 
 /**
  * Serialize task for JSON response
+ * Maps backend task format to frontend expected format
  */
 function serializeTask(task: OpenCodeTask): Record<string, unknown> {
+  // Map backend status to frontend status
+  const statusMap: Record<string, string> = {
+    pending: "pending_approval",
+    "needs-approval": "pending_approval",
+    running: "running",
+    completed: "completed",
+    failed: "failed",
+    cancelled: "cancelled",
+  };
+
   return {
     id: task.id,
+    prompt: task.description, // Frontend expects 'prompt', backend uses 'description'
     description: task.description,
     project: task.project,
-    status: task.status,
+    status: statusMap[task.status] || task.status,
     createdAt: task.createdAt.toISOString(),
     startedAt: task.startedAt?.toISOString(),
     completedAt: task.completedAt?.toISOString(),
