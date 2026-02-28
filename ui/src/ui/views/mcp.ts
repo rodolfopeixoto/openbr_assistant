@@ -43,6 +43,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export function renderMcpView(state: AppViewState) {
+  // Auto-load MCP data on first render
+  if (state.mcpServers.length === 0 && !state.mcpLoading && !state.mcpError && state.connected) {
+    console.log("[MCP View] Auto-loading MCP servers...");
+    state.handleMcpLoad();
+  }
+
   const filteredServers = getFilteredServers(state);
 
   return html`

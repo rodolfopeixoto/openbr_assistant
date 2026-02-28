@@ -21,5 +21,6 @@
 @import "./styles/analytics.css";
 @import "./styles/features.css";
 @import "./styles/design-system.css";
+@import "./styles/icon-fixes.css";
 @import "./styles/components/cards.css";
 @import "./styles/components/forms.css";

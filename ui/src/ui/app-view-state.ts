@@ -451,8 +451,9 @@ export type AppViewState = {
   mcpMarketplaceSelectedCategory: string | null;
   mcpMarketplaceSelectedTag: string | null;
   mcpMarketplaceOfficialOnly: boolean;
-  mcpMarketplaceCategories: string[];
+  mcpMarketplaceCategories: Array<{ id: string; name: string; count: number }>;
   mcpMarketplaceTags: string[];
+  mcpMarketplaceError: string | null;
   handleMcpLoad: () => Promise<void>;
   handleMcpSearchChange: (query: string) => void;
   handleMcpCategoryChange: (category: string | null) => void;
@@ -463,7 +464,7 @@ export type AppViewState = {
   handleMcpUpdateNewServerName: (name: string) => void;
   handleMcpUpdateNewServerUrl: (url: string) => void;
   handleMcpUpdateNewServerCategory: (category: string) => void;
-  handleMcpAddServer: (name: string, url: string, category: string) => Promise<void>;
+  handleMcpAddServer: (name: string, url: string, type: string, category: string) => Promise<void>;
   handleMcpShowMarketplace: () => void;
   handleMcpCloseMarketplace: () => void;
   handleMcpMarketplaceSearchChange: (query: string) => void;
@@ -472,6 +473,7 @@ export type AppViewState = {
   handleMcpMarketplaceOfficialToggle: () => void;
   handleMcpResetMarketplaceFilters: () => void;
   handleMcpInstallFromMarketplace: (serverId: string) => Promise<void>;
+  handleMcpLoadMarketplace: () => Promise<void>;
   // Model Routing
   modelRoutingLoading: boolean;
   modelRoutingError: string | null;

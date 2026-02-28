@@ -1,0 +1,208 @@
+/* ===========================================
+   Icon Standardization - Fix oversized icons
+   =========================================== */
+
+/* All icons should have controlled sizing */
+.view-header svg,
+.mcp-icon svg,
+.mcp-title-wrapper svg,
+.category-icon svg,
+.server-icon-wrapper svg,
+.marketplace-icon svg,
+.marketplace-item-header svg,
+.rl-card-icon svg,
+.overview-card .card-icon svg,
+.analytics-section h3 svg,
+.content-header svg,
+.page-title svg,
+.stat-card svg,
+.btn-icon svg,
+.btn-icon-only svg,
+.filter-icon svg,
+.empty-icon svg,
+.error-icon svg,
+.loading-state svg,
+.mcp-header svg,
+.mcp-toolbar svg,
+.modal-header svg,
+.opencode-header svg,
+.opencode-status-card .status-icon svg,
+.features-header svg,
+.feature-icon svg,
+.tip-card svg,
+.tip-icon svg {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Hero icons (page headers) */
+.view-header .mcp-icon svg,
+.opencode-header .opencode-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Button icons */
+.btn-primary svg,
+.btn-secondary svg,
+.btn-text svg,
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Status indicators */
+.status-dot + svg,
+.status-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Card icons in overview grids */
+.overview-grid .card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Section headers */
+.analytics-section h3 svg,
+.rate-limits-section h3 svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+/* Empty states */
+.empty-icon svg,
+.error-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+/* Filter icons */
+.filter-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Server card icons */
+.server-icon-wrapper svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Remove button icons */
+.action-btn.remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Modal close button */
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Toggle switches - no SVG sizing needed */
+.toggle-switch svg {
+  display: none;
+}
+
+/* Search icons */
+.search-icon svg,
+.mcp-search svg,
+.marketplace-search svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Form field icons */
+.form-group svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner svg {
+  display: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Fix for inline SVG in text elements */
+span svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Icon containers should size their children */
+[class*="icon"] {
+  line-height: 0;
+}
+
+/* Ensure icons don't break layout */
+.view-header,
+.mcp-header,
+.opencode-header,
+.analytics-section h3,
+.page-title,
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Button with icon layout */
+.btn-primary,
+.btn-secondary,
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Category filter icons */
+.category-filter svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Fix header icon containers */
+.mcp-title-wrapper,
+.opencode-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Fix card icon backgrounds */
+.card-icon,
+.server-icon-wrapper,
+.marketplace-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ensure text doesn't wrap weirdly with icons */
+.page-title,
+h1, h2, h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
