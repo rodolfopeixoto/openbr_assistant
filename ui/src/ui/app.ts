@@ -687,7 +687,9 @@ export class OpenClawApp extends LitElement {
   }
 
   async handleChannelWizardTest() {
-    if (!this.channelWizardState || !this.client) return;
+    if (!this.channelWizardState) return;
+    
+    const { testChannelConnection } = await import('./components/channel-wizard.js');
     
     this.channelWizardState = {
       ...this.channelWizardState,
@@ -696,24 +698,16 @@ export class OpenClawApp extends LitElement {
     };
 
     try {
-      const token = this.channelWizardState.config.token as string;
+      const result = await testChannelConnection(
+        this.channelWizardState.channelKey,
+        this.channelWizardState.config
+      );
       
-      // Test connection by calling Telegram API
-      const response = await fetch(`https://api.telegram.org/bot${token}/getMe`);
-      const data = await response.json();
-      
-      if (data.ok) {
-        this.channelWizardState = {
-          ...this.channelWizardState,
-          isTesting: false,
-          testResult: {
-            success: true,
-            botInfo: data.result,
-          },
-        };
-      } else {
-        throw new Error(data.description || 'Token inválido');
-      }
+      this.channelWizardState = {
+        ...this.channelWizardState,
+        isTesting: false,
+        testResult: result,
+      };
     } catch (error) {
       this.channelWizardState = {
         ...this.channelWizardState,
@@ -737,23 +731,28 @@ export class OpenClawApp extends LitElement {
     try {
       const { channelKey, config } = this.channelWizardState;
       
+      // Import and use buildChannelConfig
+      const { buildChannelConfig, getChannelConfig } = await import('./components/channel-wizard.js');
+      const channelConfig = getChannelConfig(channelKey);
+      
+      if (!channelConfig) {
+        throw new Error(`Configuração não encontrada para o canal: ${channelKey}`);
+      }
+      
+      // Build channel config using the helper
+      const value = buildChannelConfig(channelKey, config);
+      
       // Save configuration via API
       await this.client.request('config.patch', {
-        path: ['channels', channelKey],
-        value: {
-          enabled: true,
-          token: config.token,
-          timeoutSeconds: config.timeoutSeconds || 60,
-          allowDMs: config.allowDMs !== false,
-          autoStart: config.autoStart !== false,
-        },
+        path: channelConfig.configPath,
+        value,
       });
 
       // Close wizard
       this.channelWizardState = null;
       
       // Show success message
-      this.addToast?.('Bot configurado com sucesso!', 'success');
+      this.addToast?.(`${channelConfig.name} configurado com sucesso!`, 'success');
       
       // Refresh channels
       await loadChannels(this, true);

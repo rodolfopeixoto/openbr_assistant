@@ -582,7 +582,7 @@ export type AppViewState = {
     totalSteps: number;
     config: Record<string, unknown>;
     isTesting: boolean;
-    testResult: { success: boolean; botInfo?: { username: string; first_name: string; id: number }; error?: string } | null;
+    testResult: { success: boolean; botInfo?: { username: string; first_name?: string; id: number }; error?: string } | null;
     isSaving: boolean;
   } | null;
   handleChannelWizardOpen: (channelKey: string) => void;

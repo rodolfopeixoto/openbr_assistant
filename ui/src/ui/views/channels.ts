@@ -419,8 +419,8 @@ function disconnectChannel(key: ChannelKey, props: ChannelsProps) {
 }
 
 function connectChannel(key: ChannelKey, props: ChannelsProps) {
-  // Open wizard to enable/configure channel
-  if (key === 'telegram') {
+  // Open wizard for supported channels, otherwise navigate to config
+  if (shouldUseWizard(key)) {
     props.state?.handleChannelWizardOpen(key);
   } else {
     props.onNavigate?.('config', { section: 'channels', channel: key });
@@ -428,8 +428,8 @@ function connectChannel(key: ChannelKey, props: ChannelsProps) {
 }
 
 function configureChannel(key: ChannelKey, props: ChannelsProps) {
-  // Open wizard for Telegram, otherwise navigate to config
-  if (key === 'telegram') {
+  // Open wizard for supported channels, otherwise navigate to config
+  if (shouldUseWizard(key)) {
     props.state?.handleChannelWizardOpen(key);
   } else {
     props.onNavigate?.('config', { section: 'channels', channel: key });
@@ -437,8 +437,8 @@ function configureChannel(key: ChannelKey, props: ChannelsProps) {
 }
 
 function setupChannel(key: ChannelKey, props: ChannelsProps) {
-  // Open wizard for Telegram, otherwise navigate to config
-  if (key === 'telegram') {
+  // Open wizard for supported channels, otherwise navigate to config
+  if (shouldUseWizard(key)) {
     props.state?.handleChannelWizardOpen(key);
   } else {
     props.onNavigate?.('config', { section: 'channels', channel: key, setup: 'true' });
@@ -446,12 +446,17 @@ function setupChannel(key: ChannelKey, props: ChannelsProps) {
 }
 
 function manageChannel(key: ChannelKey, props: ChannelsProps) {
-  // Open wizard for Telegram, otherwise navigate to config
-  if (key === 'telegram') {
+  // Open wizard for supported channels, otherwise navigate to config
+  if (shouldUseWizard(key)) {
     props.state?.handleChannelWizardOpen(key);
   } else {
     props.onNavigate?.('config', { section: 'channels', channel: key });
   }
+}
+
+function shouldUseWizard(key: ChannelKey): boolean {
+  // Channels that have full wizard support
+  return ['telegram', 'discord', 'slack'].includes(key);
 }
 
 // Toggle handlers
