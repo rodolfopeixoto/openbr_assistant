@@ -1,473 +1,463 @@
 import { html, nothing } from "lit";
-import type {
-  ChannelAccountSnapshot,
-  ChannelUiMetaEntry,
-  ChannelsStatusSnapshot,
-  DiscordStatus,
-  GoogleChatStatus,
-  IMessageStatus,
-  NostrProfile,
-  NostrStatus,
-  SignalStatus,
-  SlackStatus,
-  TelegramStatus,
-  WhatsAppStatus,
-} from "../types";
-import type { ChannelKey, ChannelsChannelData, ChannelsProps } from "./channels.types";
+import type { ChannelsStatusSnapshot, ChannelAccountSnapshot } from "../types";
+import type { ChannelKey, ChannelsProps } from "./channels.types";
 import { formatAgo } from "../format";
 import { icons } from "../icons";
-import { renderChannelConfigSection } from "./channels.config";
-import { renderDiscordCard } from "./channels.discord";
-import { renderGoogleChatCard } from "./channels.googlechat";
-import { renderIMessageCard } from "./channels.imessage";
-import { renderNostrCard } from "./channels.nostr";
-import { channelEnabled, renderChannelAccountCount } from "./channels.shared";
-import { renderSignalCard } from "./channels.signal";
-import { renderSlackCard } from "./channels.slack";
-import { renderTelegramCard } from "./channels.telegram";
-import { renderWhatsAppCard } from "./channels.whatsapp";
+
+// Channel metadata for display
+const CHANNEL_META: Record<ChannelKey, { 
+  name: string; 
+  description: string; 
+  icon: string;
+  color: string;
+  setupUrl?: string;
+}> = {
+  whatsapp: {
+    name: "WhatsApp",
+    description: "Connect via WhatsApp Web QR code",
+    icon: "messageSquare",
+    color: "#25D366",
+    setupUrl: "#whatsapp-setup"
+  },
+  telegram: {
+    name: "Telegram",
+    description: "Bot-based messaging integration",
+    icon: "send",
+    color: "#0088cc",
+    setupUrl: "#telegram-setup"
+  },
+  discord: {
+    name: "Discord",
+    description: "Server and DM integration",
+    icon: "messageCircle",
+    color: "#5865F2",
+    setupUrl: "#discord-setup"
+  },
+  slack: {
+    name: "Slack",
+    description: "Workspace messaging",
+    icon: "hash",
+    color: "#4A154B",
+    setupUrl: "#slack-setup"
+  },
+  signal: {
+    name: "Signal",
+    description: "Secure messaging",
+    icon: "shield",
+    color: "#3A76F0",
+    setupUrl: "#signal-setup"
+  },
+  imessage: {
+    name: "iMessage",
+    description: "Apple Messages (Mac only)",
+    icon: "messageSquare",
+    color: "#34C759",
+    setupUrl: "#imessage-setup"
+  },
+  googlechat: {
+    name: "Google Chat",
+    description: "Google Workspace messaging",
+    icon: "messageSquare",
+    color: "#00832d",
+    setupUrl: "#googlechat-setup"
+  },
+  nostr: {
+    name: "Nostr",
+    description: "Decentralized social protocol",
+    icon: "zap",
+    color: "#8e44ad",
+    setupUrl: "#nostr-setup"
+  }
+};
+
+// Safe icon getter
+function getIcon(name: string) {
+  return (icons as Record<string, typeof icons.settings>)[name] || icons.settings;
+}
 
 export function renderChannels(props: ChannelsProps) {
   const channels = props.snapshot?.channels as Record<string, unknown> | null;
-  const whatsapp = (channels?.whatsapp ?? undefined) as WhatsAppStatus | undefined;
-  const telegram = (channels?.telegram ?? undefined) as TelegramStatus | undefined;
-  const discord = (channels?.discord ?? null) as DiscordStatus | null;
-  const googlechat = (channels?.googlechat ?? null) as GoogleChatStatus | null;
-  const slack = (channels?.slack ?? null) as SlackStatus | null;
-  const signal = (channels?.signal ?? null) as SignalStatus | null;
-  const imessage = (channels?.imessage ?? null) as IMessageStatus | null;
-  const nostr = (channels?.nostr ?? null) as NostrStatus | null;
+  const lastUpdated = props.lastSuccessAt ? formatAgo(props.lastSuccessAt) : null;
   
-  const channelOrder = resolveChannelOrder(props.snapshot);
-  const orderedChannels = channelOrder
-    .map((key, index) => ({
-      key,
-      enabled: channelEnabled(key, props),
-      order: index,
-    }))
-    .sort((a, b) => {
-      if (a.enabled !== b.enabled) return a.enabled ? -1 : 1;
-      return a.order - b.order;
-    });
+  // Categorize channels
+  const channelList = Object.entries(CHANNEL_META).map(([key, meta]) => {
+    const status = channels?.[key] as Record<string, unknown> | undefined;
+    const accounts = props.snapshot?.channelAccounts?.[key] ?? [];
+    const isConnected = status?.connected === true;
+    const isConfigured = status?.configured === true;
+    const hasError = status?.lastError != null;
+    
+    return {
+      key: key as ChannelKey,
+      meta,
+      status,
+      accounts,
+      isConnected,
+      isConfigured,
+      hasError,
+      accountCount: accounts.length
+    };
+  });
 
-  // Calculate stats
-  const totalChannels = orderedChannels.length;
-  const enabledChannels = orderedChannels.filter(c => c.enabled).length;
-  const connectedChannels = orderedChannels.filter(c => {
-    const status = channels?.[c.key] as Record<string, unknown> | undefined;
-    return status?.connected === true;
-  }).length;
+  const connected = channelList.filter(c => c.isConnected);
+  const configured = channelList.filter(c => !c.isConnected && c.isConfigured);
+  const available = channelList.filter(c => !c.isConnected && !c.isConfigured);
 
   return html`
     <div class="channels-page">
-      <!-- Header -->
-      <header class="channels-header">
-        <div class="channels-header__content">
-          <h1 class="channels-header__title">
-            <span class="channels-header__icon">${icons.messageSquare}</span>
-            Channels
-          </h1>
-          <p class="channels-header__subtitle">
-            Manage messaging platform connections
-          </p>
-        </div>
-      </header>
+      ${renderHeader(props, lastUpdated)}
+      ${renderStats(channelList)}
+      
+      ${connected.length > 0 ? html`
+        <section class="channels-section">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="status-dot connected"></div>
+              <h2>Connected</h2>
+              <span class="count">${connected.length}</span>
+            </div>
+            <p class="section-desc">Active messaging channels ready to use</p>
+          </div>
+          <div class="channels-grid">
+            ${connected.map(channel => renderChannelCard(channel, props))}
+          </div>
+        </section>
+      ` : nothing}
+      
+      ${configured.length > 0 ? html`
+        <section class="channels-section">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="status-dot configured"></div>
+              <h2>Configured</h2>
+              <span class="count">${configured.length}</span>
+            </div>
+            <p class="section-desc">Channels configured but not currently connected</p>
+          </div>
+          <div class="channels-grid">
+            ${configured.map(channel => renderChannelCard(channel, props))}
+          </div>
+        </section>
+      ` : nothing}
+      
+      ${available.length > 0 ? html`
+        <section class="channels-section">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="status-dot available"></div>
+              <h2>Available</h2>
+              <span class="count">${available.length}</span>
+            </div>
+            <p class="section-desc">Channels available to configure</p>
+          </div>
+          <div class="channels-grid">
+            ${available.map(channel => renderChannelCard(channel, props))}
+          </div>
+        </section>
+      ` : nothing}
+      
+      ${renderHealthSection(props)}
+    </div>
+  `;
+}
 
-      <!-- Stats Row -->
-      <div class="channels-stats">
-        <div class="channels-stat">
-          <span class="channels-stat__value">${totalChannels}</span>
-          <span class="channels-stat__label">Total Channels</span>
-        </div>
-        <div class="channels-stat">
-          <span class="channels-stat__value channels-stat__value--ok">${enabledChannels}</span>
-          <span class="channels-stat__label">Enabled</span>
-        </div>
-        <div class="channels-stat">
-          <span class="channels-stat__value channels-stat__value--ok">${connectedChannels}</span>
-          <span class="channels-stat__label">Connected</span>
-        </div>
-      </div>
-
-      <!-- Channels Grid -->
-      <section class="channels-grid">
-        ${orderedChannels.map((channel) =>
-          renderChannel(channel.key, props, {
-            whatsapp,
-            telegram,
-            discord,
-            googlechat,
-            slack,
-            signal,
-            imessage,
-            nostr,
-            channelAccounts: props.snapshot?.channelAccounts ?? null,
-          }),
-        )}
-      </section>
-
-      <!-- Health Section -->
-      <section class="channels-health">
-        <div class="channels-health__header">
-          <h2 class="channels-health__title">Channel Health</h2>
-          <div class="channels-health__meta">
-            <span class="channels-health__time">
-              ${props.lastSuccessAt ? `Updated ${formatAgo(props.lastSuccessAt)}` : "Not updated yet"}
-            </span>
-            <button 
-              class="channels-health__refresh"
-              @click=${props.onRefresh}
-              title="Refresh channels"
-            >
-              ${icons.refreshCw}
-            </button>
+function renderHeader(props: ChannelsProps, lastUpdated: string | null) {
+  return html`
+    <header class="channels-header">
+      <div class="header-content">
+        <div class="header-main">
+          <div class="header-icon">${icons.messageSquare}</div>
+          <div class="header-text">
+            <h1>Channels</h1>
+            <p>Manage messaging platform connections</p>
           </div>
         </div>
         
-        <div class="channels-health__body">
-          ${props.lastError
-            ? html`
-              <div class="callout danger" style="margin-bottom: 16px;">
-                ${props.lastError}
-              </div>
-            `
-            : nothing
-          }
+        <div class="header-actions">
+          ${lastUpdated ? html`
+            <span class="last-updated">
+              ${icons.clock} Updated ${lastUpdated}
+            </span>
+          ` : nothing}
           
-          ${props.snapshot ? renderHealthMetrics(props.snapshot) : nothing}
-          
-          ${renderJsonPreview(props)}
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderHealthMetrics(snapshot: ChannelsStatusSnapshot) {
-  const channels = snapshot.channels as Record<string, unknown> | null;
-  
-  // Count channels by status
-  const metrics = {
-    configured: 0,
-    running: 0,
-    connected: 0,
-    errors: 0,
-  };
-  
-  Object.values(channels || {}).forEach((ch: unknown) => {
-    const status = ch as Record<string, unknown>;
-    if (status?.configured) metrics.configured++;
-    if (status?.running) metrics.running++;
-    if (status?.connected) metrics.connected++;
-    if (status?.lastError) metrics.errors++;
-  });
-
-  return html`
-    <div class="health-metrics">
-      <div class="health-metric">
-        <div class="health-metric__icon">${icons.checkCircle}</div>
-        <div class="health-metric__content">
-          <div class="health-metric__label">Configured</div>
-          <div class="health-metric__value health-metric__value--ok">${metrics.configured}</div>
+          <button 
+            class="btn-refresh ${props.loading ? 'spinning' : ''}"
+            @click=${() => props.onRefresh(true)}
+            ?disabled=${props.loading}
+          >
+            ${icons.refreshCw}
+          </button>
         </div>
       </div>
-      <div class="health-metric">
-        <div class="health-metric__icon">${icons.playCircle}</div>
-        <div class="health-metric__content">
-          <div class="health-metric__label">Running</div>
-          <div class="health-metric__value">${metrics.running}</div>
-        </div>
-      </div>
-      <div class="health-metric">
-        <div class="health-metric__icon">${icons.wifi}</div>
-        <div class="health-metric__content">
-          <div class="health-metric__label">Connected</div>
-          <div class="health-metric__value health-metric__value--ok">${metrics.connected}</div>
-        </div>
-      </div>
-      ${metrics.errors > 0 ? html`
-        <div class="health-metric">
-          <div class="health-metric__icon" style="color: var(--danger)">${icons.alertTriangle}</div>
-          <div class="health-metric__content">
-            <div class="health-metric__label">Errors</div>
-            <div class="health-metric__value health-metric__value--error">${metrics.errors}</div>
-          </div>
+      
+      ${props.lastError ? html`
+        <div class="error-banner">
+          ${icons.alertTriangle}
+          <span>${props.lastError}</span>
         </div>
       ` : nothing}
-    </div>
+    </header>
   `;
 }
 
-function renderJsonPreview(props: ChannelsProps) {
+function renderStats(channelList: Array<{
+  isConnected: boolean;
+  isConfigured: boolean;
+  accountCount: number;
+}>) {
+  const total = channelList.length;
+  const connected = channelList.filter(c => c.isConnected).length;
+  const configured = channelList.filter(c => !c.isConnected && c.isConfigured).length;
+  const totalAccounts = channelList.reduce((sum, c) => sum + c.accountCount, 0);
+
   return html`
-    <div class="health-json">
-      <div class="health-json__header">
-        <span class="health-json__title">Raw Snapshot</span>
-        <button class="health-json__toggle" @click=${() => {
-          const el = document.querySelector('.health-json__content');
-          if (el) el.classList.toggle('hidden');
-        }}>
-          ${icons.eye} Toggle
-        </button>
+    <section class="channels-stats-bar">
+      <div class="stat-item">
+        <span class="stat-value">${connected}</span>
+        <span class="stat-label">Connected</span>
       </div>
-      <div class="health-json__content">
-        <pre>${props.snapshot ? JSON.stringify(props.snapshot, null, 2) : "No snapshot available."}</pre>
+      <div class="stat-divider"></div>
+      
+      <div class="stat-item">
+        <span class="stat-value">${configured}</span>
+        <span class="stat-label">Configured</span>
       </div>
-    </div>
+      <div class="stat-divider"></div>
+      
+      <div class="stat-item">
+        <span class="stat-value">${totalAccounts}</span>
+        <span class="stat-label">Accounts</span>
+      </div>
+      <div class="stat-divider"></div>
+      
+      <div class="stat-item">
+        <span class="stat-value total">${total}</span>
+        <span class="stat-label">Total</span>
+      </div>
+    </section>
   `;
 }
 
-function resolveChannelOrder(snapshot: ChannelsStatusSnapshot | null): ChannelKey[] {
-  if (snapshot?.channelMeta?.length) {
-    return snapshot.channelMeta.map((entry) => entry.id) as ChannelKey[];
-  }
-  if (snapshot?.channelOrder?.length) {
-    return snapshot.channelOrder;
-  }
-  return ["whatsapp", "telegram", "discord", "googlechat", "slack", "signal", "imessage", "nostr"];
-}
-
-function renderChannel(key: ChannelKey, props: ChannelsProps, data: ChannelsChannelData) {
-  const accountCountLabel = renderChannelAccountCount(key, data.channelAccounts);
-  switch (key) {
-    case "whatsapp":
-      return renderWhatsAppCard({
-        props,
-        whatsapp: data.whatsapp,
-        accountCountLabel,
-      });
-    case "telegram":
-      return renderTelegramCard({
-        props,
-        telegram: data.telegram,
-        telegramAccounts: data.channelAccounts?.telegram ?? [],
-        accountCountLabel,
-      });
-    case "discord":
-      return renderDiscordCard({
-        props,
-        discord: data.discord,
-        accountCountLabel,
-      });
-    case "googlechat":
-      return renderGoogleChatCard({
-        props,
-        googleChat: data.googlechat,
-        accountCountLabel,
-      });
-    case "slack":
-      return renderSlackCard({
-        props,
-        slack: data.slack,
-        accountCountLabel,
-      });
-    case "signal":
-      return renderSignalCard({
-        props,
-        signal: data.signal,
-        accountCountLabel,
-      });
-    case "imessage":
-      return renderIMessageCard({
-        props,
-        imessage: data.imessage,
-        accountCountLabel,
-      });
-    case "nostr": {
-      const nostrAccounts = data.channelAccounts?.nostr ?? [];
-      const primaryAccount = nostrAccounts[0];
-      const accountId = primaryAccount?.accountId ?? "default";
-      const profile =
-        (primaryAccount as { profile?: NostrProfile | null } | undefined)?.profile ?? null;
-      const showForm =
-        props.nostrProfileAccountId === accountId ? props.nostrProfileFormState : null;
-      const profileFormCallbacks = showForm
-        ? {
-            onFieldChange: props.onNostrProfileFieldChange,
-            onSave: props.onNostrProfileSave,
-            onImport: props.onNostrProfileImport,
-            onCancel: props.onNostrProfileCancel,
-            onToggleAdvanced: props.onNostrProfileToggleAdvanced,
-          }
-        : null;
-      return renderNostrCard({
-        props,
-        nostr: data.nostr,
-        nostrAccounts,
-        accountCountLabel,
-        profileFormState: showForm,
-        profileFormCallbacks,
-        onEditProfile: () => props.onNostrProfileEdit(accountId, profile),
-      });
-    }
-    default:
-      return renderGenericChannelCard(key, props, data.channelAccounts ?? {});
-  }
-}
-
-function renderGenericChannelCard(
-  key: ChannelKey,
-  props: ChannelsProps,
-  channelAccounts: Record<string, ChannelAccountSnapshot[]>,
+function renderChannelCard(
+  channel: {
+    key: ChannelKey;
+    meta: { name: string; description: string; icon: string; color: string; setupUrl?: string };
+    status: Record<string, unknown> | undefined;
+    accounts: ChannelAccountSnapshot[];
+    isConnected: boolean;
+    isConfigured: boolean;
+    hasError: boolean;
+    accountCount: number;
+  },
+  props: ChannelsProps
 ) {
-  const label = resolveChannelLabel(props.snapshot, key);
-  const status = props.snapshot?.channels?.[key] as Record<string, unknown> | undefined;
-  const configured = typeof status?.configured === "boolean" ? status.configured : undefined;
-  const running = typeof status?.running === "boolean" ? status.running : undefined;
-  const connected = typeof status?.connected === "boolean" ? status.connected : undefined;
-  const lastError = typeof status?.lastError === "string" ? status.lastError : undefined;
-  const accounts = channelAccounts[key] ?? [];
-  const accountCountLabel = renderChannelAccountCount(key, channelAccounts);
-
-  // Determine card state
+  const { key, meta, accounts, isConnected, isConfigured, hasError } = channel;
+  const lastError = typeof channel.status?.lastError === 'string' ? channel.status.lastError : undefined;
+  
+  // Get last activity
+  const lastActivity = accounts.length > 0 
+    ? Math.max(...accounts.map(a => a.lastInboundAt || 0))
+    : null;
+  
   let cardClass = "channel-card";
-  if (connected) cardClass += " channel-card--enabled";
-  else if (lastError) cardClass += " channel-card--error";
-  else if (!configured) cardClass += " channel-card--disabled";
-
-  // Determine status dot
-  let statusDotClass = "channel-card__status-dot--disconnected";
-  let statusText = "Disconnected";
-  if (connected) {
-    statusDotClass = "channel-card__status-dot--connected";
-    statusText = "Connected";
-  } else if (lastError) {
-    statusDotClass = "channel-card__status-dot--error";
-    statusText = "Error";
-  }
+  if (isConnected) cardClass += " connected";
+  else if (hasError) cardClass += " error";
+  else if (isConfigured) cardClass += " configured";
+  else cardClass += " available";
 
   return html`
     <div class="${cardClass}">
-      <div class="channel-card__header">
-        <div class="channel-card__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
-        <div class="channel-card__info">
-          <h3 class="channel-card__name">
-            ${label}
-            ${accountCountLabel}
-          </h3>
-          <div class="channel-card__status">
-            <span class="channel-card__status-dot ${statusDotClass}"></span>
-            <span class="channel-card__status-text">${statusText}</span>
-          </div>
+      <div class="card-header">
+        <div class="channel-icon" style="background: ${meta.color}20; color: ${meta.color}">
+          ${getIcon(meta.icon)}
         </div>
-      </div>
-
-      <div class="channel-card__body">
-        <p class="channel-card__description">Channel status and configuration.</p>
         
-        <div class="channel-card__stats">
-          <div class="channel-card__stat">
-            <span class="channel-card__stat-label">Configured</span>
-            <span class="channel-card__stat-value ${configured ? 'channel-card__stat-value--ok' : ''}">
-              ${configured == null ? "n/a" : configured ? "Yes" : "No"}
-            </span>
-          </div>
-          <div class="channel-card__stat">
-            <span class="channel-card__stat-label">Running</span>
-            <span class="channel-card__stat-value ${running ? 'channel-card__stat-value--ok' : ''}">
-              ${running == null ? "n/a" : running ? "Yes" : "No"}
-            </span>
+        <div class="channel-info">
+          <h3>${meta.name}</h3>
+          <div class="channel-status">
+            <span class="status-indicator ${isConnected ? 'connected' : hasError ? 'error' : isConfigured ? 'configured' : 'available'}"></span>
+            <span class="status-text">${isConnected ? 'Connected' : hasError ? 'Error' : isConfigured ? 'Configured' : 'Available'}</span>
           </div>
         </div>
-
-        ${accounts.length > 0
-          ? html`
-            <div class="account-card-list" style="margin-top: 12px;">
-              ${accounts.map((account) => renderGenericAccount(account))}
-            </div>
-          `
-          : nothing
-        }
-
-        ${lastError
-          ? html`
-            <div class="channel-card__error" style="margin-top: 12px;">
-              <span class="channel-card__error-icon">${icons.alertCircle}</span>
-              <span class="channel-card__error-text">${lastError}</span>
-            </div>
-          `
-          : nothing
-        }
+        
+        ${accounts.length > 0 ? html`
+          <div class="account-badge">
+            ${accounts.length} account${accounts.length !== 1 ? 's' : ''}
+          </div>
+        ` : nothing}
       </div>
-
-      <div class="channel-card__footer">
-        ${renderChannelConfigSection({ channelId: key, props })}
+      
+      <div class="card-body">
+        <p class="channel-desc">${meta.description}</p>
+        
+        ${accounts.length > 0 ? html`
+          <div class="account-list">
+            ${accounts.slice(0, 3).map(account => renderAccountItem(account))}
+            ${accounts.length > 3 ? html`
+              <div class="account-more">+${accounts.length - 3} more</div>
+            ` : nothing}
+          </div>
+        ` : nothing}
+        
+        ${lastError ? html`
+          <div class="error-message">
+            ${icons.alertCircle}
+            <span>${lastError}</span>
+          </div>
+        ` : nothing}
+        
+        ${lastActivity ? html`
+          <div class="last-activity">
+            ${icons.clock}
+            <span>Last activity ${formatAgo(lastActivity)}</span>
+          </div>
+        ` : nothing}
+      </div>
+      
+      <div class="card-footer">
+          ${isConnected ? html`
+          <button class="btn-action secondary" @click=${() => disconnectChannel(key, props)}>
+            ${icons.x} Disconnect
+          </button>
+          <button class="btn-action primary" @click=${() => manageChannel(key, props)}>
+            ${icons.settings} Manage
+          </button>
+        ` : isConfigured ? html`
+          <button class="btn-action primary" @click=${() => connectChannel(key, props)}>
+            ${icons.check} Connect
+          </button>
+          <button class="btn-action secondary" @click=${() => configureChannel(key, props)}>
+            ${icons.settings} Configure
+          </button>
+        ` : html`
+          <button class="btn-action primary full" @click=${() => setupChannel(key, props)}>
+            ${icons.plus} Setup
+          </button>
+        `}
       </div>
     </div>
   `;
 }
 
-function resolveChannelMetaMap(
-  snapshot: ChannelsStatusSnapshot | null,
-): Record<string, ChannelUiMetaEntry> {
-  if (!snapshot?.channelMeta?.length) return {};
-  return Object.fromEntries(snapshot.channelMeta.map((entry) => [entry.id, entry]));
+function renderAccountItem(account: ChannelAccountSnapshot) {
+  const isActive = account.running || (account.lastInboundAt && Date.now() - account.lastInboundAt < 10 * 60 * 1000);
+  
+  return html`
+    <div class="account-item">
+      <div class="account-status ${isActive ? 'active' : 'inactive'}"></div>
+      <span class="account-name">${account.name || account.accountId}</span>
+      ${account.connected ? html`<span class="connected-badge">${icons.wifi}</span>` : nothing}
+    </div>
+  `;
 }
 
-function resolveChannelLabel(snapshot: ChannelsStatusSnapshot | null, key: string): string {
-  const meta = resolveChannelMetaMap(snapshot)[key];
-  return meta?.label ?? snapshot?.channelLabels?.[key] ?? key;
-}
-
-const RECENT_ACTIVITY_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
-
-function hasRecentActivity(account: ChannelAccountSnapshot): boolean {
-  if (!account.lastInboundAt) return false;
-  return Date.now() - account.lastInboundAt < RECENT_ACTIVITY_THRESHOLD_MS;
-}
-
-function deriveRunningStatus(account: ChannelAccountSnapshot): "Yes" | "No" | "Active" {
-  if (account.running) return "Yes";
-  // If we have recent inbound activity, the channel is effectively running
-  if (hasRecentActivity(account)) return "Active";
-  return "No";
-}
-
-function deriveConnectedStatus(account: ChannelAccountSnapshot): "Yes" | "No" | "Active" | "n/a" {
-  if (account.connected === true) return "Yes";
-  if (account.connected === false) return "No";
-  // If connected is null/undefined but we have recent activity, show as active
-  if (hasRecentActivity(account)) return "Active";
-  return "n/a";
-}
-
-function renderGenericAccount(account: ChannelAccountSnapshot) {
-  const runningStatus = deriveRunningStatus(account);
-  const connectedStatus = deriveConnectedStatus(account);
+function renderHealthSection(props: ChannelsProps) {
+  if (!props.snapshot) return nothing;
+  
+  const channels = props.snapshot.channels as Record<string, unknown> | null;
+  const errors: string[] = [];
+  
+  Object.entries(channels || {}).forEach(([key, ch]) => {
+    const status = ch as Record<string, unknown>;
+    if (status?.lastError) {
+      errors.push(`${CHANNEL_META[key as ChannelKey]?.name || key}: ${status.lastError}`);
+    }
+  });
 
   return html`
-    <div class="account-card">
-      <div class="account-card-header">
-        <div class="account-card-title">${account.name || account.accountId}</div>
-        <div class="account-card-id">${account.accountId}</div>
+    <section class="channels-health">
+      <div class="health-header" @click=${toggleHealthSection}>
+        <div class="health-title">
+          ${icons.activity}
+          <h3>System Health</h3>
+          ${errors.length > 0 ? html`<span class="error-count">${errors.length}</span>` : nothing}
+        </div>
+        <div class="health-toggle">
+          ${icons.chevronDown}
+        </div>
       </div>
-      <div class="status-list account-card-status">
-        <div>
-          <span class="label">Running</span>
-          <span>${runningStatus}</span>
-        </div>
-        <div>
-          <span class="label">Configured</span>
-          <span>${account.configured ? "Yes" : "No"}</span>
-        </div>
-        <div>
-          <span class="label">Connected</span>
-          <span>${connectedStatus}</span>
-        </div>
-        <div>
-          <span class="label">Last inbound</span>
-          <span>${account.lastInboundAt ? formatAgo(account.lastInboundAt) : "n/a"}</span>
-        </div>
-        ${
-          account.lastError
-            ? html`
-              <div class="account-card-error">
-                ${account.lastError}
-              </div>
-            `
-            : nothing
-        }
+      
+      <div class="health-content collapsed">
+        ${errors.length > 0 ? html`
+          <div class="health-errors">
+            <h4>${icons.alertTriangle} Active Issues</h4>
+            <ul>
+              ${errors.map(err => html`<li>${err}</li>`)}
+            </ul>
+          </div>
+        ` : html`
+          <div class="health-ok">
+            ${icons.checkCircle}
+            <span>All systems operational</span>
+          </div>
+        `}
+        
+        ${props.snapshot ? html`
+          <div class="health-raw">
+            <button class="toggle-raw" @click=${toggleRawData}>
+              ${icons.code} Show Raw Data
+            </button>
+            <pre class="raw-data hidden">${JSON.stringify(props.snapshot, null, 2)}</pre>
+          </div>
+        ` : nothing}
       </div>
-    </div>
+    </section>
   `;
+}
+
+// Action handlers
+function disconnectChannel(key: ChannelKey, props: ChannelsProps) {
+  if (confirm(`Disconnect ${CHANNEL_META[key].name}?`)) {
+    props.onToggleChannel?.(key, false);
+  }
+}
+
+function connectChannel(key: ChannelKey, props: ChannelsProps) {
+  props.onToggleChannel?.(key, true);
+}
+
+function configureChannel(key: ChannelKey, _props: ChannelsProps) {
+  if (CHANNEL_META[key].setupUrl) {
+    window.location.hash = CHANNEL_META[key].setupUrl!;
+  }
+}
+
+function setupChannel(key: ChannelKey, props: ChannelsProps) {
+  if (CHANNEL_META[key].setupUrl) {
+    window.location.hash = CHANNEL_META[key].setupUrl!;
+  } else {
+    props.onChannelSetupOpen?.(key);
+  }
+}
+
+function manageChannel(key: ChannelKey, _props: ChannelsProps) {
+  // Navigate to channel-specific management page
+  const setupUrl = CHANNEL_META[key].setupUrl;
+  if (setupUrl) {
+    window.location.hash = setupUrl;
+  }
+}
+
+// Toggle handlers
+function toggleHealthSection(e: Event) {
+  const header = e.currentTarget as HTMLElement;
+  const content = header.nextElementSibling as HTMLElement;
+  const toggle = header.querySelector('.health-toggle');
+  
+  if (content) {
+    content.classList.toggle('collapsed');
+    toggle?.classList.toggle('rotated');
+  }
+}
+
+function toggleRawData(e: Event) {
+  const button = e.currentTarget as HTMLElement;
+  const raw = button.nextElementSibling as HTMLElement;
+  
+  if (raw) {
+    raw.classList.toggle('hidden');
+    button.innerHTML = raw.classList.contains('hidden') 
+      ? `${getIcon('code')} Show Raw Data`
+      : `${getIcon('code')} Hide Raw Data`;
+  }
 }
