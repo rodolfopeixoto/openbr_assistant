@@ -1,9 +1,16 @@
 import { html, nothing } from "lit";
 import type { AppViewState } from "../app-view-state";
 import { icons } from "../icons";
-import type { FeatureCategory, DashboardFeature, QuickAction } from "../../../config/feature-registry";
+import type { FeatureCategory, DashboardFeature, QuickAction } from "../controllers/features.js";
 
 // Spec B1: Centralized Features Dashboard
+
+// Helper to safely access icons by name
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getIcon(name: string): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (icons as any)[name] || icons.settings;
+}
 
 export function renderFeaturesView(state: AppViewState) {
   const features = state.featuresList || [];
@@ -81,18 +88,18 @@ function renderSummaryCards(state: AppViewState) {
 }
 
 function renderCategories(state: AppViewState) {
-  const categories = state.featureCategories || [];
-  
+  const categories = (state.featuresList || []) as FeatureCategory[];
+
   if (categories.length === 0) {
     return html`
       <div class="features-empty">
-        <div class="features-empty-icon">${icons.box}</div>
+        <div class="features-empty-icon">${(icons as Record<string, typeof icons.messageSquare>).box}</div>
         <h3>No features found</h3>
         <p>No features match your search criteria</p>
       </div>
     `;
   }
-  
+
   return html`
     <div class="categories-grid">
       ${categories.map(cat => renderCategorySection(cat, state))}
@@ -110,7 +117,7 @@ function renderCategorySection(category: FeatureCategory, state: AppViewState) {
         class="category-header" 
         @click="${() => state.handleToggleCategory(category.id)}"
       >
-        <div class="category-icon">${icons[category.icon] || icons.settings}</div>
+        <div class="category-icon">${getIcon(category.icon)}</div>
         <div class="category-info">
           <h3>${category.name}</h3>
           <p>${category.description}</p>
@@ -155,7 +162,7 @@ function renderFeatureCard(feature: DashboardFeature, state: AppViewState) {
       ${feature.isNew ? html`<span class="badge-new">NEW</span>` : nothing}
       
       <div class="card-header">
-        <div class="feature-icon">${icons[feature.icon] || icons.settings}</div>
+        <div class="feature-icon">${getIcon(feature.icon)}</div>
         <div class="status-badge ${statusClass}">${statusLabel}</div>
       </div>
       
@@ -191,7 +198,7 @@ function renderQuickAction(action: QuickAction, feature: DashboardFeature, state
       class="btn-quick ${action.id}"
       title="${action.label}"
     >
-      ${icons[iconMap[action.id]] || icons.settings}
+      ${getIcon(iconMap[action.id])}
     </button>
   `;
 }
@@ -228,9 +235,10 @@ function handleQuickAction(action: QuickAction, feature: DashboardFeature, state
 function renderConfigModal(state: AppViewState) {
   if (!state.featuresConfigModalOpen || !state.featuresConfigModalFeature) return nothing;
   
-  const feature = state.featuresList.find(f => f.id === state.featuresConfigModalFeature);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const feature = (state.featuresList as any[]).find((f: any) => f.id === state.featuresConfigModalFeature);
   if (!feature) return nothing;
-  
+
   return html`
     <div class="modal-overlay" @click="${() => state.handleFeaturesCloseConfigModal()}">
       <div class="modal" @click="${(e: Event) => e.stopPropagation()}">
@@ -248,8 +256,8 @@ function renderConfigModal(state: AppViewState) {
           <button class="btn-secondary" @click="${() => state.handleFeaturesCloseConfigModal()}">
             Cancel
           </button>
-          <button 
-            class="btn-primary" 
+          <button
+            class="btn-primary"
             @click="${() => state.handleFeaturesConfigure(feature.id, state.featuresConfigFormData)}"
           >
             Save

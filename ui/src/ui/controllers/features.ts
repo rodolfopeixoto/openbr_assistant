@@ -42,6 +42,9 @@ export interface FeaturesDashboardResponse {
   };
 }
 
+// Note: featuresList is used to store categories for the features dashboard
+// Cast to FeatureCategory[] when using in views
+
 export async function loadFeaturesDashboard(state: AppViewState): Promise<void> {
   if (!state.client?.connected) {
     return;
