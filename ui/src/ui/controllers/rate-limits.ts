@@ -52,8 +52,12 @@ export async function loadRateLimits(state: AppViewState): Promise<void> {
   state.rateLimitsError = null;
 
   try {
-    const result = (await state.client.request("rate-limits.status")) as RateLimitStatus;
-    state.rateLimitsStatus = result as unknown as Record<string, unknown>;
+    const [statusResult, configResult] = await Promise.all([
+      state.client.request("rate-limits.status") as Promise<RateLimitStatus>,
+      state.client.request("rate-limits.config.get") as Promise<{ config: RateLimitConfig }>,
+    ]);
+    state.rateLimitsStatus = statusResult as unknown as Record<string, unknown>;
+    state.rateLimitsConfig = configResult.config as unknown as Record<string, unknown>;
   } catch (err) {
     state.rateLimitsError = err instanceof Error ? err.message : "Failed to load rate limits";
     console.error("[RateLimits] Failed to load:", err);

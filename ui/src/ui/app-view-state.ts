@@ -506,8 +506,11 @@ export type AppViewState = {
   rateLimitsLoading: boolean;
   rateLimitsError: string | null;
   rateLimitsStatus: Record<string, unknown> | null;
+  rateLimitsConfig: Record<string, unknown> | null;
   handleRateLimitsLoad: () => Promise<void>;
   handleRateLimitsConfigure: (config: Record<string, unknown>) => Promise<void>;
+  handleRateLimitsReset: () => Promise<void>;
+  handleRateLimitsToggle: (enabled: boolean) => Promise<void>;
   // Budget
   budgetLoading: boolean;
   budgetError: string | null;

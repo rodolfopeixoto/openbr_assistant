@@ -417,6 +417,7 @@ export class OpenClawApp extends LitElement {
   @state() rateLimitsLoading = false;
   @state() rateLimitsError: string | null = null;
   @state() rateLimitsStatus: Record<string, unknown> | null = null;
+  @state() rateLimitsConfig: Record<string, unknown> | null = null;
 
   // Budget state
   @state() budgetLoading = false;
