@@ -1452,6 +1452,22 @@ export class OpenClawApp extends LitElement {
     this.configRaw = raw;
   }
 
+  async handleConfigAutocomplete(
+    source: string,
+    query: string
+  ): Promise<Array<{ value: string; label: string; description?: string; category?: string }>> {
+    const { fetchAutocompleteResults } = await import("./controllers/config.js");
+    return fetchAutocompleteResults(this, source, query);
+  }
+
+  async handleConfigValidate(
+    path: string[],
+    value: unknown
+  ): Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }> {
+    const { validateConfigField } = await import("./controllers/config.js");
+    return validateConfigField(this, path, value);
+  }
+
   // Wizard methods
   handleWizardClose() {
     this.wizardOpen = false;

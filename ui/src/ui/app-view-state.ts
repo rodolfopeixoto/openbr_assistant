@@ -198,6 +198,9 @@ export type AppViewState = {
   handleConfigFormUpdate: (path: string, value: unknown) => void;
   handleConfigFormModeChange: (mode: "form" | "raw") => void;
   handleConfigRawChange: (raw: string) => void;
+  // Config autocomplete and validation
+  handleConfigAutocomplete: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
+  handleConfigValidate: (path: string[], value: unknown) => Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }>;
   handleInstallSkill: (key: string) => Promise<void>;
   handleUpdateSkill: (key: string) => Promise<void>;
   handleToggleSkillEnabled: (key: string, enabled: boolean) => Promise<void>;

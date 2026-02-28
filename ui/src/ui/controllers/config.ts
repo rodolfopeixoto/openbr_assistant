@@ -183,3 +183,74 @@ export function removeConfigFormValue(state: ConfigState, path: Array<string | n
     state.configRaw = serializeConfigForm(base);
   }
 }
+
+// Autocomplete API
+export interface AutocompleteResult {
+  value: string;
+  label: string;
+  description?: string;
+  category?: string;
+}
+
+export interface AutocompleteResponse {
+  results: AutocompleteResult[];
+  hasMore: boolean;
+  total: number;
+}
+
+export async function fetchAutocompleteResults(
+  state: ConfigState,
+  source: string,
+  query: string,
+  limit?: number
+): Promise<AutocompleteResult[]> {
+  if (!state.client || !state.connected) return [];
+  
+  try {
+    const res = await state.client.request("config.autocomplete", {
+      source,
+      query,
+      limit: limit ?? 10,
+    }) as AutocompleteResponse;
+    
+    return res.results ?? [];
+  } catch (err) {
+    console.error("Autocomplete error:", err);
+    return [];
+  }
+}
+
+// Validation API
+export interface ValidationError {
+  message: string;
+  code: string;
+  severity: "error" | "warning" | "info";
+}
+
+export interface ValidationResponse {
+  valid: boolean;
+  errors?: ValidationError[];
+}
+
+export async function validateConfigField(
+  state: ConfigState,
+  path: string[],
+  value: unknown
+): Promise<ValidationResponse> {
+  if (!state.client || !state.connected) {
+    return { valid: true };
+  }
+  
+  try {
+    const res = await state.client.request("config.validate", {
+      path,
+      value,
+      currentConfig: state.configForm ?? state.configSnapshot?.config ?? {},
+    }) as ValidationResponse;
+    
+    return res;
+  } catch (err) {
+    console.error("Validation error:", err);
+    return { valid: true };
+  }
+}

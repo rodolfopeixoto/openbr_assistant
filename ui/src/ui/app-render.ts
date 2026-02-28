@@ -638,6 +638,7 @@ export function renderApp(state: AppViewState) {
                 },
                 onFormModeChange: (mode) => (state.configFormMode = mode),
                 onFormPatch: (path, value) => updateConfigFormValue(state, path, value),
+                onFormSearch: async (source, query) => state.handleConfigAutocomplete(source, query),
                 onSearchChange: (query) => (state.configSearchQuery = query),
                 onSectionChange: (section) => {
                   state.configActiveSection = section;

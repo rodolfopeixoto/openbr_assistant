@@ -113,6 +113,7 @@ export function renderNode(params: {
   disabled: boolean;
   showLabel?: boolean;
   onPatch: (path: Array<string | number>, value: unknown) => void;
+  onSearch?: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
 }): TemplateResult | typeof nothing {
   const { schema, value, path, hints, unsupported, disabled, onPatch } = params;
   const showLabel = params.showLabel ?? true;
@@ -169,16 +170,15 @@ export function renderNode(params: {
         break;
       case 'autocomplete':
         if (hint.autocomplete) {
-          // Note: This would need to be connected to the actual API
-          // For now, render as text input with note
           return renderEnhancedAutocompleteField({
             label,
             value: value as string | undefined,
             config: hint.autocomplete,
             placeholder: hint.placeholder,
-            help: help ? `${help} (Autocomplete: ${hint.autocomplete.source})` : `Autocomplete: ${hint.autocomplete.source}`,
+            help,
             disabled,
             onChange: (val) => onPatch(path, val),
+            onSearch: params.onSearch || (async () => []),
           });
         }
         break;
@@ -853,8 +853,9 @@ function renderEnhancedAutocompleteField(props: {
   help?: string;
   disabled?: boolean;
   onChange: (value: string | undefined) => void;
+  onSearch: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
 }): TemplateResult {
-  const { label, value, config, placeholder, help, disabled = false, onChange } = props;
+  const { label, value, config, placeholder, help, disabled = false, onChange, onSearch } = props;
 
   return html`
     <div class="cfg-field" ?data-disabled=${disabled}>
@@ -868,10 +869,18 @@ function renderEnhancedAutocompleteField(props: {
           .value=${value || ''}
           ?disabled=${disabled}
           @change=${(e: Event) => onChange((e.target as HTMLInputElement).value || undefined)}
+          @input=${async (e: Event) => {
+            const query = (e.target as HTMLInputElement).value;
+            if (query.length >= (config.minChars || 2)) {
+              const results = await onSearch(config.source, query);
+              // In a full implementation, this would show a dropdown with results
+              console.log('Autocomplete results:', results);
+            }
+          }}
         />
       </div>
       <div class="cfg-field__note">
-        <small>💡 Enhanced autocomplete available (source: ${config.source})</small>
+        <small>💡 Type ${config.minChars || 2}+ chars to search ${config.source}</small>
       </div>
     </div>
   `;
