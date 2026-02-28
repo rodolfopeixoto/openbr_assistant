@@ -1,0 +1,457 @@
+/*
+ * Component Library - Cards
+ * Componentes de card reutilizáveis e consistentes
+ */
+
+/* ===========================================
+   Card Base
+   =========================================== */
+.card {
+  --card-bg: var(--card);
+  --card-border: var(--border);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+  --card-padding: var(--space-5);
+  
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--card-padding);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  --card-border: var(--border-strong);
+  --card-shadow: var(--shadow-md);
+}
+
+/* Card Variants */
+.card--flat {
+  --card-shadow: none;
+  --card-bg: transparent;
+}
+
+.card--elevated {
+  --card-shadow: var(--shadow-lg);
+}
+
+.card--outlined {
+  --card-shadow: none;
+  --card-border: var(--border-strong);
+}
+
+.card--interactive {
+  cursor: pointer;
+}
+
+.card--interactive:hover {
+  transform: translateY(-2px);
+  --card-shadow: var(--shadow-lg);
+}
+
+.card--compact {
+  --card-padding: var(--space-4);
+}
+
+.card-- spacious {
+  --card-padding: var(--space-6);
+}
+
+/* Card Header */
+.card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.card__header--center {
+  align-items: center;
+}
+
+.card__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.card__header-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Card Title */
+.card__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-strong);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.card__title--sm {
+  font-size: var(--font-size-base);
+}
+
+.card__title--lg {
+  font-size: var(--font-size-xl);
+}
+
+/* Card Subtitle */
+.card__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  line-height: var(--leading-normal);
+  margin: 0;
+}
+
+/* Card Body */
+.card__body {
+  color: var(--text);
+  line-height: var(--leading-relaxed);
+}
+
+.card__body > * + * {
+  margin-top: var(--space-4);
+}
+
+/* Card Footer */
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.card__footer--start {
+  justify-content: flex-start;
+}
+
+.card__footer--between {
+  justify-content: space-between;
+}
+
+/* Card Media */
+.card__media {
+  margin: calc(-1 * var(--card-padding));
+  margin-bottom: var(--card-padding);
+  overflow: hidden;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+.card__media img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Card Badge */
+.card__badge {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+/* Card Status Indicators */
+.card__status {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: var(--card-radius) 0 0 var(--card-radius);
+}
+
+.card__status--success { background: var(--ok); }
+.card__status--warning { background: var(--warn); }
+.card__status--danger { background: var(--danger); }
+.card__status--info { background: var(--info); }
+.card__status--accent { background: var(--accent); }
+
+/* Card with Status Padding */
+.card--status {
+  padding-left: calc(var(--card-padding) + 4px);
+}
+
+/* ===========================================
+   Stat Cards
+   =========================================== */
+.stat-card {
+  --stat-icon-size: 44px;
+  --stat-icon-bg: var(--accent-subtle);
+  --stat-icon-color: var(--accent);
+  
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.stat-card--horizontal {
+  flex-direction: row;
+  align-items: center;
+}
+
+.stat-card--compact {
+  padding: var(--space-3);
+  gap: var(--space-3);
+}
+
+.stat-card--compact .stat-card__icon {
+  width: 36px;
+  height: 36px;
+}
+
+.stat-card--compact .stat-card__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.stat-card--compact .stat-card__value {
+  font-size: var(--font-size-xl);
+}
+
+.stat-card--compact .stat-card__label {
+  font-size: var(--font-size-xs);
+}
+
+.stat-card__icon {
+  width: var(--stat-icon-size);
+  height: var(--stat-icon-size);
+  border-radius: var(--radius-lg);
+  background: var(--stat-icon-bg);
+  color: var(--stat-icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-card__label {
+  font-size: var(--font-size-xs);
+  color: var(--muted);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card__value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-strong);
+  line-height: var(--leading-tight);
+}
+
+.stat-card__value--sm {
+  font-size: var(--font-size-lg);
+}
+
+.stat-card__value--lg {
+  font-size: var(--font-size-2xl);
+}
+
+.stat-card__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.stat-card__delta--positive {
+  color: var(--ok);
+}
+
+.stat-card__delta--negative {
+  color: var(--danger);
+}
+
+.stat-card__delta svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Stat Card Variants */
+.stat-card--success {
+  --stat-icon-bg: var(--ok-subtle);
+  --stat-icon-color: var(--ok);
+}
+
+.stat-card--warning {
+  --stat-icon-bg: var(--warn-subtle);
+  --stat-icon-color: var(--warn);
+}
+
+.stat-card--danger {
+  --stat-icon-bg: var(--danger-subtle);
+  --stat-icon-color: var(--danger);
+}
+
+/* ===========================================
+   Info Cards
+   =========================================== */
+.info-card {
+  --info-card-accent: var(--accent);
+  --info-card-bg: var(--accent-subtle);
+  
+  border-left: 4px solid var(--info-card-accent);
+  background: var(--info-card-bg);
+}
+
+.info-card--success {
+  --info-card-accent: var(--ok);
+  --info-card-bg: var(--ok-subtle);
+}
+
+.info-card--warning {
+  --info-card-accent: var(--warn);
+  --info-card-bg: var(--warn-subtle);
+}
+
+.info-card--danger {
+  --info-card-accent: var(--danger);
+  --info-card-bg: var(--danger-subtle);
+}
+
+.info-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-strong);
+  margin-bottom: var(--space-2);
+}
+
+.info-card__title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--info-card-accent);
+}
+
+/* ===========================================
+   Grid Cards
+   =========================================== */
+.cards-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.cards-grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.cards-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.cards-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 1200px) {
+  .cards-grid--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .cards-grid--2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .cards-grid--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cards-grid,
+  .cards-grid--2,
+  .cards-grid--3,
+  .cards-grid--4 {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+
+/* ===========================================
+   Card Loading State
+   =========================================== */
+.card--loading {
+  pointer-events: none;
+}
+
+.card--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===========================================
+   Card Animations
+   =========================================== */
+.card--animate-in {
+  animation: cardEnter 0.35s var(--ease-out) backwards;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger children */
+.cards-grid .card:nth-child(1) { animation-delay: 0ms; }
+.cards-grid .card:nth-child(2) { animation-delay: 50ms; }
+.cards-grid .card:nth-child(3) { animation-delay: 100ms; }
+.cards-grid .card:nth-child(4) { animation-delay: 150ms; }
+.cards-grid .card:nth-child(5) { animation-delay: 200ms; }
+.cards-grid .card:nth-child(6) { animation-delay: 250ms; }
