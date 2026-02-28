@@ -1,25 +1,17 @@
 import { html, nothing } from "lit";
 import type { AppViewState } from "../app-view-state.js";
 import type { RoutingTier, TestRoutingResult, TierConfig } from "../controllers/model-routing.js";
+import { icons } from "../icons.js";
 
-// Icons (using emoji/simple text for now - could use proper icon library)
-const icons: Record<string, string> = {
-  zap: "⚡",
-  activity: "📊",
-  brain: "🧠",
-  check: "✓",
-  x: "✕",
-  settings: "⚙️",
-  externalLink: "↗",
-  power: "⏻",
-  chevronUp: "▲",
-  chevronDown: "▼",
-  dollar: "$",
-  clock: "🕐",
-  routing: "🔄",
-  search: "🔍",
-  drag: "⋮⋮",
-};
+// Helper to map icon names from tier config to actual icon components
+function getTierIcon(iconName: string): ReturnType<typeof html> {
+  const iconMap: Record<string, ReturnType<typeof html>> = {
+    zap: icons.zap,
+    activity: icons.barChart,
+    brain: icons.brain,
+  };
+  return iconMap[iconName] || icons.circle;
+}
 
 export function renderModelRoutingView(state: AppViewState) {
   const status = state.modelRoutingStatus as
@@ -83,7 +75,7 @@ function renderHeader(
         ? html`
             <div class="header-stats">
               <div class="stat-card savings">
-                <div class="stat-icon">${icons.dollar}</div>
+                <div class="stat-icon">${icons.dollarSign}</div>
                 <div class="stat-content">
                   <div class="stat-value">$${savings.toFixed(4)}</div>
                   <div class="stat-label">Saved</div>
@@ -185,7 +177,7 @@ function renderTierCard(
     <div class="tier-card ${tier.id}" data-tier="${tier.id}">
       <div class="tier-header ${tier.color}">
         <div class="tier-icon-wrapper">
-          <span class="tier-icon">${icons[tier.icon]}</span>
+          <span class="tier-icon">${getTierIcon(tier.icon)}</span>
         </div>
         <div class="tier-title">
           <h3>${tier.name}</h3>
@@ -248,7 +240,7 @@ function renderModelItem(model: string, index: number, tierId: RoutingTier, stat
       @drop="${(e: DragEvent) => handleDrop(e, tierId, index, state)}"
       @dragend="${handleDragEnd}"
     >
-      <span class="drag-handle">${icons.drag}</span>
+      <span class="drag-handle">${icons.gripVertical}</span>
       <span class="model-rank">#${index + 1}</span>
       <span class="model-name">${model}</span>
       ${isLocal ? html`<span class="model-badge local">Local</span>` : nothing}
