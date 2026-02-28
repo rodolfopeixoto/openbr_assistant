@@ -318,7 +318,15 @@ export function renderApp(state: AppViewState) {
                 onNostrProfileSave: () => state.handleNostrProfileSave(),
                 onNostrProfileImport: () => state.handleNostrProfileImport(),
                 onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
-                onNavigate: (tab) => { state.tab = tab as Tab; },
+                onNavigate: (tab, params) => { 
+                  state.tab = tab as Tab; 
+                  if (params?.section && state.configManagerState) {
+                    state.configManagerState = {
+                      ...state.configManagerState,
+                      selectedTab: params.section
+                    };
+                  }
+                },
               })
             : nothing
         }
