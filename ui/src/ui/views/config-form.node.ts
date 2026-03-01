@@ -143,9 +143,11 @@ export function renderNode(params: {
 
   // Check for enhanced widget hints
   if (hint?.widget) {
+    console.log('[ConfigForm] Widget hint found:', { path: pathKey, widget: hint.widget, options: hint.options?.length });
     switch (hint.widget) {
       case 'select':
         if (hint.options && hint.options.length > 0) {
+          console.log('[ConfigForm] Rendering select for:', pathKey);
           return renderSelectField({
             label,
             value: value as string | number | boolean | undefined,
