@@ -40,10 +40,8 @@ export async function loadOpencodeStatus(state: AppViewState): Promise<void> {
   if (!state.client?.connected) return;
   
   try {
-    const result = await state.client.request({
-      method: "opencode.status",
-    });
-    state.opencodeStatus = result as OpenCodeStatus;
+    const result = await state.client.request("opencode.status");
+    state.opencodeStatus = result as unknown as OpenCodeStatus;
   } catch (err) {
     console.error("Failed to load OpenCode status:", err);
     state.opencodeStatus = null;
@@ -54,9 +52,7 @@ export async function loadOpencodeTasks(state: AppViewState): Promise<void> {
   if (!state.client?.connected) return;
   
   try {
-    const result = await state.client.request({
-      method: "opencode.task.list",
-    });
+    const result = await state.client.request("opencode.task.list");
     state.opencodeTasks = (result as { tasks: OpenCodeTask[] }).tasks || [];
   } catch (err) {
     console.error("Failed to load OpenCode tasks:", err);
@@ -69,10 +65,7 @@ export async function createOpencodeTask(state: AppViewState, prompt: string): P
   
   state.opencodeTaskCreating = true;
   try {
-    await state.client.request({
-      method: "opencode.task.create",
-      params: { prompt },
-    });
+    await state.client.request("opencode.task.create", { prompt });
     await loadOpencodeTasks(state);
     await loadOpencodeStatus(state);
     state.opencodeTaskInput = "";
@@ -88,10 +81,7 @@ export async function approveOpencodeTask(state: AppViewState, taskId: string): 
   if (!state.client?.connected) return;
   
   try {
-    await state.client.request({
-      method: "opencode.task.approve",
-      params: { taskId },
-    });
+    await state.client.request("opencode.task.approve", { taskId });
     await loadOpencodeTasks(state);
     await loadOpencodeStatus(state);
   } catch (err) {
@@ -104,10 +94,7 @@ export async function cancelOpencodeTask(state: AppViewState, taskId: string): P
   if (!state.client?.connected) return;
   
   try {
-    await state.client.request({
-      method: "opencode.task.cancel",
-      params: { taskId },
-    });
+    await state.client.request("opencode.task.cancel", { taskId });
     await loadOpencodeTasks(state);
     await loadOpencodeStatus(state);
   } catch (err) {
@@ -123,9 +110,7 @@ export async function loadOpencodeConfig(state: AppViewState): Promise<void> {
   state.opencodeConfigError = null;
   
   try {
-    const result = await state.client.request({
-      method: "opencode.config.get",
-    });
+    const result = await state.client.request("opencode.config.get");
     state.opencodeConfig = (result as { config: Record<string, unknown> }).config || {};
     state.opencodeConfigDirty = false;
   } catch (err) {
@@ -141,10 +126,7 @@ export async function saveOpencodeConfig(state: AppViewState): Promise<void> {
   
   state.opencodeConfigSaving = true;
   try {
-    await state.client.request({
-      method: "config.set",
-      params: { opencode: state.opencodeConfig },
-    });
+    await state.client.request("config.set", { opencode: state.opencodeConfig });
     state.opencodeConfigDirty = false;
   } catch (err) {
     console.error("Failed to save OpenCode config:", err);
@@ -175,9 +157,7 @@ export async function loadOpencodeSecurity(state: AppViewState): Promise<void> {
   if (!state.client?.connected) return;
   
   try {
-    const result = await state.client.request({
-      method: "opencode.config.get",
-    });
+    const result = await state.client.request("opencode.config.get");
     const config = (result as { config: Record<string, unknown> }).config || {};
     state.opencodeSecurityConfig = (config.security as Record<string, unknown>) || {};
   } catch (err) {
@@ -190,14 +170,11 @@ export async function saveOpencodeSecurity(state: AppViewState): Promise<void> {
   
   state.opencodeSecuritySaving = true;
   try {
-    await state.client.request({
-      method: "config.set",
-      params: { 
-        opencode: {
-          ...state.opencodeConfig,
-          security: state.opencodeSecurityConfig 
-        } 
-      },
+    await state.client.request("config.set", { 
+      opencode: {
+        ...state.opencodeConfig,
+        security: state.opencodeSecurityConfig 
+      } 
     });
     state.opencodeSecurityDirty = false;
   } catch (err) {
@@ -218,9 +195,7 @@ export async function loadOpencodeAudit(state: AppViewState): Promise<void> {
   
   state.opencodeAuditLoading = true;
   try {
-    const result = await state.client.request({
-      method: "opencode.audit.list",
-    });
+    const result = await state.client.request("opencode.audit.list");
     state.opencodeAuditLog = (result as { entries: OpenCodeAuditEntry[] }).entries || [];
   } catch (err) {
     console.error("Failed to load OpenCode audit:", err);

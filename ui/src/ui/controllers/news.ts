@@ -1,4 +1,5 @@
 import type { AppViewState } from "../app-view-state.js";
+import { normalizeUrl, isValidUrl } from "../../utils/url-validator.js";
 
 export interface NewsItem {
   id: string;
@@ -63,6 +64,18 @@ export async function loadNews(state: AppViewState): Promise<void> {
     };
 
     let items = result.items;
+    
+    // Validate and normalize URLs for each item
+    items = items.map(item => {
+      const baseUrl = item.sourceUrl ? item.sourceUrl : `https://${item.source}`;
+      const normalizedUrl = normalizeUrl(item.url, baseUrl);
+      
+      return {
+        ...item,
+        url: normalizedUrl || item.url,
+        isUrlValid: normalizedUrl !== null && isValidUrl(normalizedUrl),
+      };
+    });
     
     // Apply client-side source filtering if sources are selected
     if (state.newsSelectedSources && state.newsSelectedSources.length > 0) {

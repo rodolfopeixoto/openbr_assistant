@@ -203,12 +203,49 @@ export async function loadMCPServers(state: AppViewState): Promise<void> {
   state.mcpError = null;
 
   try {
-    const result = (await state.client.request("mcp.list")) as {
-      servers: MCPServer[];
-    };
+    // Timeout wrapper for the request
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("Timeout ao carregar servidores MCP")), 10000);
+    });
+    
+    const result = await Promise.race([
+      state.client.request("mcp.list") as Promise<{ servers: MCPServer[] }>,
+      timeoutPromise
+    ]);
+    
     state.mcpServers = result.servers || [];
+    
+    // Cache the result in localStorage for offline fallback
+    try {
+      localStorage.setItem('mcp-servers-cache', JSON.stringify({
+        servers: state.mcpServers,
+        timestamp: Date.now()
+      }));
+    } catch {
+      // Ignore localStorage errors
+    }
   } catch (err) {
-    state.mcpError = err instanceof Error ? err.message : "Failed to load MCP servers";
+    const errorMessage = err instanceof Error ? err.message : "Failed to load MCP servers";
+    
+    // Check if we have cached data
+    try {
+      const cached = localStorage.getItem('mcp-servers-cache');
+      if (cached) {
+        const { servers, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        const ageMinutes = Math.floor(age / 60000);
+        
+        state.mcpServers = servers;
+        state.mcpError = `Mostrando dados em cache (${ageMinutes} min atrás). ${errorMessage}`;
+      } else {
+        state.mcpError = errorMessage;
+        state.mcpServers = [];
+      }
+    } catch {
+      state.mcpError = errorMessage;
+      state.mcpServers = [];
+    }
+    
     console.error("[MCP] Failed to load:", err);
   } finally {
     state.mcpLoading = false;

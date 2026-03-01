@@ -22,6 +22,25 @@ export interface DashboardFeature {
   requires: string[];
   quickActions: QuickAction[];
   isNew?: boolean;
+  configSchema?: ConfigSchema;
+}
+
+export interface ConfigSchema {
+  [key: string]: {
+    type: 'string' | 'number' | 'boolean' | 'select' | 'password' | 'textarea';
+    label: string;
+    description?: string;
+    required?: boolean;
+    default?: unknown;
+    options?: Array<{ label: string; value: string }>;
+    placeholder?: string;
+    validation?: {
+      min?: number;
+      max?: number;
+      pattern?: string;
+      message?: string;
+    };
+  };
 }
 
 export interface QuickAction {
