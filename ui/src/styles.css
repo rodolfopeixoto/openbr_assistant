@@ -23,6 +23,7 @@
 @import "./styles/features.css";
 @import "./styles/design-system.css";
 @import "./styles/icon-fixes.css";
+@import "./styles/opencode-settings.css";
 @import "./styles/cache.css";
 @import "./styles/containers.css";
 @import "./styles/channel-wizard.css";

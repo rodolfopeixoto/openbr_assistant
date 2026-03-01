@@ -172,6 +172,7 @@ export class OpenClawApp extends LitElement {
   @state() opencodeSecuritySaving = false;
   @state() opencodeAuditLoading = false;
   @state() opencodeAuditLog: unknown[] = [];
+  @state() opencodeSettingsSection = "general";
   // Channel Wizard
   @state() channelWizardState: {
     isOpen: boolean;
@@ -1699,6 +1700,35 @@ export class OpenClawApp extends LitElement {
   async handleOpencodeTaskDownload(taskId: string) {
     console.log("[Opencode] Download workspace for task:", taskId);
     // TODO: Implement workspace download
+  }
+
+  handleOpencodeTaskInputChange(value: string) {
+    this.opencodeTaskInput = value;
+  }
+
+  // OpenCode Config handlers
+  async handleOpencodeConfigLoad() {
+    const { loadOpencodeConfig } = await import("./controllers/opencode.js");
+    await loadOpencodeConfig(this);
+  }
+
+  async handleOpencodeConfigSave() {
+    const { saveOpencodeConfig } = await import("./controllers/opencode.js");
+    await saveOpencodeConfig(this);
+  }
+
+  handleOpencodeConfigReset() {
+    this.opencodeConfigDirty = false;
+    this.handleOpencodeConfigLoad();
+  }
+
+  async handleOpencodeConfigChange(key: string, value: unknown) {
+    const { updateOpencodeConfigValue } = await import("./controllers/opencode.js");
+    updateOpencodeConfigValue(this, key, value);
+  }
+
+  handleOpencodeSettingsSectionChange(section: string) {
+    this.opencodeSettingsSection = section;
   }
 
   // Security handlers

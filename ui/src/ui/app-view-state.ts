@@ -439,6 +439,18 @@ export type AppViewState = {
   handleOpencodeTaskCancel: (taskId: string) => Promise<void>;
   handleOpencodeTaskLogs: (taskId: string) => Promise<void>;
   handleOpencodeTaskDownload: (taskId: string) => Promise<void>;
+  // OpenCode Config
+  opencodeConfig: Record<string, unknown> | null;
+  opencodeConfigLoading: boolean;
+  opencodeConfigError: string | null;
+  opencodeConfigDirty: boolean;
+  opencodeConfigSaving: boolean;
+  opencodeSettingsSection: string;
+  handleOpencodeConfigLoad: () => Promise<void>;
+  handleOpencodeConfigSave: () => Promise<void>;
+  handleOpencodeConfigReset: () => void;
+  handleOpencodeConfigChange: (key: string, value: unknown) => void;
+  handleOpencodeSettingsSectionChange: (section: string) => void;
   // MCP
   mcpLoading: boolean;
   mcpError: string | null;
