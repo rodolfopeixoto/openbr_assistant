@@ -92,7 +92,10 @@ type ControlUiAvatarMeta = {
 function sendJson(res: ServerResponse, status: number, body: unknown) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Cache-Control", "no-cache");
+  // Aggressive anti-cache headers
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.end(JSON.stringify(body));
 }
 
@@ -171,7 +174,10 @@ function serveFile(res: ServerResponse, filePath: string) {
   res.setHeader("Content-Type", contentTypeForExt(ext));
   // Static UI should never be cached aggressively while iterating; allow the
   // browser to revalidate.
-  res.setHeader("Cache-Control", "no-cache");
+  // Aggressive anti-cache headers to prevent browser caching during development
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.end(fs.readFileSync(filePath));
 }
 
@@ -226,7 +232,10 @@ function serveIndexHtml(res: ServerResponse, indexPath: string, opts: ServeIndex
       basePath,
     }) ?? identity.avatar;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "no-cache");
+  // Aggressive anti-cache headers for HTML (entry point)
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   const raw = fs.readFileSync(indexPath, "utf8");
   res.end(
     injectControlUiConfig(raw, {
