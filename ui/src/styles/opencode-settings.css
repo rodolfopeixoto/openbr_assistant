@@ -1,3 +1,130 @@
+/* OpenCode Main View - Icon and Layout Fixes */
+
+/* Main OpenCode View Container */
+.opencode-view {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.opencode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.opencode-header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.opencode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--accent-subtle);
+  border-radius: 10px;
+  color: var(--accent);
+}
+
+.opencode-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.opencode-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.opencode-header .subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 4px 0 0 0;
+}
+
+.opencode-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Disabled State (when OpenCode is not enabled) */
+.opencode-disabled-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 16px;
+}
+
+.disabled-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  color: var(--muted);
+}
+
+.disabled-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.opencode-disabled-state h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.opencode-disabled-state p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  max-width: 400px;
+}
+
+/* Loading State */
+.view-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+}
+
+.view-loading .spinner {
+  width: 40px;
+  height: 40px;
+}
+
+.view-loading p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
 /* OpenCode Settings - Organized and Functional */
 
 .opencode-settings-view {
