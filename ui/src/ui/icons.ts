@@ -243,6 +243,26 @@ export const icons = {
       <path d="m9 12 2 2 4-4" />
     </svg>
   `,
+  xCircle: html`
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" />
+      <path d="m15 9-6 6" />
+      <path d="m9 9 6 6" />
+    </svg>
+  `,
+  userCheck: html`
+    <svg viewBox="0 0 24 24">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <polyline points="16 11 18 13 22 9" />
+    </svg>
+  `,
+  arrowLeft: html`
+    <svg viewBox="0 0 24 24">
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
+    </svg>
+  `,
   info: html`
     <svg viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10" />

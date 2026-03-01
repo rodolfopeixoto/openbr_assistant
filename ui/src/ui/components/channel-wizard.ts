@@ -822,51 +822,81 @@ function canGoToNext(wizard: NonNullable<AppViewState['channelWizardState']>, ch
 }
 
 function translateError(channelKey: string, error: string): string {
+  const errorLower = error.toLowerCase();
+  
   if (channelKey === 'telegram') {
-    if (error.includes('Unauthorized')) return 'Token não autorizado ou revogado';
-    if (error.includes('Not Found')) return 'Bot não encontrado';
-    if (error.includes('Conflict')) return 'Conflito - outra instância está usando este token';
+    if (errorLower.includes('unauthorized')) return 'Token não autorizado ou revogado';
+    if (errorLower.includes('not found')) return 'Bot não encontrado';
+    if (errorLower.includes('conflict')) return 'Conflito - outra instância está usando este token';
+    if (errorLower.includes('getupdates') && errorLower.includes('timeout')) return 'Timeout ao conectar com Telegram (demorou mais de 500s)';
+    if (errorLower.includes('etimedout')) return 'Timeout de conexão';
+    if (errorLower.includes('econnrefused')) return 'Conexão recusada';
+    if (errorLower.includes('enetunreach')) return 'Rede inacessível';
   } else if (channelKey === 'discord') {
-    if (error.includes('Unauthorized') || error.includes('401')) return 'Token inválido ou não autorizado';
-    if (error.includes('Forbidden') || error.includes('403')) return 'Permissões insuficientes para o bot';
+    if (errorLower.includes('unauthorized') || errorLower.includes('401')) return 'Token inválido ou não autorizado';
+    if (errorLower.includes('forbidden') || errorLower.includes('403')) return 'Permissões insuficientes para o bot';
+    if (errorLower.includes('gateway')) return 'Erro no Gateway Discord';
   } else if (channelKey === 'slack') {
-    if (error.includes('invalid_auth') || error.includes('account_inactive')) return 'Token inválido ou expirado';
-    if (error.includes('missing_scope')) return 'Scopes insuficientes no token';
+    if (errorLower.includes('invalid_auth') || errorLower.includes('account_inactive')) return 'Token inválido ou expirado';
+    if (errorLower.includes('missing_scope')) return 'Scopes insuficientes no token';
+    if (errorLower.includes('channel_not_found')) return 'Canal não encontrado';
   }
   
-  if (error.includes('Timeout')) return 'Timeout na conexão';
-  if (error.includes('Network')) return 'Erro de rede';
+  if (errorLower.includes('timeout') || errorLower.includes('timed out')) return 'Timeout na conexão';
+  if (errorLower.includes('network') || errorLower.includes('econnreset')) return 'Erro de rede';
+  if (errorLower.includes('cors')) return 'Erro de CORS - acesso bloqueado';
+  if (errorLower.includes('fetch')) return 'Erro ao buscar dados';
   return error || 'Erro desconhecido';
 }
 
 function getErrorSolution(channelKey: string, error: string): string {
+  const errorLower = error.toLowerCase();
+  
   if (channelKey === 'telegram') {
-    if (error.includes('Unauthorized')) {
+    if (errorLower.includes('unauthorized')) {
       return 'O token pode ter sido revogado. Vá ao @BotFather, envie /revoke e depois /token para obter um novo token.';
     }
-    if (error.includes('Not Found')) {
+    if (errorLower.includes('not found')) {
       return 'Verifique se o token está completo e correto. O formato deve ser: números:letras';
     }
+    if (errorLower.includes('getupdates') && errorLower.includes('timeout')) {
+      return 'O Telegram está demorando para responder. Isso pode ser normal em períodos de alta demanda. Tente novamente em alguns minutos ou verifique sua conexão.';
+    }
+    if (errorLower.includes('etimedout') || errorLower.includes('econnrefused')) {
+      return 'Não foi possível conectar aos servidores do Telegram. Verifique sua conexão com a internet e firewall.';
+    }
   } else if (channelKey === 'discord') {
-    if (error.includes('Unauthorized') || error.includes('401')) {
+    if (errorLower.includes('unauthorized') || errorLower.includes('401')) {
       return 'Verifique se o token foi copiado corretamente do Discord Developer Portal. O token deve começar com caracteres aleatórios longos.';
     }
-    if (error.includes('Forbidden') || error.includes('403')) {
+    if (errorLower.includes('forbidden') || errorLower.includes('403')) {
       return 'O bot pode não ter as permissões necessárias. Vá em OAuth2 > URL Generator e adicione scopes: bot, applications.commands. Depois em Bot > Privileged Gateway Intents, habilite as intents necessárias.';
     }
+    if (errorLower.includes('gateway')) {
+      return 'Erro no Gateway do Discord. Tente novamente em alguns minutos ou verifique o status em discordstatus.com.';
+    }
   } else if (channelKey === 'slack') {
-    if (error.includes('invalid_auth') || error.includes('account_inactive')) {
+    if (errorLower.includes('invalid_auth') || errorLower.includes('account_inactive')) {
       return 'O token pode estar expirado ou foi revogado. Gere um novo token em api.slack.com/apps > OAuth & Permissions > Reinstall to Workspace.';
     }
-    if (error.includes('missing_scope')) {
+    if (errorLower.includes('missing_scope')) {
       return 'O token não tem os scopes necessários. Adicione em OAuth & Permissions > Scopes: chat:write, channels:read, im:read, groups:read.';
+    }
+    if (errorLower.includes('channel_not_found')) {
+      return 'O canal especificado não foi encontrado. Verifique se o bot foi adicionado ao canal ou se o ID está correto.';
     }
   }
   
-  if (error.includes('Timeout') || error.includes('Network')) {
-    return 'Verifique sua conexão com a internet. Se estiver atrás de um firewall, pode ser necessário configurar um proxy.';
+  if (errorLower.includes('timeout') || errorLower.includes('timed out')) {
+    return 'Verifique sua conexão com a internet. Se estiver atrás de um firewall, pode ser necessário configurar um proxy. Tente aumentar o timeout nas configurações.';
   }
-  return 'Verifique se as credenciais estão corretas e tente novamente.';
+  if (errorLower.includes('network') || errorLower.includes('econnreset')) {
+    return 'Erro de rede detectado. Verifique sua conexão com a internet e tente novamente.';
+  }
+  if (errorLower.includes('cors')) {
+    return 'Erro de CORS - acesso bloqueado pelo navegador. Verifique as configurações de CORS ou use o aplicativo desktop.';
+  }
+  return 'Verifique se as credenciais estão corretas e tente novamente. Se o problema persistir, consulte a documentação.';
 }
 
 // Export config mapping for use in app.ts
