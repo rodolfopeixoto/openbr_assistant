@@ -15,6 +15,8 @@ export type ConfigFormProps = {
   activeSubsection?: string | null;
   onPatch: (path: Array<string | number>, value: unknown) => void;
   onSearch?: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
+  onValidate?: (path: Array<string | number>, value: unknown) => Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }>;
+  validationErrors?: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }>;
 };
 
 // SVG Icons for section cards (Lucide-style)
@@ -460,6 +462,8 @@ export function renderConfigForm(props: ConfigFormProps) {
                     showLabel: false,
                     onPatch: props.onPatch,
                     onSearch: props.onSearch,
+                    onValidate: props.onValidate,
+                    validationErrors: props.validationErrors,
                   })}
                 </div>
               </section>
@@ -495,6 +499,8 @@ export function renderConfigForm(props: ConfigFormProps) {
                     showLabel: false,
                     onPatch: props.onPatch,
                     onSearch: props.onSearch,
+                    onValidate: props.onValidate,
+                    validationErrors: props.validationErrors,
                   })}
                 </div>
               </section>

@@ -33,6 +33,8 @@ export type ConfigProps = {
   onFormModeChange: (mode: "form" | "raw") => void;
   onFormPatch: (path: Array<string | number>, value: unknown) => void;
   onFormSearch?: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
+  onFormValidate?: (path: Array<string | number>, value: unknown) => Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }>;
+  validationErrors?: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }>;
   onSearchChange: (query: string) => void;
   onSectionChange: (section: string | null) => void;
   onSubsectionChange: (section: string | null) => void;
@@ -782,6 +784,8 @@ export function renderConfig(props: ConfigProps) {
                         unsupportedPaths: analysis.unsupportedPaths,
                         onPatch: props.onFormPatch,
                         onSearch: props.onFormSearch,
+                        onValidate: props.onFormValidate,
+                        validationErrors: props.validationErrors,
                         searchQuery: props.searchQuery,
                         activeSection: props.activeSection,
                         activeSubsection: effectiveSubsection,

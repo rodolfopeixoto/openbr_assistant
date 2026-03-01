@@ -343,6 +343,7 @@ export type AppViewState = {
   configSearchQuery: string;
   configActiveSection: string | null;
   configActiveSubsection: string | null;
+  configValidationErrors: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }>;
   // Models
   handleModelsConfigure: (providerId: string) => void;
   handleModelsManage: (providerId: string) => void;

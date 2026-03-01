@@ -114,6 +114,8 @@ export function renderNode(params: {
   showLabel?: boolean;
   onPatch: (path: Array<string | number>, value: unknown) => void;
   onSearch?: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
+  onValidate?: (path: Array<string | number>, value: unknown) => Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }>;
+  validationErrors?: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }>;
 }): TemplateResult | typeof nothing {
   const { schema, value, path, hints, unsupported, disabled, onPatch } = params;
   const showLabel = params.showLabel ?? true;
@@ -356,8 +358,10 @@ function renderTextInput(params: {
   showLabel?: boolean;
   inputType: "text" | "number";
   onPatch: (path: Array<string | number>, value: unknown) => void;
+  onValidate?: (path: Array<string | number>, value: unknown) => Promise<{ valid: boolean; errors?: Array<{ message: string; code: string; severity: "error" | "warning" | "info" }> }>;
+  validationErrors?: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }>;
 }): TemplateResult {
-  const { schema, value, path, hints, disabled, onPatch, inputType } = params;
+  const { schema, value, path, hints, disabled, onPatch, inputType, onValidate, validationErrors } = params;
   const showLabel = params.showLabel ?? true;
   const hint = hintForPath(path, hints);
   const label = hint?.label ?? schema.title ?? humanize(String(path.at(-1)));
@@ -367,15 +371,23 @@ function renderTextInput(params: {
     hint?.placeholder ??
     (isSensitive ? "••••" : schema.default !== undefined ? `Default: ${schema.default}` : "");
   const displayValue = value ?? "";
+  
+  // Check for validation errors for this path
+  const pathKey = path.join('.');
+  const fieldErrors = validationErrors?.filter(e => e.path === pathKey) ?? [];
+  const hasErrors = fieldErrors.length > 0;
+  
+  // Get validation rules from hint
+  const validation = hint?.validation;
 
   return html`
-    <div class="cfg-field">
+    <div class="cfg-field ${hasErrors ? 'cfg-field--error' : ''}">
       ${showLabel ? html`<label class="cfg-field__label">${renderLabelWithTooltip(label, help)}</label>` : nothing}
       ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
       <div class="cfg-input-wrap">
         <input
           type=${isSensitive ? "password" : inputType}
-          class="cfg-input"
+          class="cfg-input ${hasErrors ? 'cfg-input--error' : ''}"
           placeholder=${placeholder}
           .value=${displayValue == null ? "" : String(displayValue)}
           ?disabled=${disabled}
@@ -392,10 +404,15 @@ function renderTextInput(params: {
             }
             onPatch(path, raw);
           }}
-          @change=${(e: Event) => {
+          @change=${async (e: Event) => {
             if (inputType === "number") return;
             const raw = (e.target as HTMLInputElement).value;
             onPatch(path, raw.trim());
+            
+            // Trigger validation on change if validator provided
+            if (onValidate) {
+              await onValidate(path, raw.trim());
+            }
           }}
         />
         ${
@@ -412,6 +429,25 @@ function renderTextInput(params: {
             : nothing
         }
       </div>
+      ${hasErrors ? html`
+        <div class="cfg-field__errors">
+          ${fieldErrors.map(error => html`
+            <div class="cfg-field__error cfg-field__error--${error.severity}">
+              ${error.severity === 'error' ? '❌' : error.severity === 'warning' ? '⚠️' : 'ℹ️'} ${error.message}
+            </div>
+          `)}
+        </div>
+      ` : nothing}
+      ${validation && !hasErrors ? html`
+        <div class="cfg-field__validation-hint">
+          <small>
+            ${validation.pattern ? 'Formato específico requerido' : ''}
+            ${validation.min !== undefined || validation.max !== undefined ? `Valores entre ${validation.min ?? 'n/a'} e ${validation.max ?? 'n/a'}` : ''}
+            ${validation.minLength !== undefined ? `Mínimo ${validation.minLength} caracteres` : ''}
+            ${validation.required ? 'Obrigatório' : ''}
+          </small>
+        </div>
+      ` : nothing}
     </div>
   `;
 }
@@ -844,7 +880,7 @@ function renderMapField(params: {
   `;
 }
 
-// Enhanced Autocomplete Field (simplified version without full state management)
+// Enhanced Autocomplete Field with dropdown
 function renderEnhancedAutocompleteField(props: {
   label: string;
   value: string | undefined;
@@ -856,29 +892,152 @@ function renderEnhancedAutocompleteField(props: {
   onSearch: (source: string, query: string) => Promise<Array<{ value: string; label: string; description?: string; category?: string }>>;
 }): TemplateResult {
   const { label, value, config, placeholder, help, disabled = false, onChange, onSearch } = props;
-
+  
+  // Unique ID for this field instance
+  const fieldId = `autocomplete-${Math.random().toString(36).substr(2, 9)}`;
+  
   return html`
-    <div class="cfg-field" ?data-disabled=${disabled}>
+    <div class="cfg-field cfg-autocomplete-container" ?data-disabled=${disabled} id="${fieldId}">
       <label class="cfg-field__label">${label}</label>
       ${help ? html`<div class="cfg-field__help">${help}</div>` : nothing}
-      <div class="cfg-input-wrap">
-        <input
-          type="text"
-          class="cfg-input"
-          placeholder=${placeholder || `Search ${config.source}...`}
-          .value=${value || ''}
-          ?disabled=${disabled}
-          @change=${(e: Event) => onChange((e.target as HTMLInputElement).value || undefined)}
-          @input=${async (e: Event) => {
-            const query = (e.target as HTMLInputElement).value;
-            if (query.length >= (config.minChars || 2)) {
-              const results = await onSearch(config.source, query);
-              // In a full implementation, this would show a dropdown with results
-              console.log('Autocomplete results:', results);
-            }
-          }}
-        />
+      <div class="cfg-autocomplete-wrapper">
+        <div class="cfg-input-wrap cfg-autocomplete-input-wrap">
+          <input
+            type="text"
+            class="cfg-input cfg-autocomplete-input"
+            placeholder=${placeholder || `Search ${config.source}...`}
+            .value=${value || ''}
+            ?disabled=${disabled}
+            autocomplete="off"
+            @change=${(e: Event) => onChange((e.target as HTMLInputElement).value || undefined)}
+            @input=${async (e: Event) => {
+              const input = e.target as HTMLInputElement;
+              const query = input.value;
+              const container = input.closest('.cfg-autocomplete-container') as HTMLElement;
+              const dropdown = container?.querySelector('.cfg-autocomplete-dropdown') as HTMLElement;
+              
+              if (query.length >= (config.minChars || 2)) {
+                // Show loading state
+                if (dropdown) {
+                  dropdown.style.display = 'block';
+                  dropdown.innerHTML = '<div class="cfg-autocomplete-loading">Searching...</div>';
+                }
+                
+                const results = await onSearch(config.source, query);
+                
+                if (dropdown) {
+                  if (results.length === 0) {
+                    dropdown.innerHTML = '<div class="cfg-autocomplete-empty">No results found</div>';
+                  } else {
+                    // Group results by category
+                    const grouped = results.reduce((acc, result) => {
+                      const cat = result.category || 'Results';
+                      if (!acc[cat]) acc[cat] = [];
+                      acc[cat].push(result);
+                      return acc;
+                    }, {} as Record<string, typeof results>);
+                    
+                    dropdown.innerHTML = Object.entries(grouped).map(([category, items]) => `
+                      <div class="cfg-autocomplete-category">
+                        <div class="cfg-autocomplete-category-header">${category}</div>
+                        ${items.map((item, idx) => `
+                          <button type="button" class="cfg-autocomplete-option" data-value="${item.value}" tabindex="0">
+                            <div class="cfg-autocomplete-option-label">${item.label}</div>
+                            ${item.description ? `<div class="cfg-autocomplete-option-desc">${item.description}</div>` : ''}
+                          </button>
+                        `).join('')}
+                      </div>
+                    `).join('');
+                    
+                    // Add click handlers
+                    dropdown.querySelectorAll('.cfg-autocomplete-option').forEach(option => {
+                      option.addEventListener('click', () => {
+                        const selectedValue = option.getAttribute('data-value');
+                        const selectedLabel = option.querySelector('.cfg-autocomplete-option-label')?.textContent || selectedValue;
+                        input.value = selectedLabel || '';
+                        onChange(selectedValue || undefined);
+                        dropdown.style.display = 'none';
+                      });
+                    });
+                  }
+                }
+              } else {
+                if (dropdown) dropdown.style.display = 'none';
+              }
+            }}
+            @focus=${(e: Event) => {
+              const input = e.target as HTMLInputElement;
+              const container = input.closest('.cfg-autocomplete-container') as HTMLElement;
+              const dropdown = container?.querySelector('.cfg-autocomplete-dropdown') as HTMLElement;
+              if (dropdown && input.value.length >= (config.minChars || 2)) {
+                dropdown.style.display = 'block';
+              }
+            }}
+            @blur=${(e: Event) => {
+              // Delay hiding to allow click on dropdown
+              setTimeout(() => {
+                const input = e.target as HTMLInputElement;
+                const container = input.closest('.cfg-autocomplete-container') as HTMLElement;
+                const dropdown = container?.querySelector('.cfg-autocomplete-dropdown') as HTMLElement;
+                if (dropdown) dropdown.style.display = 'none';
+              }, 200);
+            }}
+            @keydown=${(e: KeyboardEvent) => {
+              const input = e.target as HTMLInputElement;
+              const container = input.closest('.cfg-autocomplete-container') as HTMLElement;
+              const dropdown = container?.querySelector('.cfg-autocomplete-dropdown') as HTMLElement;
+              if (!dropdown || dropdown.style.display === 'none') return;
+              
+              const options = dropdown.querySelectorAll('.cfg-autocomplete-option');
+              const currentIndex = Array.from(options).findIndex(opt => opt.classList.contains('selected'));
+              
+              switch (e.key) {
+                case 'ArrowDown':
+                  e.preventDefault();
+                  if (currentIndex < options.length - 1) {
+                    options[currentIndex]?.classList.remove('selected');
+                    options[currentIndex + 1]?.classList.add('selected');
+                    (options[currentIndex + 1] as HTMLElement)?.scrollIntoView({ block: 'nearest' });
+                  }
+                  break;
+                case 'ArrowUp':
+                  e.preventDefault();
+                  if (currentIndex > 0) {
+                    options[currentIndex]?.classList.remove('selected');
+                    options[currentIndex - 1]?.classList.add('selected');
+                    (options[currentIndex - 1] as HTMLElement)?.scrollIntoView({ block: 'nearest' });
+                  }
+                  break;
+                case 'Enter':
+                  e.preventDefault();
+                  const selected = dropdown.querySelector('.cfg-autocomplete-option.selected');
+                  if (selected) {
+                    const selectedValue = selected.getAttribute('data-value');
+                    const selectedLabel = selected.querySelector('.cfg-autocomplete-option-label')?.textContent || selectedValue;
+                    input.value = selectedLabel || '';
+                    onChange(selectedValue || undefined);
+                    dropdown.style.display = 'none';
+                  }
+                  break;
+                case 'Escape':
+                  dropdown.style.display = 'none';
+                  break;
+              }
+            }}
+          />
+          ${value ? html`
+            <button type="button" class="cfg-autocomplete-clear" @click=${() => onChange(undefined)}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          ` : nothing}
+        </div>
+        
+        <div class="cfg-autocomplete-dropdown" style="display: none;"></div>
       </div>
+      
       <div class="cfg-field__note">
         <small>💡 Type ${config.minChars || 2}+ chars to search ${config.source}</small>
       </div>

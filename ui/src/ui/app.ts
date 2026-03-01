@@ -262,6 +262,7 @@ export class OpenClawApp extends LitElement {
   @state() configSearchQuery = "";
   @state() configActiveSection: string | null = null;
   @state() configActiveSubsection: string | null = null;
+  @state() configValidationErrors: Array<{ path: string; message: string; severity: "error" | "warning" | "info" }> = [];
   @state() configDocPanelOpen = false;
   @state() configDocSearchQuery = "";
 
