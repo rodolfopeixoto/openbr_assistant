@@ -3,6 +3,7 @@
 @import "./styles/layout.mobile.css";
 @import "./styles/components.css";
 @import "./styles/config.css";
+@import "./styles/config-enhanced.css";
 @import "./styles/compliance.css";
 @import "./styles/skills.css";
 @import "./styles/channels.css";

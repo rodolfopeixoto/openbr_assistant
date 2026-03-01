@@ -1133,6 +1133,194 @@ function generateEnhancedWidgetHints(
         { value: "full", label: "Full" },
       ],
     },
+    "agents.defaults.verboseDefault": {
+      widget: "segmented",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "on", label: "On" },
+        { value: "full", label: "Full" },
+      ],
+    },
+    "agents.defaults.elevatedDefault": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "on", label: "On" },
+        { value: "ask", label: "Ask" },
+        { value: "full", label: "Full" },
+      ],
+    },
+    "agents.defaults.blockStreamingDefault": {
+      widget: "segmented",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "on", label: "On" },
+      ],
+    },
+    "agents.defaults.blockStreamingBreak": {
+      widget: "select",
+      options: [
+        { value: "text_end", label: "Text End" },
+        { value: "message_end", label: "Message End" },
+      ],
+    },
+    "agents.defaults.timeFormat": {
+      widget: "segmented",
+      options: [
+        { value: "auto", label: "Auto" },
+        { value: "12", label: "12h" },
+        { value: "24", label: "24h" },
+      ],
+    },
+    "agents.defaults.contextPruning.mode": {
+      widget: "segmented",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "cache-ttl", label: "Cache TTL" },
+      ],
+    },
+    "agents.defaults.compaction.mode": {
+      widget: "segmented",
+      options: [
+        { value: "default", label: "Default" },
+        { value: "safeguard", label: "Safeguard" },
+      ],
+    },
+    "tools.web.search.provider": {
+      widget: "segmented",
+      options: [
+        { value: "brave", label: "Brave" },
+        { value: "perplexity", label: "Perplexity" },
+      ],
+    },
+    "agents.defaults.memorySearch.provider": {
+      widget: "select",
+      options: [
+        { value: "openai", label: "OpenAI" },
+        { value: "local", label: "Local" },
+        { value: "gemini", label: "Gemini" },
+      ],
+    },
+    "agents.defaults.memorySearch.fallback": {
+      widget: "select",
+      options: [
+        { value: "openai", label: "OpenAI" },
+        { value: "gemini", label: "Gemini" },
+        { value: "local", label: "Local" },
+        { value: "none", label: "None" },
+      ],
+    },
+    "agents.defaults.humanDelay.mode": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "natural", label: "Natural" },
+        { value: "custom", label: "Custom" },
+      ],
+    },
+    "messages.tts.provider": {
+      widget: "select",
+      options: [
+        { value: "elevenlabs", label: "ElevenLabs" },
+        { value: "openai", label: "OpenAI" },
+        { value: "edge", label: "Edge" },
+      ],
+    },
+    "messages.tts.mode": {
+      widget: "segmented",
+      options: [
+        { value: "final", label: "Final" },
+        { value: "all", label: "All" },
+      ],
+    },
+    "messages.tts.auto": {
+      widget: "select",
+      options: [
+        { value: "off", label: "Off" },
+        { value: "always", label: "Always" },
+        { value: "inbound", label: "Inbound" },
+        { value: "tagged", label: "Tagged" },
+      ],
+    },
+    "messages.ackReactionScope": {
+      widget: "select",
+      options: [
+        { value: "group-mentions", label: "Group Mentions" },
+        { value: "group-all", label: "Group All" },
+        { value: "direct", label: "Direct" },
+        { value: "all", label: "All" },
+      ],
+    },
+    "messages.queue.mode": {
+      widget: "select",
+      options: [
+        { value: "steer", label: "Steer" },
+        { value: "followup", label: "Followup" },
+        { value: "collect", label: "Collect" },
+        { value: "steer-backlog", label: "Steer Backlog" },
+        { value: "steer+backlog", label: "Steer+Backlog" },
+        { value: "queue", label: "Queue" },
+        { value: "interrupt", label: "Interrupt" },
+      ],
+    },
+    "messages.queue.drop": {
+      widget: "segmented",
+      options: [
+        { value: "old", label: "Old" },
+        { value: "new", label: "New" },
+        { value: "summarize", label: "Summarize" },
+      ],
+    },
+    "broadcast.strategy": {
+      widget: "segmented",
+      options: [
+        { value: "parallel", label: "Parallel" },
+        { value: "sequential", label: "Sequential" },
+      ],
+    },
+    "skills.install.nodeManager": {
+      widget: "segmented",
+      options: [
+        { value: "npm", label: "NPM" },
+        { value: "pnpm", label: "PNPM" },
+        { value: "yarn", label: "Yarn" },
+        { value: "bun", label: "Bun" },
+      ],
+    },
+    "mcpServers.*.transport": {
+      widget: "select",
+      options: [
+        { value: "stdio", label: "STDIO" },
+        { value: "http", label: "HTTP" },
+        { value: "websocket", label: "WebSocket" },
+      ],
+    },
+    "opencode.container.runtime": {
+      widget: "select",
+      options: [
+        { value: "docker", label: "Docker" },
+        { value: "podman", label: "Podman" },
+        { value: "container", label: "Container" },
+        { value: "auto", label: "Auto" },
+      ],
+    },
+    "opencode.security.approvalMode": {
+      widget: "select",
+      options: [
+        { value: "always", label: "Always" },
+        { value: "on-miss", label: "On Miss" },
+        { value: "auto", label: "Auto" },
+      ],
+    },
+    "opencode.audit.logLevel": {
+      widget: "select",
+      options: [
+        { value: "debug", label: "Debug" },
+        { value: "info", label: "Info" },
+        { value: "warn", label: "Warn" },
+        { value: "error", label: "Error" },
+      ],
+    },
   };
 
   // Apply enum mappings
