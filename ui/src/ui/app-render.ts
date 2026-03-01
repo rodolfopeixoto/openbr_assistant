@@ -97,6 +97,8 @@ import { renderFeaturesView } from "./views/features";
 import { renderContainersView } from "./views/containers";
 import { renderSecurityView } from "./views/security";
 import { renderOpencodeView } from "./views/opencode";
+import { renderOpencodeSettingsView } from "./views/opencode-settings";
+import { renderOpencodeSecurityView } from "./views/opencode-security";
 import { renderMcpView } from "./views/mcp";
 import { renderModelRoutingView } from "./views/model-routing";
 import { renderOllamaView } from "./views/ollama";
@@ -120,6 +122,24 @@ function resolveAssistantAvatarUrl(state: AppViewState): string | undefined {
   if (!candidate) return undefined;
   if (AVATAR_DATA_RE.test(candidate) || AVATAR_HTTP_RE.test(candidate)) return candidate;
   return identity?.avatarUrl;
+}
+
+/**
+ * Render the appropriate OpenCode sub-view based on the URL hash
+ */
+function renderOpencodeSubView(state: AppViewState) {
+  const hash = typeof window !== "undefined" ? window.location.hash : "";
+  
+  if (hash === "#opencode-settings") {
+    return renderOpencodeSettingsView(state);
+  }
+  
+  if (hash === "#opencode-security") {
+    return renderOpencodeSecurityView(state);
+  }
+  
+  // Default to main opencode view
+  return renderOpencodeView(state);
 }
 
 export function renderApp(state: AppViewState) {
@@ -179,14 +199,16 @@ export function renderApp(state: AppViewState) {
           ${renderThemeToggle(state)}
         </div>
       </header>
-      <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
+      <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}" role="navigation" aria-label="Main navigation">
         ${TAB_GROUPS.map((group) => {
           const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
           const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
+          const groupId = `nav-group-${group.label.toLowerCase().replace(/\s+/g, '-')}`;
           return html`
-            <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}">
+            <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}" role="group" aria-labelledby="${groupId}-label">
               <button
                 class="nav-label"
+                id="${groupId}-label"
                 @click=${() => {
                   const next = { ...state.settings.navGroupsCollapsed };
                   next[group.label] = !isGroupCollapsed;
@@ -196,11 +218,12 @@ export function renderApp(state: AppViewState) {
                   });
                 }}
                 aria-expanded=${!isGroupCollapsed}
+                aria-controls="${groupId}-items"
               >
                 <span class="nav-label__text">${group.label}</span>
-                <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
+                <span class="nav-label__chevron" aria-hidden="true">${isGroupCollapsed ? "+" : "−"}</span>
               </button>
-              <div class="nav-group__items">
+              <div class="nav-group__items" id="${groupId}-items" role="list">
                 ${group.tabs.map((tab) => renderTab(state, tab))}
               </div>
             </div>
@@ -780,7 +803,7 @@ export function renderApp(state: AppViewState) {
         ${state.tab === "features" ? renderFeaturesView(state) : nothing}
         ${state.tab === "containers" ? renderContainersView(state) : nothing}
         ${state.tab === "security" ? renderSecurityView(state) : nothing}
-        ${state.tab === "opencode" ? renderOpencodeView(state) : nothing}
+        ${state.tab === "opencode" ? renderOpencodeSubView(state) : nothing}
         ${state.tab === "mcp" ? renderMcpView(state) : nothing}
         ${state.tab === "modelRouting" ? renderModelRoutingView(state) : nothing}
         ${state.tab === "ollama" ? renderOllamaView(state) : nothing}

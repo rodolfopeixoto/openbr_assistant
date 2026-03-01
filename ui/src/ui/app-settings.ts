@@ -355,6 +355,11 @@ export function syncUrlWithTab(host: SettingsHost, tab: Tab, replace: boolean) {
     url.pathname = targetPath;
   }
 
+  // Clear hash when switching tabs to avoid stale hash fragments
+  if (url.hash && tab !== "opencode") {
+    url.hash = "";
+  }
+
   if (replace) {
     window.history.replaceState({}, "", url.toString());
   } else {

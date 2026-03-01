@@ -157,7 +157,7 @@ export class OpenClawApp extends LitElement {
   // Opencode
   @state() opencodeLoading = false;
   @state() opencodeError: string | null = null;
-  @state() opencodeStatus: string | null = null;
+  @state() opencodeStatus: import("./controllers/opencode").OpenCodeStatus | null = null;
   @state() opencodeTasks: unknown[] = [];
   @state() opencodeSelectedTask: unknown | null = null;
   @state() opencodeTaskCreating = false;
@@ -170,6 +170,7 @@ export class OpenClawApp extends LitElement {
   @state() opencodeSecurityConfig: Record<string, unknown> = {};
   @state() opencodeSecurityDirty = false;
   @state() opencodeSecuritySaving = false;
+  @state() opencodeSecuritySection = "overview";
   @state() opencodeAuditLoading = false;
   @state() opencodeAuditLog: unknown[] = [];
   @state() opencodeSettingsSection = "general";
@@ -1729,6 +1730,42 @@ export class OpenClawApp extends LitElement {
 
   handleOpencodeSettingsSectionChange(section: string) {
     this.opencodeSettingsSection = section;
+  }
+
+  // OpenCode Security handlers
+  async handleOpencodeSecurityLoad() {
+    const { loadOpencodeSecurity } = await import("./controllers/opencode.js");
+    await loadOpencodeSecurity(this);
+  }
+
+  async handleOpencodeSecuritySave() {
+    const { saveOpencodeSecurity } = await import("./controllers/opencode.js");
+    await saveOpencodeSecurity(this);
+  }
+
+  handleOpencodeSecurityReset() {
+    this.opencodeSecurityDirty = false;
+    this.handleOpencodeSecurityLoad();
+  }
+
+  async handleOpencodeSecurityChange(key: string, value: unknown) {
+    const { updateOpencodeSecurityValue } = await import("./controllers/opencode.js");
+    updateOpencodeSecurityValue(this, key, value);
+  }
+
+  handleOpencodeSecuritySectionChange(section: string) {
+    this.opencodeSecuritySection = section;
+  }
+
+  // OpenCode Audit handlers
+  async handleOpencodeAuditRefresh() {
+    const { loadOpencodeAudit } = await import("./controllers/opencode.js");
+    await loadOpencodeAudit(this);
+  }
+
+  async handleOpencodeAuditExport() {
+    const { exportOpencodeAudit } = await import("./controllers/opencode.js");
+    await exportOpencodeAudit(this);
   }
 
   // Security handlers

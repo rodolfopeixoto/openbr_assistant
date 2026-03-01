@@ -1,4 +1,5 @@
 import type { EventLogEntry } from "./app-events";
+import type { OpenCodeAuditEntry } from "./controllers/opencode";
 import type { DevicePairingList } from "./controllers/devices";
 import type { ExecApprovalRequest } from "./controllers/exec-approval";
 import type { ExecApprovalsFile, ExecApprovalsSnapshot } from "./controllers/exec-approvals";
@@ -425,7 +426,7 @@ export type AppViewState = {
   // OpenCode
   opencodeLoading: boolean;
   opencodeError: string | null;
-  opencodeStatus: string | null;
+  opencodeStatus: import("./controllers/opencode").OpenCodeStatus | null;
   opencodeTasks: unknown[];
   opencodeSelectedTask: unknown | null;
   opencodeTaskInput: string;
@@ -451,6 +452,21 @@ export type AppViewState = {
   handleOpencodeConfigReset: () => void;
   handleOpencodeConfigChange: (key: string, value: unknown) => void;
   handleOpencodeSettingsSectionChange: (section: string) => void;
+  // OpenCode Security
+  opencodeSecurityConfig: Record<string, unknown>;
+  opencodeSecurityDirty: boolean;
+  opencodeSecuritySaving: boolean;
+  opencodeSecuritySection: string;
+  handleOpencodeSecurityLoad: () => Promise<void>;
+  handleOpencodeSecuritySave: () => Promise<void>;
+  handleOpencodeSecurityReset: () => void;
+  handleOpencodeSecurityChange: (key: string, value: unknown) => void;
+  handleOpencodeSecuritySectionChange: (section: string) => void;
+  // OpenCode Audit
+  opencodeAuditLog: OpenCodeAuditEntry[];
+  opencodeAuditLoading: boolean;
+  handleOpencodeAuditRefresh: () => Promise<void>;
+  handleOpencodeAuditExport: () => Promise<void>;
   // MCP
   mcpLoading: boolean;
   mcpError: string | null;
