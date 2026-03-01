@@ -87,28 +87,51 @@ export function renderNodes(props: NodesProps) {
   
   return html`
     <div class="nodes-page">
-      <!-- Help Section -->
-      <div class="nodes-help-section">
-        <div class="help-card">
-          <div class="help-icon">${icons.monitor}</div>
-          <div class="help-content">
-            <h3>What are Nodes?</h3>
-            <p>Nodes are remote devices that execute commands on behalf of the gateway. They can run skills, tools, and automations for you. Examples: your computer, a server, or a cloud instance.</p>
+      <!-- Page Header -->
+      <div class="nodes-header">
+        <h1 class="nodes-title">Nodes & Devices</h1>
+        <p class="nodes-subtitle">Manage remote execution nodes, connected devices, and access controls</p>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="nodes-overview">
+        <div class="overview-card">
+          <div class="overview-icon">${icons.monitor}</div>
+          <div class="overview-content">
+            <h3>Nodes</h3>
+            <p>${props.nodes.length} connected</p>
           </div>
         </div>
-        <div class="help-card">
-          <div class="help-icon">${icons.smartphone}</div>
-          <div class="help-content">
-            <h3>What are Devices?</h3>
-            <p>Devices are applications connected to the gateway (mobile apps, web clients, integrations). They send and receive messages but don't execute commands like nodes do.</p>
+        <div class="overview-card">
+          <div class="overview-icon">${icons.smartphone}</div>
+          <div class="overview-content">
+            <h3>Devices</h3>
+            <p>${(props.devicesList?.paired?.length || 0)} paired</p>
+          </div>
+        </div>
+        <div class="overview-card">
+          <div class="overview-icon">${icons.shield}</div>
+          <div class="overview-content">
+            <h3>Security</h3>
+            <p>Exec approvals active</p>
           </div>
         </div>
       </div>
 
-      ${renderExecApprovals(approvalsState)}
-      ${renderBindings(bindingState)}
-      ${renderDevicesSection(props)}
-      ${renderNodesSection(props)}
+      <!-- Main Content Sections -->
+      <div class="nodes-content">
+        <!-- Section 1: Connected Nodes -->
+        ${renderNodesSection(props)}
+        
+        <!-- Section 2: Devices -->
+        ${renderDevicesSection(props)}
+        
+        <!-- Section 3: Configuration -->
+        <div class="nodes-config-sections">
+          ${renderExecApprovals(approvalsState)}
+          ${renderBindings(bindingState)}
+        </div>
+      </div>
     </div>
   `;
 }

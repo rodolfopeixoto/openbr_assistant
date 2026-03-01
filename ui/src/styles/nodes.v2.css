@@ -1,9 +1,91 @@
-/* Nodes Page - Card-based Design */
+/* Nodes Page - Organized Linear Design */
 
 .nodes-page {
-  padding: 24px;
+  padding: 32px 24px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* Page Header */
+.nodes-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nodes-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0 0 8px 0;
+}
+
+.nodes-subtitle {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Overview Cards */
+.nodes-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.overview-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.overview-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-subtle);
+  border-radius: 12px;
+  color: var(--accent);
+}
+
+.overview-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.overview-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Main Content Layout */
+.nodes-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.nodes-config-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 /* Help Section */
