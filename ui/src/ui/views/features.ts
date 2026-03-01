@@ -2,10 +2,12 @@ import { html, nothing } from "lit";
 import type { AppViewState } from "../app-view-state";
 import { icons } from "../icons";
 import type { FeatureCategory, DashboardFeature } from "../controllers/features.js";
+import { renderFeatureConfigForm, validateConfigForm, getDefaultValues } from "../components/FeatureConfigForm.js";
 
 // Safe icon getter
-function getIcon(name: string) {
-  return (icons as Record<string, ReturnType<typeof icons.settings>>)[name] || icons.settings;
+function getIcon(name: string): ReturnType<typeof html> {
+  const iconMap = icons as Record<string, ReturnType<typeof html>>;
+  return iconMap[name] || icons.settings;
 }
 
 export function renderFeaturesView(state: AppViewState) {
@@ -94,7 +96,9 @@ function renderSummary(state: AppViewState) {
     unavailable: 0
   };
   
-  const enabledPercent = summary.total > 0 ? Math.round((summary.enabled / summary.total) * 100) : 0;
+  const total = Number(summary.total) || 0;
+  const enabled = Number(summary.enabled) || 0;
+  const enabledPercent = total > 0 ? Math.round((enabled / total) * 100) : 0;
   
   return html`
     <section class="features-summary">
@@ -320,12 +324,35 @@ function handleQuickAction(actionId: string, feature: DashboardFeature, state: A
 
 function renderConfigModal(state: AppViewState) {
   if (!state.featuresConfigModalOpen || !state.featuresConfigModalFeature) return nothing;
-  
+
   const feature = (state.featuresList as FeatureCategory[])
     .flatMap(c => c.features)
     .find((f: DashboardFeature) => f.id === state.featuresConfigModalFeature);
-    
+
   if (!feature) return nothing;
+
+  // Inicializa dados do formulário se necessário
+  if (!state.featuresConfigFormData && feature.configSchema) {
+    state.featuresConfigFormData = getDefaultValues(feature.configSchema);
+  }
+
+  const formData = state.featuresConfigFormData || {};
+  const validation = feature.configSchema
+    ? validateConfigForm(feature.configSchema, formData)
+    : { isValid: true, errors: {} };
+
+  const handleFormChange = (key: string, value: unknown) => {
+    state.featuresConfigFormData = {
+      ...formData,
+      [key]: value
+    };
+  };
+
+  const handleSave = () => {
+    if (validation.isValid) {
+      state.handleFeaturesConfigure(feature.id, formData);
+    }
+  };
 
   return html`
     <div class="modal-overlay" @click="${() => state.handleFeaturesCloseConfigModal()}">
@@ -342,21 +369,24 @@ function renderConfigModal(state: AppViewState) {
             ${icons.x}
           </button>
         </div>
-        
+
         <div class="modal-body">
-          <div class="config-placeholder">
-            ${icons.settings}
-            <p>Configuration options for ${feature.name} will appear here.</p>
-          </div>
+          ${renderFeatureConfigForm({
+            schema: feature.configSchema || null,
+            data: formData,
+            onChange: handleFormChange,
+            disabled: false
+          })}
         </div>
-        
+
         <div class="modal-footer">
           <button class="btn-secondary" @click="${() => state.handleFeaturesCloseConfigModal()}">
             Cancel
           </button>
           <button
             class="btn-primary"
-            @click="${() => state.handleFeaturesConfigure(feature.id, state.featuresConfigFormData || {})}"
+            @click="${handleSave}"
+            ?disabled="${!validation.isValid}"
           >
             ${icons.check} Save Changes
           </button>

@@ -363,15 +363,20 @@ function renderFilterOption(value: string, label: string, state: AppViewState) {
 
 function renderArticleCard(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
+  const isUrlValid = (item as NewsItem & { isUrlValid?: boolean }).isUrlValid !== false;
   
   return html`
-    <article class="article-card ${sentiment}">
-      <a 
-        href="${item.url}" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        class="article-link"
-      >
+    <article class="article-card ${sentiment} ${!isUrlValid ? 'invalid-url' : ''}">
+      ${isUrlValid ? html`
+        <a 
+          href="${item.url}" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="article-link"
+        >
+      ` : html`
+        <div class="article-link disabled" title="Link temporariamente indisponível">
+      `}
         <div class="article-header">
           <span class="article-source">${item.source}</span>
           <span class="article-time">${formatDate(item.publishedAt)}</span>
@@ -385,7 +390,7 @@ function renderArticleCard(item: NewsItem, state: AppViewState) {
         ${item.summary ? html`
           <p class="article-summary">${item.summary}</p>
         ` : null}
-      </a>
+      ${isUrlValid ? html`</a>` : html`</div>`}
       
       <div class="article-footer">
         ${item.tags?.length ? html`
@@ -394,7 +399,19 @@ function renderArticleCard(item: NewsItem, state: AppViewState) {
           </div>
         ` : null}
         
-        <button class="btn-text" @click="${(e: Event) => { e.stopPropagation(); state.handleNewsSelectItem(item); }}">
+        ${!isUrlValid ? html`
+          <span class="url-warning" title="Link temporariamente indisponível">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Link indisponível
+          </span>
+        ` : null}
+        
+        <button class="btn-text" @click="${(e: Event) => { e.stopPropagation(); state.handleNewsSelectItem(item); }}"
+          ?disabled="${!isUrlValid}">
           Read More
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="m9 18 6-6-6-6"/>
@@ -407,6 +424,7 @@ function renderArticleCard(item: NewsItem, state: AppViewState) {
 
 function renderArticleModal(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
+  const isUrlValid = (item as NewsItem & { isUrlValid?: boolean }).isUrlValid !== false;
   
   return html`
     <div class="modal-overlay" @click="${(e: Event) => {
@@ -440,19 +458,33 @@ function renderArticleModal(item: NewsItem, state: AppViewState) {
             </div>
           ` : null}
           
-          <a
-            href="${item.url}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-primary"
-          >
-            Read Original Article
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-              <polyline points="15 3 21 3 21 9"/>
-              <line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
-          </a>
+          ${!isUrlValid ? html`
+            <div class="url-error-notice">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <div>
+                <strong>Link temporariamente indisponível</strong>
+                <p>A URL original deste artigo não está acessível no momento. Isso pode ser temporário ou o conteúdo pode ter sido movido.</p>
+              </div>
+            </div>
+          ` : html`
+            <a
+              href="${item.url}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary"
+            >
+              Read Original Article
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+          `}
           
           ${item.tags?.length ? html`
             <div class="article-tags-section">
