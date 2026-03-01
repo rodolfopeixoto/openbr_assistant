@@ -81,6 +81,22 @@ const CAPABILITY_DESCRIPTIONS: Record<string, string> = {
   "git": "Git version control operations",
 };
 
+// Tooltips and help text
+const HELP_TEXT = {
+  nodes: "Remote execution devices that can run commands and skills on your behalf",
+  devices: "Applications and clients connected to the gateway (mobile apps, web clients)",
+  execApprovals: "Security policies that control which commands can be executed on remote nodes",
+  bindings: "Configure which nodes specific agents should use for command execution",
+  securityDeny: "Block all command execution - safest option",
+  securityAllowlist: "Only allow commands matching specific patterns",
+  securityFull: "Allow any command - use with caution",
+  askOff: "Never ask for approval",
+  askOnMiss: "Ask only when command doesn't match allowlist",
+  askAlways: "Always ask for approval before executing",
+  defaultBinding: "Default node to use when agents don't specify one",
+  agentBinding: "Override default node for a specific agent"
+};
+
 export function renderNodes(props: NodesProps) {
   const bindingState = resolveBindingsState(props);
   const approvalsState = resolveExecApprovalsState(props);
@@ -89,31 +105,31 @@ export function renderNodes(props: NodesProps) {
     <div class="nodes-page">
       <!-- Page Header -->
       <div class="nodes-header">
-        <h1 class="nodes-title">Nodes & Devices</h1>
-        <p class="nodes-subtitle">Manage remote execution nodes, connected devices, and access controls</p>
+        <h1 class="nodes-title">Infrastructure Management</h1>
+        <p class="nodes-subtitle">Manage execution nodes, connected devices, and security policies</p>
       </div>
 
       <!-- Overview Cards -->
       <div class="nodes-overview">
-        <div class="overview-card">
+        <div class="overview-card" title="${HELP_TEXT.nodes}">
           <div class="overview-icon">${icons.monitor}</div>
           <div class="overview-content">
-            <h3>Nodes</h3>
-            <p>${props.nodes.length} connected</p>
+            <h3>Execution Nodes</h3>
+            <p>${props.nodes.filter(n => n.connected).length} active of ${props.nodes.length} total</p>
           </div>
         </div>
-        <div class="overview-card">
+        <div class="overview-card" title="${HELP_TEXT.devices}">
           <div class="overview-icon">${icons.smartphone}</div>
           <div class="overview-content">
-            <h3>Devices</h3>
+            <h3>Connected Devices</h3>
             <p>${(props.devicesList?.paired?.length || 0)} paired</p>
           </div>
         </div>
-        <div class="overview-card">
+        <div class="overview-card" title="${HELP_TEXT.execApprovals}">
           <div class="overview-icon">${icons.shield}</div>
           <div class="overview-content">
-            <h3>Security</h3>
-            <p>Exec approvals active</p>
+            <h3>Security Policies</h3>
+            <p>${approvalsState.ready ? 'Configured' : 'Not loaded'}</p>
           </div>
         </div>
       </div>
@@ -126,13 +142,32 @@ export function renderNodes(props: NodesProps) {
         <!-- Section 2: Devices -->
         ${renderDevicesSection(props)}
         
-        <!-- Section 3: Configuration -->
-        <div class="nodes-config-sections">
-          ${renderExecApprovals(approvalsState)}
-          ${renderBindings(bindingState)}
-        </div>
+        <!-- Section 3: Security & Routing -->
+        ${renderSecuritySection(approvalsState, bindingState)}
       </div>
     </div>
+  `;
+}
+
+// New unified security section
+function renderSecuritySection(approvalsState: ExecApprovalsState, bindingState: BindingState) {
+  return html`
+    <section class="nodes-section nodes-section--security">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <div class="section-icon">${icons.shield}</div>
+          <div>
+            <h2 class="section-title">Security & Routing</h2>
+            <p class="section-subtitle">Configure command execution policies and node routing</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="security-tabs">
+        ${renderExecApprovals(approvalsState)}
+        ${renderBindings(bindingState)}
+      </div>
+    </section>
   `;
 }
 
@@ -752,138 +787,154 @@ function resolveExecApprovalsState(props: NodesProps): ExecApprovalsState {
 function renderBindings(state: BindingState) {
   const supportsBinding = state.nodes.length > 0;
   const defaultValue = state.defaultBinding ?? "";
+  
   return html`
-    <section class="card">
-      <div class="row" style="justify-content: space-between; align-items: center;">
-        <div>
-          <div class="card-title">Exec node binding</div>
-          <div class="card-sub">
-            Pin agents to a specific node when using <span class="mono">exec host=node</span>.
-          </div>
+    <div class="security-subsection">
+      <div class="subsection-header">
+        <div class="subsection-title-area">
+          <h3 class="subsection-title">Node Routing</h3>
+          <p class="subsection-description" title="${HELP_TEXT.bindings}">
+            Configure which execution nodes agents should use
+          </p>
         </div>
         <button
-          class="btn"
+          class="btn btn--primary"
           ?disabled=${state.disabled || !state.configDirty}
           @click=${state.onSave}
         >
-          ${state.configSaving ? "Saving…" : "Save"}
+          ${state.configSaving ? html`<span class="spinner"></span>Saving…` : "Save Changes"}
         </button>
       </div>
 
-      ${
-        state.formMode === "raw"
-          ? html`
-              <div class="callout warn" style="margin-top: 12px">
-                Switch the Config tab to <strong>Form</strong> mode to edit bindings here.
-              </div>
-            `
-          : nothing
+      ${state.formMode === "raw"
+        ? html`
+          <div class="warning-banner">
+            <span class="warning-icon">⚠️</span>
+            <span>Switch to <strong>Form</strong> mode in the Config tab to edit bindings here</span>
+          </div>
+        `
+        : nothing
       }
 
-      ${
-        !state.ready
-          ? html`<div class="row" style="margin-top: 12px; gap: 12px;">
-            <div class="muted">Load config to edit bindings.</div>
-            <button class="btn" ?disabled=${state.configLoading} @click=${state.onLoadConfig}>
-              ${state.configLoading ? "Loading…" : "Load config"}
-            </button>
-          </div>`
-          : html`
-            <div class="list" style="margin-top: 16px;">
-              <div class="list-item">
-                <div class="list-main">
-                  <div class="list-title">Default binding</div>
-                  <div class="list-sub">Used when agents do not override a node binding.</div>
-                </div>
-                <div class="list-meta">
-                  <label class="field">
-                    <span>Node</span>
-                    <select
-                      ?disabled=${state.disabled || !supportsBinding}
-                      @change=${(event: Event) => {
-                        const target = event.target as HTMLSelectElement;
-                        const value = target.value.trim();
-                        state.onBindDefault(value ? value : null);
-                      }}
-                    >
-                      <option value="" ?selected=${defaultValue === ""}>Any node</option>
-                      ${state.nodes.map(
-                        (node) =>
-                          html`<option
-                            value=${node.id}
-                            ?selected=${defaultValue === node.id}
-                          >
-                            ${node.label}
-                          </option>`,
-                      )}
-                    </select>
-                  </label>
-                  ${
-                    !supportsBinding
-                      ? html`
-                          <div class="muted">No nodes with system.run available.</div>
-                        `
-                      : nothing
-                  }
-                </div>
-              </div>
-
-              ${
-                state.agents.length === 0
-                  ? html`
-                      <div class="muted">No agents found.</div>
-                    `
-                  : state.agents.map((agent) => renderAgentBinding(agent, state))
-              }
+      ${!state.ready
+        ? html`
+          <div class="loading-state">
+            <div class="loading-icon">${icons.loader}</div>
+            <div class="loading-text">
+              <p>Loading configuration...</p>
+              <button 
+                class="btn btn--secondary" 
+                ?disabled=${state.configLoading} 
+                @click=${state.onLoadConfig}
+              >
+                ${state.configLoading ? html`<span class="spinner"></span>Loading…` : "Load Now"}
+              </button>
             </div>
-          `
+          </div>
+        `
+        : html`
+          <div class="bindings-list">
+            <div class="binding-row binding-row--default">
+              <div class="binding-info">
+                <div class="binding-label">Default Binding</div>
+                <div class="binding-help">Used when agents don't specify a node</div>
+              </div>
+              <div class="binding-control">
+                <select
+                  class="binding-select"
+                  ?disabled=${state.disabled || !supportsBinding}
+                  @change=${(event: Event) => {
+                    const target = event.target as HTMLSelectElement;
+                    const value = target.value.trim();
+                    state.onBindDefault(value ? value : null);
+                  }}
+                >
+                  <option value="" ?selected=${defaultValue === ""}>🌐 Any available node</option>
+                  ${state.nodes.map(
+                    (node) =>
+                      html`<option
+                        value=${node.id}
+                        ?selected=${defaultValue === node.id}
+                      >
+                        ${node.label}
+                      </option>`,
+                  )}
+                </select>
+                ${!supportsBinding
+                  ? html`<div class="help-text">No execution nodes available</div>`
+                  : nothing
+                }
+              </div>
+            </div>
+
+            ${state.agents.length === 0
+              ? html`<div class="empty-state">No agents configured</div>`
+              : html`
+                <div class="bindings-divider"></div>
+                <div class="bindings-agents">
+                  ${state.agents.map((agent) => renderAgentBinding(agent, state))}
+                </div>
+              `
+            }
+          </div>
+        `
       }
-    </section>
+    </div>
   `;
 }
 
 function renderExecApprovals(state: ExecApprovalsState) {
   const ready = state.ready;
   const targetReady = state.target !== "node" || Boolean(state.targetNodeId);
+  
   return html`
-    <section class="card">
-      <div class="row" style="justify-content: space-between; align-items: center;">
-        <div>
-          <div class="card-title">Exec approvals</div>
-          <div class="card-sub">
-            Allowlist and approval policy for <span class="mono">exec host=gateway/node</span>.
-          </div>
+    <div class="security-subsection">
+      <div class="subsection-header">
+        <div class="subsection-title-area">
+          <h3 class="subsection-title">Execution Approvals</h3>
+          <p class="subsection-description" title="${HELP_TEXT.execApprovals}">
+            Control which commands can be executed on remote nodes
+          </p>
         </div>
         <button
-          class="btn"
+          class="btn btn--primary"
           ?disabled=${state.disabled || !state.dirty || !targetReady}
           @click=${state.onSave}
         >
-          ${state.saving ? "Saving…" : "Save"}
+          ${state.saving ? html`<span class="spinner"></span>Saving…` : "Save Changes"}
         </button>
       </div>
 
       ${renderExecApprovalsTarget(state)}
 
-      ${
-        !ready
-          ? html`<div class="row" style="margin-top: 12px; gap: 12px;">
-            <div class="muted">Load exec approvals to edit allowlists.</div>
-            <button class="btn" ?disabled=${state.loading || !targetReady} @click=${state.onLoad}>
-              ${state.loading ? "Loading…" : "Load approvals"}
-            </button>
-          </div>`
-          : html`
-            ${renderExecApprovalsTabs(state)}
+      ${!ready
+        ? html`
+          <div class="loading-state">
+            <div class="loading-icon">${icons.loader}</div>
+            <div class="loading-text">
+              <p>Loading execution approvals...</p>
+              <button 
+                class="btn btn--secondary" 
+                ?disabled=${state.loading || !targetReady} 
+                @click=${state.onLoad}
+              >
+                ${state.loading ? html`<span class="spinner"></span>Loading…` : "Load Now"}
+              </button>
+            </div>
+          </div>
+        `
+        : html`
+          ${renderExecApprovalsTabs(state)}
+          <div class="policy-container">
             ${renderExecApprovalsPolicy(state)}
-            ${
-              state.selectedScope === EXEC_APPROVALS_DEFAULT_SCOPE
-                ? nothing
-                : renderExecApprovalsAllowlist(state)
+            ${state.selectedScope === EXEC_APPROVALS_DEFAULT_SCOPE
+              ? nothing
+              : renderExecApprovalsAllowlist(state)
             }
-          `
+          </div>
+        `
       }
-    </section>
+    </div>
   `;
 }
 
