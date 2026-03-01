@@ -1,5 +1,15 @@
 /* OpenCode Settings - Organized and Functional */
 
+/* Global icon sizing */
+.opencode-settings-view svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+}
+
 .opencode-settings-view {
   padding: 24px;
   max-width: 1000px;
@@ -37,6 +47,14 @@
 .btn-back:hover {
   background: var(--bg);
   border-color: var(--border-strong);
+}
+
+.btn-back svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
 }
 
 .header-title {
@@ -102,9 +120,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+}
+
+.sidebar-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
 }
 
 .sidebar-label {
@@ -364,6 +390,14 @@
   cursor: not-allowed;
 }
 
+.btn-primary svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
 .btn-secondary {
   display: flex;
   align-items: center;
@@ -382,6 +416,14 @@
 .btn-secondary:hover:not(:disabled) {
   background: var(--bg-elevated);
   border-color: var(--border-strong);
+}
+
+.btn-secondary svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
 }
 
 /* Responsive */
