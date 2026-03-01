@@ -189,6 +189,12 @@ export function renderOpencodeSettingsView(state: AppViewState) {
   const activeSection = state.opencodeSettingsSection || "general";
   const config = state.opencodeConfig || {};
 
+  // Auto-load config on first render if not loaded and not already loading
+  if (!state.opencodeConfig && !state.opencodeConfigLoading && !state.opencodeConfigError && state.connected) {
+    console.log("[OpencodeSettings] Auto-loading config...");
+    state.handleOpencodeConfigLoad();
+  }
+
   return html`
     <div class="opencode-settings-view">
       ${renderSettingsHeader(state)}
