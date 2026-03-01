@@ -2,6 +2,19 @@ import { html, nothing } from "lit";
 import type { AppViewState } from "../app-view-state";
 import { icons } from "../icons";
 
+/**
+ * Navigate to an OpenCode sub-view (settings or security)
+ * Ensures we're on the opencode tab before setting the hash
+ */
+function navigateToOpencodeSubView(state: AppViewState, hash: string) {
+  // First ensure we're on the opencode tab
+  if (state.tab !== "opencode") {
+    state.setTab("opencode");
+  }
+  // Then set the hash for the sub-view
+  window.location.hash = hash;
+}
+
 export interface OpenCodeTask {
   id: string;
   prompt: string;
@@ -51,7 +64,7 @@ export function renderOpencodeView(state: AppViewState) {
   if (!status) {
     return html`
       <div class="opencode-view">
-        ${renderHeader(null)}
+        ${renderHeader(null, state)}
         <div class="opencode-disabled-state">
           <div class="disabled-icon">${icons.code}</div>
           <h2>OpenCode AI</h2>
@@ -63,7 +76,7 @@ export function renderOpencodeView(state: AppViewState) {
 
   return html`
     <div class="opencode-view">
-      ${renderHeader(status)}
+      ${renderHeader(status, state)}
       ${status.enabled ? html`
         <div class="opencode-content">
           ${renderStatusPanel(status)}
@@ -78,7 +91,7 @@ export function renderOpencodeView(state: AppViewState) {
   `;
 }
 
-function renderHeader(status: OpenCodeStatus | null) {
+function renderHeader(status: OpenCodeStatus | null, state: AppViewState) {
   return html`
     <div class="opencode-header">
       <div class="opencode-header-title">
@@ -95,10 +108,10 @@ function renderHeader(status: OpenCodeStatus | null) {
         </div>
       </div>
       <div class="opencode-header-actions">
-        <button @click=${() => window.location.hash = 'opencode-settings'} class="btn-secondary">
+        <button @click=${() => navigateToOpencodeSubView(state, 'opencode-settings')} class="btn-secondary">
           ${icons.settings} Settings
         </button>
-        <button @click=${() => window.location.hash = 'opencode-security'} class="btn-secondary">
+        <button @click=${() => navigateToOpencodeSubView(state, 'opencode-security')} class="btn-secondary">
           ${icons.shield} Security
         </button>
       </div>
@@ -329,7 +342,7 @@ function renderDisabledState(state: AppViewState) {
       <div class="disabled-icon">${icons.code}</div>
       <h2>OpenCode AI is Disabled</h2>
       <p>Enable OpenCode to start using AI-powered coding assistance in secure containers.</p>
-      <button @click="${() => window.location.hash = 'opencode-settings'}" class="btn-primary">
+      <button @click="${() => navigateToOpencodeSubView(state, 'opencode-settings')}" class="btn-primary">
         ${icons.settings} Configure OpenCode
       </button>
     </div>

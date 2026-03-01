@@ -219,7 +219,10 @@ function renderSettingsHeader(state: AppViewState) {
   return html`
     <div class="opencode-settings-header">
       <div class="header-back">
-        <button @click="${() => window.location.hash = 'opencode'}" class="btn-back">
+        <button @click="${() => {
+          // Clear hash to return to main opencode view
+          window.location.hash = '';
+        }}" class="btn-back">
           ${icons.arrowLeft}
         </button>
       </div>
