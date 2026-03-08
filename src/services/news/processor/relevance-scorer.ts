@@ -1,4 +1,17 @@
-import type { NewsItem } from "../../news-aggregator.js";
+// Generic news item interface for flexibility
+interface ScorableItem {
+  title: string;
+  summary: string;
+  source: string;
+  categories: string[];
+  sentiment: string;
+  publishedAt: string;
+  engagement?: {
+    score: number;
+    comments?: number;
+    likes?: number;
+  };
+}
 
 export class RelevanceScorer {
   private aiKeywords: string[] = [
@@ -24,7 +37,7 @@ export class RelevanceScorer {
     "neural",
   ];
 
-  calculate(item: NewsItem): number {
+  calculate(item: ScorableItem): number {
     let score = 0;
 
     // Base score for AI-related content
