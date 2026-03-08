@@ -5,21 +5,61 @@
 
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
-use tauri::{Manager, State, Window, WindowEvent, SystemTray, SystemTrayMenu, CustomMenuItem, SystemTrayEvent};
+use tauri::{Manager, State, Window, WindowEvent, SystemTray, SystemTrayMenu, CustomMenuItem, SystemTrayEvent, GlobalShortcutManager};
 use log::info;
+use std::fs;
+use std::path::PathBuf;
+
+// Window state for persistence
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct WindowState {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+    pub maximized: bool,
+}
+
+impl Default for WindowState {
+    fn default() -> Self {
+        Self {
+            x: 100.0,
+            y: 100.0,
+            width: 1200.0,
+            height: 800.0,
+            maximized: false,
+        }
+    }
+}
 
 // Application state
 pub struct AppState {
     pub gateway_url: Mutex<String>,
     pub app_version: String,
+    pub window_state_path: PathBuf,
 }
 
 impl AppState {
-    pub fn new() -> Self {
+    pub fn new(app_dir: PathBuf) -> Self {
         Self {
             gateway_url: Mutex::new("http://localhost:18789".to_string()),
             app_version: env!("CARGO_PKG_VERSION").to_string(),
+            window_state_path: app_dir.join("window_state.json"),
         }
+    }
+
+    pub fn load_window_state(&self) -> WindowState {
+        match fs::read_to_string(&self.window_state_path) {
+            Ok(content) => {
+                serde_json::from_str(&content).unwrap_or_default()
+            }
+            Err(_) => WindowState::default(),
+        }
+    }
+
+    pub fn save_window_state(&self, state: &WindowState) -> Result<(), String> {
+        let content = serde_json::to_string_pretty(state).map_err(|e| e.to_string())?;
+        fs::write(&self.window_state_path, content).map_err(|e| e.to_string())
     }
 }
 
@@ -107,11 +147,49 @@ fn hide_window(window: Window) -> Result<(), String> {
     window.hide().map_err(|e| e.to_string())
 }
 
+// Toggle window visibility
+fn toggle_window(app_handle: &tauri::AppHandle) {
+    if let Some(window) = app_handle.get_window("main") {
+        match window.is_visible() {
+            Ok(true) => {
+                let _ = window.hide();
+            }
+            Ok(false) => {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+            Err(e) => {
+                log::error!("Failed to check window visibility: {}", e);
+            }
+        }
+    }
+}
+
 // Quit application
 #[tauri::command]
 fn quit_app(app_handle: tauri::AppHandle) -> Result<(), String> {
     info!("Quitting application");
     app_handle.exit(0);
+    Ok(())
+}
+
+// Save current window state
+#[tauri::command]
+fn save_window_bounds(window: Window, state: State<AppState>) -> Result<(), String> {
+    let position = window.outer_position().map_err(|e| e.to_string())?;
+    let size = window.outer_size().map_err(|e| e.to_string())?;
+    let maximized = window.is_maximized().map_err(|e| e.to_string())?;
+    
+    let window_state = WindowState {
+        x: position.x as f64,
+        y: position.y as f64,
+        width: size.width as f64,
+        height: size.height as f64,
+        maximized,
+    };
+    
+    state.save_window_state(&window_state)?;
+    info!("Window state saved: {:?}", window_state);
     Ok(())
 }
 
@@ -141,7 +219,7 @@ fn main() {
     let system_tray = SystemTray::new().with_menu(tray_menu);
 
     tauri::Builder::default()
-        .manage(AppState::new())
+        .manage(AppState::new(tauri::api::path::app_config_dir(&tauri::Config::default()).unwrap_or_else(|| PathBuf::from("."))))
         .invoke_handler(tauri::generate_handler![
             get_app_version,
             get_gateway_status,
@@ -150,6 +228,7 @@ fn main() {
             show_window,
             hide_window,
             quit_app,
+            save_window_bounds,
         ])
         .system_tray(system_tray)
         .on_system_tray_event(|app, event| {
@@ -181,21 +260,50 @@ fn main() {
                     }
                 }
                 SystemTrayEvent::LeftClick { .. } => {
-                    // Toggle window visibility on left click
-                    if let Some(window) = app.get_window("main") {
-                        if window.is_visible().unwrap() {
-                            window.hide().unwrap();
-                        } else {
-                            window.show().unwrap();
-                            window.set_focus().unwrap();
-                        }
-                    }
+                    toggle_window(app);
                 }
                 _ => {}
             }
         })
         .setup(|app| {
             log::info!("Setting up OpenBR Desktop application");
+            
+            // Register global shortcut Cmd/Ctrl+Shift+O to toggle window
+            let app_handle = app.handle();
+            let mut shortcut_manager = app.global_shortcut_manager();
+            #[cfg(target_os = "macos")]
+            let shortcut = "Cmd+Shift+O";
+            #[cfg(not(target_os = "macos"))]
+            let shortcut = "Ctrl+Shift+O";
+            
+            if let Err(e) = shortcut_manager.register(shortcut, move || {
+                toggle_window(&app_handle);
+            }) {
+                log::error!("Failed to register global shortcut: {}", e);
+            } else {
+                log::info!("Registered global shortcut: {}", shortcut);
+            }
+            
+            // Restore window state if available
+            let state = app.state::<AppState>();
+            let window_state = state.load_window_state();
+            
+            if let Some(window) = app.get_window("main") {
+                // Set window position and size
+                let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition {
+                    x: window_state.x as i32,
+                    y: window_state.y as i32,
+                }));
+                let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+                    width: window_state.width as u32,
+                    height: window_state.height as u32,
+                }));
+                
+                // Restore maximized state
+                if window_state.maximized {
+                    let _ = window.maximize();
+                }
+            }
             
             #[cfg(debug_assertions)]
             {
@@ -213,6 +321,27 @@ fn main() {
                     // Hide window instead of closing
                     if let Err(e) = event.window().hide() {
                         log::error!("Failed to hide window: {}", e);
+                    }
+                }
+                WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
+                    // Auto-save window state on resize/move
+                    let window = event.window();
+                    let app_handle = window.app_handle();
+                    if let Some(state) = app_handle.try_state::<AppState>() {
+                        let position = window.outer_position().ok();
+                        let size = window.outer_size().ok();
+                        let maximized = window.is_maximized().unwrap_or(false);
+                        
+                        if let (Some(pos), Some(sz)) = (position, size) {
+                            let window_state = WindowState {
+                                x: pos.x as f64,
+                                y: pos.y as f64,
+                                width: sz.width as f64,
+                                height: sz.height as f64,
+                                maximized,
+                            };
+                            let _ = state.save_window_state(&window_state);
+                        }
                     }
                 }
                 _ => {}
