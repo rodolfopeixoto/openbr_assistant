@@ -106,6 +106,25 @@ pub struct GatewayStatus {
     pub error: Option<String>,
 }
 
+// Update info
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UpdateInfo {
+    pub available: bool,
+    pub current_version: String,
+    pub latest_version: Option<String>,
+    pub download_url: Option<String>,
+    pub release_notes: Option<String>,
+    pub error: Option<String>,
+}
+
+// Update status
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UpdateStatus {
+    pub status: String, // "checking", "available", "downloading", "ready", "installed", "error"
+    pub progress: Option<u8>, // 0-100
+    pub error: Option<String>,
+}
+
 // Get application version
 #[tauri::command]
 fn get_app_version(state: State<AppState>) -> String {
@@ -233,6 +252,158 @@ fn save_window_bounds(window: Window, state: State<AppState>) -> Result<(), Stri
     Ok(())
 }
 
+// Check for updates
+#[tauri::command]
+async fn check_for_updates(app_handle: tauri::AppHandle) -> Result<UpdateInfo, String> {
+    info!("Checking for updates...");
+    
+    // Emit checking status
+    let _ = app_handle.emit_all("update-status", UpdateStatus {
+        status: "checking".to_string(),
+        progress: None,
+        error: None,
+    });
+    
+    // Get current version
+    let current_version = env!("CARGO_PKG_VERSION").to_string();
+    
+    // Check GitHub releases API
+    let github_api_url = "https://api.github.com/repos/rodolfopeixoto/openbr_assistant/releases/latest";
+    
+    let client = reqwest::Client::new();
+    let response = client
+        .get(github_api_url)
+        .header("User-Agent", "OpenBR-Desktop")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    if !response.status().is_success() {
+        let error_msg = format!("GitHub API returned status: {}", response.status());
+        let _ = app_handle.emit_all("update-status", UpdateStatus {
+            status: "error".to_string(),
+            progress: None,
+            error: Some(error_msg.clone()),
+        });
+        return Ok(UpdateInfo {
+            available: false,
+            current_version: current_version.clone(),
+            latest_version: None,
+            download_url: None,
+            release_notes: None,
+            error: Some(error_msg),
+        });
+    }
+    
+    let release: serde_json::Value = response.json().await.map_err(|e| e.to_string())?;
+    
+    let latest_version = release.get("tag_name")
+        .and_then(|v| v.as_str())
+        .map(|v| v.trim_start_matches('v').to_string());
+    
+    let release_notes = release.get("body")
+        .and_then(|v| v.as_str())
+        .map(|v| v.to_string());
+    
+    // Determine if update is available by simple version comparison
+    let available = match &latest_version {
+        Some(latest) => {
+            // Simple string comparison (for production, use semver crate)
+            latest != &current_version
+        }
+        None => false,
+    };
+    
+    // Get download URL for the current platform
+    let download_url = if available {
+        let assets = release.get("assets").and_then(|a| a.as_array());
+        let platform_suffix = if cfg!(target_os = "macos") {
+            ".app.tar.gz"
+        } else if cfg!(target_os = "windows") {
+            ".msi"
+        } else {
+            ".AppImage"
+        };
+        
+        assets.and_then(|assets| {
+            assets.iter()
+                .find(|asset| {
+                    asset.get("name")
+                        .and_then(|n| n.as_str())
+                        .map(|name| name.ends_with(platform_suffix))
+                        .unwrap_or(false)
+                })
+                .and_then(|asset| asset.get("browser_download_url"))
+                .and_then(|url| url.as_str())
+                .map(|url| url.to_string())
+        })
+    } else {
+        None
+    };
+    
+    let update_info = UpdateInfo {
+        available,
+        current_version: current_version.clone(),
+        latest_version: latest_version.clone(),
+        download_url,
+        release_notes,
+        error: None,
+    };
+    
+    // Emit result
+    let status = if available { "available" } else { "up-to-date" };
+    let _ = app_handle.emit_all("update-status", UpdateStatus {
+        status: status.to_string(),
+        progress: None,
+        error: None,
+    });
+    
+    let _ = app_handle.emit_all("update-info", &update_info);
+    
+    info!("Update check complete: available={}, current={}, latest={:?}", 
+          available, current_version, latest_version);
+    
+    Ok(update_info)
+}
+
+// Install update (placeholder - triggers download and restart)
+#[tauri::command]
+async fn install_update(app_handle: tauri::AppHandle, download_url: String) -> Result<(), String> {
+    info!("Installing update from: {}", download_url);
+    
+    // Emit downloading status
+    let _ = app_handle.emit_all("update-status", UpdateStatus {
+        status: "downloading".to_string(),
+        progress: Some(0),
+        error: None,
+    });
+    
+    // For a production implementation, you would:
+    // 1. Download the update package
+    // 2. Verify the signature
+    // 3. Install the update
+    // 4. Restart the application
+    
+    // For now, we emit a "ready" status and the frontend handles the external download
+    let _ = app_handle.emit_all("update-status", UpdateStatus {
+        status: "ready".to_string(),
+        progress: Some(100),
+        error: None,
+    });
+    
+    // Open download URL in browser
+    if let Err(e) = open::that(&download_url) {
+        let _ = app_handle.emit_all("update-status", UpdateStatus {
+            status: "error".to_string(),
+            progress: None,
+            error: Some(format!("Failed to open download URL: {}", e)),
+        });
+        return Err(e.to_string());
+    }
+    
+    Ok(())
+}
+
 // Background health check task
 async fn health_check_task(app_handle: tauri::AppHandle, state: Arc<AppState>) {
     let mut interval = interval(Duration::from_secs(30));
@@ -326,6 +497,8 @@ fn main() {
             hide_window,
             quit_app,
             save_window_bounds,
+            check_for_updates,
+            install_update,
         ])
         .system_tray(system_tray)
         .on_system_tray_event(|app, event| {
