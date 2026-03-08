@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
-use tauri::{Manager, State, Window, WindowEvent};
+use tauri::{Manager, State, Window, WindowEvent, SystemTray, SystemTrayMenu, CustomMenuItem, SystemTrayEvent};
 use log::info;
 
 // Application state
@@ -124,6 +124,22 @@ fn init_logging() {
 fn main() {
     init_logging();
 
+    // Create system tray menu
+    let show = CustomMenuItem::new("show", "Show");
+    let hide = CustomMenuItem::new("hide", "Hide");
+    let settings = CustomMenuItem::new("settings", "Settings");
+    let quit = CustomMenuItem::new("quit", "Quit");
+    
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(show)
+        .add_item(hide)
+        .add_native_item(tauri::SystemTrayMenuItem::Separator)
+        .add_item(settings)
+        .add_native_item(tauri::SystemTrayMenuItem::Separator)
+        .add_item(quit);
+
+    let system_tray = SystemTray::new().with_menu(tray_menu);
+
     tauri::Builder::default()
         .manage(AppState::new())
         .invoke_handler(tauri::generate_handler![
@@ -135,6 +151,49 @@ fn main() {
             hide_window,
             quit_app,
         ])
+        .system_tray(system_tray)
+        .on_system_tray_event(|app, event| {
+            match event {
+                SystemTrayEvent::MenuItemClick { id, .. } => {
+                    match id.as_str() {
+                        "show" => {
+                            if let Some(window) = app.get_window("main") {
+                                window.show().unwrap();
+                                window.set_focus().unwrap();
+                            }
+                        }
+                        "hide" => {
+                            if let Some(window) = app.get_window("main") {
+                                window.hide().unwrap();
+                            }
+                        }
+                        "settings" => {
+                            if let Some(window) = app.get_window("main") {
+                                window.show().unwrap();
+                                window.set_focus().unwrap();
+                                window.emit("open-settings", ()).unwrap();
+                            }
+                        }
+                        "quit" => {
+                            std::process::exit(0);
+                        }
+                        _ => {}
+                    }
+                }
+                SystemTrayEvent::LeftClick { .. } => {
+                    // Toggle window visibility on left click
+                    if let Some(window) = app.get_window("main") {
+                        if window.is_visible().unwrap() {
+                            window.hide().unwrap();
+                        } else {
+                            window.show().unwrap();
+                            window.set_focus().unwrap();
+                        }
+                    }
+                }
+                _ => {}
+            }
+        })
         .setup(|app| {
             log::info!("Setting up OpenBR Desktop application");
             
