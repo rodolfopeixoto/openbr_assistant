@@ -1,0 +1,21 @@
+{
+  "name": "openbr-desktop",
+  "version": "2026.1.30",
+  "description": "OpenBR Desktop Application for Linux and Windows",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cd src-tauri && cargo tauri dev",
+    "build": "cd src-tauri && cargo tauri build",
+    "check": "cd src-tauri && cargo check",
+    "test": "cd src-tauri && cargo test"
+  },
+  "keywords": [
+    "openbr",
+    "ai",
+    "assistant",
+    "desktop",
+    "tauri"
+  ],
+  "author": "OpenBR Team",
+  "license": "MIT"
+}
