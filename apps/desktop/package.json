@@ -5,17 +5,42 @@
   "main": "index.js",
   "scripts": {
     "dev": "cd src-tauri && cargo tauri dev",
+    "dev:debug": "cd src-tauri && cargo tauri dev --features devtools",
     "build": "cd src-tauri && cargo tauri build",
+    "build:debug": "cd src-tauri && cargo tauri build --debug",
+    "build:linux": "cd src-tauri && cargo tauri build --target x86_64-unknown-linux-gnu",
+    "build:linux:arm": "cd src-tauri && cargo tauri build --target aarch64-unknown-linux-gnu",
+    "build:windows": "cd src-tauri && cargo tauri build --target x86_64-pc-windows-msvc",
+    "build:mac": "cd src-tauri && cargo tauri build --target x86_64-apple-darwin",
+    "build:mac:arm": "cd src-tauri && cargo tauri build --target aarch64-apple-darwin",
+    "build:universal": "cd src-tauri && cargo tauri build --target universal-apple-darwin",
     "check": "cd src-tauri && cargo check",
-    "test": "cd src-tauri && cargo test"
+    "check:all": "cd src-tauri && cargo check --all-targets --all-features",
+    "test": "cd src-tauri && cargo test",
+    "test:all": "cd src-tauri && cargo test --all-targets --all-features",
+    "clean": "cd src-tauri && cargo clean",
+    "lint": "cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings",
+    "fmt": "cd src-tauri && cargo fmt",
+    "fmt:check": "cd src-tauri && cargo fmt -- --check",
+    "bundle:check": "cd src-tauri && cargo tauri info",
+    "release": "npm run build",
+    "release:all": "npm run build:linux && npm run build:windows"
   },
   "keywords": [
     "openbr",
     "ai",
     "assistant",
     "desktop",
-    "tauri"
+    "tauri",
+    "rust"
   ],
   "author": "OpenBR Team",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rodolfopeixoto/openbr_assistant.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
