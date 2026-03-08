@@ -1,4 +1,4 @@
-export type NewsSourceType = "hackernews" | "devto" | "rss";
+export type NewsSourceType = "hackernews" | "devto" | "rss" | "twitter" | "reddit";
 
 export interface NewsItem {
   id: string;
@@ -18,6 +18,8 @@ export interface NewsItem {
   engagement?: {
     score: number;
     comments?: number;
+    likes?: number;
+    retweets?: number;
   };
 }
 
