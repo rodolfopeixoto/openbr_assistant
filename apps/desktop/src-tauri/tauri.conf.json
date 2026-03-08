@@ -99,12 +99,7 @@
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true
     },
-    "updater": {
-      "active": false,
-      "endpoints": [],
-      "dialog": true,
-      "pubkey": ""
-    },
+    
     "windows": [
       {
         "fullscreen": false,
