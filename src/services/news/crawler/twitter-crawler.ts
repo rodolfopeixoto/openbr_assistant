@@ -1,4 +1,4 @@
-import type { NewsItem } from "../news-aggregator.js";
+import type { NewsItem } from "../../news-aggregator.js";
 
 export interface TwitterConfig {
   apiKey: string;

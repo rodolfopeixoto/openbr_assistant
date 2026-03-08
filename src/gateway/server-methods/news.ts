@@ -22,7 +22,6 @@ import { ErrorCodes, errorShape } from "../protocol/index.js";
 const log = createSubsystemLogger("gateway:news");
 
 // v2 Components
-let aggregator: NewsAggregator | null = null;
 let twitterCrawler: TwitterCrawler | null = null;
 let relevanceScorer: RelevanceScorer | null = null;
 let aiClassifier: AIClassifier | null = null;
