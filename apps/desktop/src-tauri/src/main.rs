@@ -4,11 +4,13 @@
 )]
 
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 use tauri::{Manager, State, Window, WindowEvent, SystemTray, SystemTrayMenu, CustomMenuItem, SystemTrayEvent, GlobalShortcutManager};
 use log::info;
 use std::fs;
 use std::path::PathBuf;
+use std::time::Duration;
+use tokio::time::interval;
 
 // Window state for persistence
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -32,11 +34,32 @@ impl Default for WindowState {
     }
 }
 
+// Gateway health status
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GatewayHealth {
+    pub online: bool,
+    pub last_check: Option<String>,
+    pub latency_ms: Option<u64>,
+    pub error: Option<String>,
+}
+
+impl Default for GatewayHealth {
+    fn default() -> Self {
+        Self {
+            online: false,
+            last_check: None,
+            latency_ms: None,
+            error: None,
+        }
+    }
+}
+
 // Application state
 pub struct AppState {
     pub gateway_url: Mutex<String>,
     pub app_version: String,
     pub window_state_path: PathBuf,
+    pub gateway_health: Arc<Mutex<GatewayHealth>>,
 }
 
 impl AppState {
@@ -45,6 +68,7 @@ impl AppState {
             gateway_url: Mutex::new("http://localhost:18789".to_string()),
             app_version: env!("CARGO_PKG_VERSION").to_string(),
             window_state_path: app_dir.join("window_state.json"),
+            gateway_health: Arc::new(Mutex::new(GatewayHealth::default())),
         }
     }
 
@@ -60,6 +84,16 @@ impl AppState {
     pub fn save_window_state(&self, state: &WindowState) -> Result<(), String> {
         let content = serde_json::to_string_pretty(state).map_err(|e| e.to_string())?;
         fs::write(&self.window_state_path, content).map_err(|e| e.to_string())
+    }
+
+    pub fn get_gateway_health(&self) -> GatewayHealth {
+        self.gateway_health.lock().unwrap().clone()
+    }
+
+    pub fn update_gateway_health(&self, health: GatewayHealth) {
+        if let Ok(mut guard) = self.gateway_health.lock() {
+            *guard = health;
+        }
     }
 }
 
@@ -78,7 +112,7 @@ fn get_app_version(state: State<AppState>) -> String {
     state.app_version.clone()
 }
 
-// Get gateway status
+// Get gateway status with health check
 #[tauri::command]
 async fn get_gateway_status(state: State<'_, AppState>) -> Result<GatewayStatus, String> {
     let url = state.gateway_url.lock().map_err(|e| e.to_string())?.clone();
@@ -113,6 +147,12 @@ async fn get_gateway_status(state: State<'_, AppState>) -> Result<GatewayStatus,
             })
         }
     }
+}
+
+// Get cached gateway health
+#[tauri::command]
+fn get_gateway_health(state: State<AppState>) -> GatewayHealth {
+    state.get_gateway_health()
 }
 
 // Set gateway URL
@@ -193,6 +233,62 @@ fn save_window_bounds(window: Window, state: State<AppState>) -> Result<(), Stri
     Ok(())
 }
 
+// Background health check task
+async fn health_check_task(app_handle: tauri::AppHandle, state: Arc<AppState>) {
+    let mut interval = interval(Duration::from_secs(30));
+    
+    loop {
+        interval.tick().await;
+        
+        let url = match state.gateway_url.lock() {
+            Ok(guard) => guard.clone(),
+            Err(_) => continue,
+        };
+        
+        let start = std::time::Instant::now();
+        let health = match reqwest::get(format!("{}/health", url)).await {
+            Ok(response) => {
+                let latency = start.elapsed().as_millis() as u64;
+                GatewayHealth {
+                    online: response.status().is_success(),
+                    last_check: Some(chrono::Local::now().to_rfc3339()),
+                    latency_ms: Some(latency),
+                    error: if response.status().is_success() {
+                        None
+                    } else {
+                        Some(format!("Status: {}", response.status()))
+                    },
+                }
+            }
+            Err(e) => {
+                GatewayHealth {
+                    online: false,
+                    last_check: Some(chrono::Local::now().to_rfc3339()),
+                    latency_ms: None,
+                    error: Some(e.to_string()),
+                }
+            }
+        };
+        
+        state.update_gateway_health(health.clone());
+        
+        // Emit health update to frontend
+        let _ = app_handle.emit_all("gateway-health-update", &health);
+        
+        // Update tray tooltip with status
+        let tray = app_handle.tray_handle();
+        let status_text = if health.online {
+            format!("OpenBR - Connected ({}ms)", health.latency_ms.unwrap_or(0))
+        } else {
+            "OpenBR - Disconnected".to_string()
+        };
+        let _ = tray.set_tooltip(&status_text);
+        
+        info!("Health check completed: online={}, latency={:?}", 
+              health.online, health.latency_ms);
+    }
+}
+
 // Initialize logging
 fn init_logging() {
     env_logger::init();
@@ -223,6 +319,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             get_app_version,
             get_gateway_status,
+            get_gateway_health,
             set_gateway_url,
             get_gateway_url,
             show_window,
@@ -304,6 +401,19 @@ fn main() {
                     let _ = window.maximize();
                 }
             }
+            
+            // Spawn health check background task
+            let state = app.state::<AppState>();
+            let state_arc = Arc::new(AppState {
+                gateway_url: Mutex::new(state.gateway_url.lock().unwrap().clone()),
+                app_version: state.app_version.clone(),
+                window_state_path: state.window_state_path.clone(),
+                gateway_health: state.gateway_health.clone(),
+            });
+            let app_handle = app.handle();
+            tauri::async_runtime::spawn(async move {
+                health_check_task(app_handle, state_arc).await;
+            });
             
             #[cfg(debug_assertions)]
             {
