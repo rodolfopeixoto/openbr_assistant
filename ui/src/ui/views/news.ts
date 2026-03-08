@@ -11,6 +11,13 @@ export interface NewsItem {
   sentiment?: "positive" | "neutral" | "negative";
   tags?: string[];
   category?: string;
+  relevanceScore?: number;
+  categories?: string[];
+  engagement?: {
+    score?: number;
+    likes?: number;
+    comments?: number;
+  };
 }
 
 export function renderNewsView(state: AppViewState) {
@@ -21,6 +28,42 @@ export function renderNewsView(state: AppViewState) {
     <div class="news-page-layout">
       <!-- Sidebar with Filters -->
       <aside class="news-sidebar">
+        <!-- Twitter/X Integration -->
+        <div class="sidebar-section twitter-section">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Twitter/X Integration
+          </h3>
+          ${state.twitterConfigured ? html`
+            <div class="twitter-status configured">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+              <span>Connected</span>
+            </div>
+            <button class="btn-secondary" @click="${() => state.handleTwitterFetch('@OpenAI')}">
+              Fetch @OpenAI
+            </button>
+            <button class="btn-secondary" @click="${() => state.handleTwitterFetch('@AnthropicAI')}">
+              Fetch @AnthropicAI
+            </button>
+          ` : html`
+            <div class="twitter-status not-configured">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>Not configured</span>
+            </div>
+            <button class="btn-primary" @click="${() => state.showTwitterConfig = true}">
+              Configure Twitter/X
+            </button>
+          `}
+        </div>
+
         <!-- Search -->
         <div class="sidebar-section">
           <h3>
@@ -48,6 +91,40 @@ export function renderNewsView(state: AppViewState) {
           </div>
         </div>
 
+        <!-- Relevance Filter -->
+        <div class="sidebar-section">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Relevance Score
+          </h3>
+          <div class="relevance-filter">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                .checked="${state.newsMinRelevance === 70}"
+                @change="${(e: Event) => {
+                  const target = e.target as HTMLInputElement;
+                  state.handleNewsMinRelevanceChange(target.checked ? 70 : 0);
+                }}"
+              />
+              High relevance only (70+)
+            </label>
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                .checked="${state.newsMinRelevance === 50}"
+                @change="${(e: Event) => {
+                  const target = e.target as HTMLInputElement;
+                  state.handleNewsMinRelevanceChange(target.checked ? 50 : 0);
+                }}"
+              />
+              Medium relevance+ (50+)
+            </label>
+          </div>
+        </div>
+
         <!-- Time Range -->
         <div class="sidebar-section">
           <h3>
@@ -62,6 +139,26 @@ export function renderNewsView(state: AppViewState) {
             ${renderTimeToggle('today', 'Today', state)}
             ${renderTimeToggle('week', 'This Week', state)}
             ${renderTimeToggle('month', 'This Month', state)}
+          </div>
+        </div>
+
+        <!-- AI Categories -->
+        <div class="sidebar-section">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            AI Categories
+          </h3>
+          <div class="category-chips">
+            ${renderAICategoryChip('all', 'All', state)}
+            ${renderAICategoryChip('llm', '🤖 LLM', state)}
+            ${renderAICategoryChip('vision', '👁️ Vision', state)}
+            ${renderAICategoryChip('robotics', '🦾 Robotics', state)}
+            ${renderAICategoryChip('research', '🔬 Research', state)}
+            ${renderAICategoryChip('security', '🔒 Security', state)}
           </div>
         </div>
 
@@ -91,22 +188,30 @@ export function renderNewsView(state: AppViewState) {
           `)}
         </div>
 
-        <!-- Categories -->
+        <!-- Actions -->
         <div class="sidebar-section">
           <h3>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 7l-8-4-8 4v10l8 4 8-4V7z"/>
-              <path d="M4 7l8 4 8-4"/>
-              <path d="M12 11v10"/>
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="12 6 16 14 8 14 12 6"/>
             </svg>
-            Categories
+            Actions
           </h3>
-          <div class="chip-group">
-            ${renderCategoryChip('all', 'All', state)}
-            ${renderCategoryChip('technology', 'Technology', state)}
-            ${renderCategoryChip('ai', 'AI', state)}
-            ${renderCategoryChip('business', 'Business', state)}
-          </div>
+          <button class="btn-secondary" @click="${() => state.handleNewsRefresh()}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            Refresh News
+          </button>
+          <button class="btn-secondary" @click="${() => state.handleNewsClassify()}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            Classify Content
+          </button>
         </div>
       </aside>
 
@@ -115,6 +220,12 @@ export function renderNewsView(state: AppViewState) {
         <div class="news-header">
           <h1>News & Intelligence</h1>
           <p class="subtitle">AI-powered news aggregation from various sources</p>
+          ${state.newsItems?.length ? html`
+            <div class="news-stats">
+              <span class="stat">${state.newsItems.length} articles</span>
+              <span class="stat">${filteredItems.length} filtered</span>
+            </div>
+          ` : null}
         </div>
 
         ${state.newsLoading ? html`
@@ -149,6 +260,7 @@ export function renderNewsView(state: AppViewState) {
       </main>
 
       ${state.newsSelectedItem ? renderNewsModal(state.newsSelectedItem as NewsItem, state) : null}
+      ${state.showTwitterConfig ? renderTwitterConfigModal(state) : null}
     </div>
   `;
 }
@@ -164,16 +276,22 @@ function renderTimeToggle(value: string, label: string, state: AppViewState) {
   `;
 }
 
-function renderCategoryChip(value: string, label: string, state: AppViewState) {
-  // For now, category filtering is not implemented in state
-  // Just showing the UI
+function renderAICategoryChip(value: string, label: string, state: AppViewState) {
+  const isActive = state.newsAICategory === value;
   return html`
-    <span class="chip">${label}</span>
+    <button
+      class="category-chip ${isActive ? 'active' : ''}"
+      @click="${() => state.handleNewsAICategoryChange(value)}"
+    >
+      ${label}
+    </button>
   `;
 }
 
 function renderNewsCard(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
+  const relevance = item.relevanceScore || 0;
+  const category = item.categories?.[0] || item.category || 'general';
   
   return html`
     <article
@@ -181,10 +299,20 @@ function renderNewsCard(item: NewsItem, state: AppViewState) {
       @click="${() => state.handleNewsSelectItem(item)}"
     >
       <div class="card-content">
-        <div class="card-meta">
-          <span class="source-badge">${item.source}</span>
-          <span class="time-badge">${formatDate(item.publishedAt)}</span>
-          <span class="sentiment-icon">${getSentimentIcon(sentiment)}</span>
+        <div class="card-header">
+          <div class="card-meta">
+            <span class="source-badge">${item.source}</span>
+            <span class="time-badge">${formatDate(item.publishedAt)}</span>
+            <span class="sentiment-icon">${getSentimentIcon(sentiment)}</span>
+          </div>
+          ${relevance > 0 ? html`
+            <div class="relevance-badge" style="--score: ${relevance}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              ${relevance}
+            </div>
+          ` : null}
         </div>
         
         <h3 class="card-title">${item.title}</h3>
@@ -194,11 +322,19 @@ function renderNewsCard(item: NewsItem, state: AppViewState) {
         ` : null}
         
         <div class="card-footer">
-          ${item.tags?.length ? html`
-            <div class="tags">
-              ${item.tags.slice(0, 3).map(tag => html`<span class="tag">${tag}</span>`)}
-            </div>
-          ` : html`<div></div>`}
+          <div class="card-tags">
+            ${item.categories?.slice(0, 3).map(cat => html`
+              <span class="category-tag ${cat}">${cat}</span>
+            `)}
+            ${item.engagement?.likes ? html`
+              <span class="engagement-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                ${formatNumber(item.engagement.likes)}
+              </span>
+            ` : null}
+          </div>
           
           <button class="read-more-btn" @click="${(e: Event) => { e.stopPropagation(); state.handleNewsSelectItem(item); }}">
             Read More
@@ -214,6 +350,7 @@ function renderNewsCard(item: NewsItem, state: AppViewState) {
 
 function renderNewsModal(item: NewsItem, state: AppViewState) {
   const sentiment = item.sentiment || 'neutral';
+  const relevance = item.relevanceScore || 0;
   
   return html`
     <div class="news-detail-modal" @click="${(e: Event) => {
@@ -236,9 +373,26 @@ function renderNewsModal(item: NewsItem, state: AppViewState) {
               ${getSentimentIcon(sentiment)}
               ${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
             </span>
+            ${relevance > 0 ? html`
+              <span class="relevance-badge" style="--score: ${relevance}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                Relevance: ${relevance}/100
+              </span>
+            ` : null}
           </div>
           
           <h2>${item.title}</h2>
+          
+          ${item.categories?.length ? html`
+            <div class="detail-section">
+              <h4>AI Categories</h4>
+              <div class="tags">
+                ${item.categories.map(cat => html`<span class="category-tag ${cat}">${cat}</span>`)}
+              </div>
+            </div>
+          ` : null}
           
           ${item.summary ? html`
             <div class="detail-section">
@@ -277,6 +431,63 @@ function renderNewsModal(item: NewsItem, state: AppViewState) {
   `;
 }
 
+function renderTwitterConfigModal(state: AppViewState) {
+  return html`
+    <div class="modal-overlay" @click="${(e: Event) => {
+      if (e.target === e.currentTarget) {
+        state.showTwitterConfig = false;
+      }
+    }}">
+      <div class="modal-content twitter-config">
+        <h3>Configure Twitter/X API</h3>
+        <p class="modal-description">
+          Enter your Twitter/X API credentials to enable news fetching from Twitter.
+          You can get these from <a href="https://developer.twitter.com" target="_blank">developer.twitter.com</a>
+        </p>
+        
+        <div class="form-group">
+          <label>API Key</label>
+          <input
+            type="password"
+            .value="${state.twitterApiKey || ''}"
+            @input="${(e: InputEvent) => state.twitterApiKey = (e.target as HTMLInputElement).value}"
+            placeholder="Enter your API Key"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>API Secret</label>
+          <input
+            type="password"
+            .value="${state.twitterApiSecret || ''}"
+            @input="${(e: InputEvent) => state.twitterApiSecret = (e.target as HTMLInputElement).value}"
+            placeholder="Enter your API Secret"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>Bearer Token</label>
+          <input
+            type="password"
+            .value="${state.twitterBearerToken || ''}"
+            @input="${(e: InputEvent) => state.twitterBearerToken = (e.target as HTMLInputElement).value}"
+            placeholder="Enter your Bearer Token"
+          />
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" @click="${() => state.showTwitterConfig = false}">
+            Cancel
+          </button>
+          <button class="btn-primary" @click="${() => state.handleTwitterConfigure()}">
+            Save Configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -291,6 +502,12 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
+function formatNumber(num: number): string {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
 function getSentimentIcon(sentiment: string) {
   switch (sentiment) {
     case 'positive':
@@ -302,10 +519,6 @@ function getSentimentIcon(sentiment: string) {
   }
 }
 
-function getSourceCount(items: NewsItem[], source: string): number {
-  return items.filter(item => item.source === source).length;
-}
-
 function filterNews(items: NewsItem[], state: AppViewState): NewsItem[] {
   let filtered = [...items];
   
@@ -315,8 +528,22 @@ function filterNews(items: NewsItem[], state: AppViewState): NewsItem[] {
     filtered = filtered.filter(item =>
       item.title.toLowerCase().includes(query) ||
       item.summary?.toLowerCase().includes(query) ||
-      item.tags?.some(tag => tag.toLowerCase().includes(query))
+      item.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+      item.categories?.some(cat => cat.toLowerCase().includes(query))
     );
+  }
+  
+  // Filter by AI category
+  if (state.newsAICategory && state.newsAICategory !== 'all') {
+    filtered = filtered.filter(item => 
+      item.categories?.includes(state.newsAICategory!) ||
+      item.category === state.newsAICategory
+    );
+  }
+  
+  // Filter by minimum relevance
+  if (state.newsMinRelevance && state.newsMinRelevance > 0) {
+    filtered = filtered.filter(item => (item.relevanceScore || 0) >= state.newsMinRelevance!);
   }
   
   // Filter by time range
