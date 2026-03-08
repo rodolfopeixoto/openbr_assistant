@@ -31,6 +31,7 @@ import { ollamaIntegratedHandlers } from "./server-methods/ollama-integrated.js"
 import { ollamaHandlers } from "./server-methods/ollama.js";
 import { onboardWizardHandlers } from "./server-methods/onboard-wizard.js";
 import { opencodeHandlers } from "./server-methods/opencode.js";
+import { optimizationHandlers } from "./server-methods/optimization.js";
 import { rateLimitsHandlers } from "./server-methods/rate-limits.js";
 import { securityHandlers } from "./server-methods/security.js";
 import { sendHandlers } from "./server-methods/send.js";
@@ -249,6 +250,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...mcpHandlers,
   ...newsHandlers,
   ...opencodeHandlers,
+  ...optimizationHandlers,
 };
 
 export async function handleGatewayRequest(
