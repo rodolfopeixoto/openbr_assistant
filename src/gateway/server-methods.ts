@@ -6,6 +6,7 @@ import { authHandlers } from "./server-methods/auth.js";
 import { browserHandlers } from "./server-methods/browser.js";
 import { budgetHandlers } from "./server-methods/budget.js";
 import { cacheHandlers } from "./server-methods/cache.js";
+import { unifiedChannelsHandlers } from "./server-methods/channels-unified.js";
 import { channelsHandlers } from "./server-methods/channels.js";
 import { chatHandlers } from "./server-methods/chat.js";
 import { complianceHandlers } from "./server-methods/compliance.js";
@@ -211,6 +212,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...voicewakeHandlers,
   ...healthHandlers,
   ...channelsHandlers,
+  ...unifiedChannelsHandlers,
   ...chatHandlers,
   ...memoryHandlers,
   ...cronHandlers,
