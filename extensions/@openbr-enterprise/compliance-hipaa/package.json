@@ -1,0 +1,47 @@
+{
+  "name": "@openbr-enterprise/compliance-hipaa",
+  "version": "1.0.0",
+  "description": "HIPAA compliance for healthcare data with PHIDetection, AuditTrail, and AccessControl",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./phi-detection": "./dist/phi-detection/index.js",
+    "./audit-trail": "./dist/audit-trail/index.js",
+    "./access-control": "./dist/access-control/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
+  },
+  "dependencies": {
+    "compromise": "^14.14.0",
+    "date-fns": "^3.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "speakeasy": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.0.0",
+    "@types/speakeasy": "^2.0.10",
+    "typescript": "^5.9.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.1.0",
+    "@openbr-enterprise/security-core": "^1.0.0"
+  },
+  "license": "MIT",
+  "author": "OpenBR Enterprise Team",
+  "keywords": [
+    "openclaw",
+    "hipaa",
+    "healthcare",
+    "phi",
+    "compliance",
+    "enterprise"
+  ]
+}
