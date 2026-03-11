@@ -1,0 +1,68 @@
+name: Sync with Upstream
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force sync even if no changes detected'
+        required: false
+        default: 'false'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/openclaw/openclaw.git || true
+          git fetch upstream
+
+      - name: Sync main branch
+        run: |
+          git checkout main
+          git pull origin main
+          
+          # Try to merge upstream changes
+          if git merge upstream/main --no-edit; then
+            echo "Successfully merged upstream changes"
+            git push origin main
+          else
+            echo "Merge conflicts detected. Creating PR..."
+            git merge --abort
+            
+            # Create a new branch for conflict resolution
+            git checkout -b upstream-sync-$(date +%Y%m%d)
+            git merge upstream/main || true
+            git push origin upstream-sync-$(date +%Y%m%d)
+            
+            # Create PR using GitHub CLI
+            gh pr create \
+              --title "Sync with upstream OpenClaw" \
+              --body "Automated sync with upstream. Manual resolution required for conflicts." \
+              --base main \
+              --head upstream-sync-$(date +%Y%m%d)
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update SPEC.md
+        run: |
+          # Update last sync date in SPEC.md
+          sed -i "s/Última Atualização:.*/Última Atualização: $(date +%Y-%m-%d)/" SPEC.md
+          git add SPEC.md
+          git commit -m "docs: update last sync date [skip ci]" || true
+          git push origin main || true
