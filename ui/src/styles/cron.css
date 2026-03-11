@@ -1,0 +1,658 @@
+/** ============================================
+ * LYNX CRON - Modern Wizard Design
+ * ============================================ */
+
+.cron-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header Section */
+.cron-header {
+  margin-bottom: 32px;
+}
+
+.cron-header__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.cron-header__subtitle {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Stats Cards */
+.cron-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.cron-stat {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.cron-stat:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.cron-stat__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.cron-stat__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Wizard Card */
+.cron-wizard {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.cron-wizard__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.cron-wizard__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.cron-wizard__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cron-wizard__subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.cron-wizard__content {
+  padding: 24px;
+}
+
+/* Steps */
+.cron-steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cron-step {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 2px solid transparent;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+.cron-step.active {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.cron-step.completed {
+  opacity: 1;
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.cron-step__number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.cron-step.active .cron-step__number {
+  background: var(--accent);
+  color: white;
+}
+
+.cron-step.completed .cron-step__number {
+  background: var(--success);
+  color: white;
+}
+
+.cron-step__label {
+  font-size: 12px;
+  font-weight: 500;
+  display: block;
+}
+
+/* Form Fields */
+.cron-field {
+  margin-bottom: 20px;
+}
+
+.cron-field__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.cron-field__hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.cron-field__input,
+.cron-field__select,
+.cron-field__textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.cron-field__input:focus,
+.cron-field__select:focus,
+.cron-field__textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.cron-field__textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: var(--font-body);
+}
+
+.cron-field.error .cron-field__input,
+.cron-field.error .cron-field__select {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.cron-field__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+/* Form Grid */
+.cron-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .cron-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Schedule Tabs */
+.cron-schedule-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.cron-schedule-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cron-schedule-tab:hover {
+  color: var(--text);
+}
+
+.cron-schedule-tab.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Toggle Switch */
+.cron-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.cron-toggle__input {
+  display: none;
+}
+
+.cron-toggle__switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--border-strong);
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.cron-toggle__switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cron-toggle__input:checked + .cron-toggle__switch {
+  background: var(--accent);
+}
+
+.cron-toggle__input:checked + .cron-toggle__switch::after {
+  transform: translateX(20px);
+}
+
+.cron-toggle__label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Jobs List */
+.cron-jobs {
+  margin-top: 32px;
+}
+
+.cron-jobs__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cron-jobs__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cron-jobs__count {
+  padding: 4px 10px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cron-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cron-job {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.cron-job:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.cron-job.selected {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.cron-job__status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cron-job__status.enabled {
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.cron-job__status.disabled {
+  background: var(--muted);
+}
+
+.cron-job__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cron-job__name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.cron-job__schedule {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.cron-job__meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cron-job__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.cron-job__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.cron-job__action {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.cron-job__action:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.cron-job__action.danger:hover {
+  background: var(--danger-subtle);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Empty State */
+.cron-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--bg-elevated);
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+}
+
+.cron-empty__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  color: var(--border-strong);
+}
+
+.cron-empty__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cron-empty__desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* Run History */
+.cron-history {
+  margin-top: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cron-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.cron-history__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cron-history__job-name {
+  color: var(--accent);
+}
+
+.cron-history__list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cron-run {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s ease;
+}
+
+.cron-run:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cron-run:last-child {
+  border-bottom: none;
+}
+
+.cron-run__status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cron-run__status.success {
+  background: var(--success);
+}
+
+.cron-run__status.error {
+  background: var(--danger);
+}
+
+.cron-run__info {
+  flex: 1;
+}
+
+.cron-run__summary {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.cron-run__error {
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 4px;
+}
+
+.cron-run__meta {
+  text-align: right;
+}
+
+.cron-run__time {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cron-run__duration {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Action Buttons */
+.cron-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.cron-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.cron-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cron-btn--primary {
+  background: var(--accent);
+  color: white;
+}
+
+.cron-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.cron-btn--secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.cron-btn--secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cron-container {
+    padding: 16px;
+  }
+  
+  .cron-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .cron-wizard__header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cron-steps {
+    flex-direction: column;
+  }
+  
+  .cron-job {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .cron-job__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

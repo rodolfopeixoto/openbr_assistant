@@ -1,0 +1,144 @@
+/** ============================================
+ * LYNX BRANDING - Header & Logo Styles
+ * ============================================ */
+
+/* Brand Logo Animation */
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.brand-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand:hover .brand-logo {
+  transform: scale(1.05);
+}
+
+/* Brand Text with Gradient */
+.brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 50%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.brand-sub {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-top: -2px;
+}
+
+/* Topbar Enhancements */
+.topbar {
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, rgba(19, 19, 31, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+/* Status Pill Glow */
+.pill {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.pill:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.statusDot.ok {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.8);
+  }
+}
+
+/* Nav Item Active State */
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.nav-item.active .nav-item__icon {
+  color: var(--accent);
+}
+
+/* Nav Group Labels */
+.nav-label {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nav-label:hover {
+  color: var(--text);
+}
+
+/* Loading State */
+.brand-logo.loading {
+  animation: lynx-bounce 1s ease infinite;
+}
+
+@keyframes lynx-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Focus Mode - Hide header elements gracefully */
+.shell--chat-focus .topbar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  transition: all 0.3s ease;
+}
+
+.shell--chat-focus:hover .topbar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .brand-title {
+    font-size: 18px;
+  }
+  
+  .brand-sub {
+    font-size: 10px;
+  }
+  
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+}
