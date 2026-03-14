@@ -4,6 +4,7 @@ summary: Machine-checked security models for OpenClaw’s highest-risk paths.
 permalink: /security/formal-verification/
 ---
 
+<<<<<<< HEAD
 # Formal Verification (Security Models)
 
 This page tracks OpenClaw’s **formal security models** (TLA+/TLC today; more as needed).
@@ -162,3 +163,6 @@ What it means:
 - Red (expected):
   - `make routing-precedence-negative`
   - `make routing-identitylinks-negative`
+=======
+This page moved to: [/gateway/security-formal-verification/](/gateway/security-formal-verification/)
+>>>>>>> origin/fix/mintlify-security-subdir-conflict

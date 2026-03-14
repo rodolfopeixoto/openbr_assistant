@@ -1,7 +1,12 @@
 ---
 title: Formal Verification (Security Models)
+<<<<<<< HEAD:docs/gateway/security/formal-verification.md
 summary: Machine-checked security models for OpenClaw’s highest-risk paths.
 permalink: /security/formal-verification/
+=======
+summary: Machine-checked security models for Clawdbot’s highest-risk paths.
+permalink: /gateway/security-formal-verification/
+>>>>>>> origin/fix/mintlify-security-subdir-conflict:docs/gateway/security-formal-verification.md
 ---
 
 # Formal Verification (Security Models)
@@ -23,7 +28,11 @@ misconfiguration safety), under explicit assumptions.
 
 ## Where the models live
 
+<<<<<<< HEAD:docs/gateway/security/formal-verification.md
 Models are maintained in a separate repo: [vignesh07/openclaw-formal-models](https://github.com/vignesh07/openclaw-formal-models).
+=======
+Models are maintained in a separate repo: [github.com/vignesh07/clawdbot-formal-models](https://github.com/vignesh07/clawdbot-formal-models).
+>>>>>>> origin/fix/mintlify-security-subdir-conflict:docs/gateway/security-formal-verification.md
 
 ## Important caveats
 
