@@ -419,8 +419,15 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           tui.requestRender();
 
           await client.resetSession(state.currentSessionKey);
+          // Clear token counts after reset to avoid stale display while refreshing. (#1523)
+          state.sessionInfo.inputTokens = 0;
+          state.sessionInfo.outputTokens = 0;
+          state.sessionInfo.totalTokens = 0;
+          tui.requestRender();
+
           chatLog.addSystem(`session ${state.currentSessionKey} reset`);
           await loadHistory();
+          await refreshSessionInfo();
         } catch (err) {
           chatLog.addSystem(`reset failed: ${String(err)}`);
         }
