@@ -32,11 +32,8 @@ import {
 import { resolveModel } from "../agents/pi-embedded-runner/model.js";
 import { normalizeChannelId } from "../channels/plugins/index.js";
 import { logVerbose } from "../globals.js";
-import { logVerbose } from "../globals.js";
-import { isVoiceCompatibleAudio } from "../media/audio.js";
 import { isVoiceCompatibleAudio } from "../media/audio.js";
 import { saveMediaSource } from "../media/store.js";
-import { CONFIG_DIR, resolveUserPath } from "../utils.js";
 import { CONFIG_DIR, resolveUserPath } from "../utils.js";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
