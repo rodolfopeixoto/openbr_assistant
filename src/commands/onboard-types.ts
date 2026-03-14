@@ -93,4 +93,8 @@ export type OnboardOptions = {
   remoteUrl?: string;
   remoteToken?: string;
   json?: boolean;
+  /** Run the interactive GUI wizard after CLI setup */
+  wizard?: boolean;
+  /** Open browser automatically after wizard setup (default: true when wizard=true) */
+  openDashboard?: boolean;
 };

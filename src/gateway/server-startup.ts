@@ -18,6 +18,7 @@ import { loadInternalHooks } from "../hooks/loader.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { type PluginServicesHandle, startPluginServices } from "../plugins/services.js";
 import { initializeAuditLogging } from "../security/index.js";
+import { getOllamaService } from "../services/ollama-integrated.js";
 import { startBrowserControlServerIfEnabled } from "./server-browser.js";
 import {
   scheduleRestartSentinelWake,
@@ -161,6 +162,19 @@ export async function startGatewaySidecars(params: {
     setTimeout(() => {
       void scheduleRestartSentinelWake({ deps: params.deps });
     }, 750);
+  }
+
+  // Auto-start Ollama if available (silent - doesn't fail if not installed)
+  if (!isTruthyEnvValue(process.env.OPENCLAW_SKIP_OLLAMA_AUTOSTART)) {
+    try {
+      const ollamaService = getOllamaService();
+      const started = await ollamaService.autoStart();
+      if (started) {
+        params.logHooks.info("ollama auto-started");
+      }
+    } catch {
+      // Silent fail - Ollama is optional
+    }
   }
 
   return { browserControl, pluginServices, auditLogger };

@@ -25,7 +25,7 @@ describe('LeakDetection', () => {
   });
 
   it('should detect Slack token', () => {
-    const code = 'const token = "xoxb-EXAMPLE123-FAKE456-SAMPLE789TOKEN"';
+    const code = 'const token = "xoxb-EXAMPLE-TOKEN-REPLACE-THIS"';
     const findings = detector.scanString(code, 'test.js');
     
     expect(findings.length).toBeGreaterThan(0);

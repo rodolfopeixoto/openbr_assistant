@@ -14,6 +14,10 @@ import { normalizeMessage, normalizeRoleForGrouping } from "../chat/message-norm
 import { icons } from "../icons";
 import { renderMarkdownSidebar } from "./markdown-sidebar";
 import "../components/resizable-divider";
+import "../components/ThinkingIndicator";
+import type { ThinkingStep, ThinkingLevel } from "../components/ThinkingIndicator";
+import "../../components/ScrollToBottomButton";
+import "../../components/ScrollToTopButton";
 
 // Quick commands definition
 interface QuickCommand {
@@ -61,6 +65,16 @@ export type CompactionIndicatorStatus = {
   completedAt: number | null;
 };
 
+export type ThinkingStatus = {
+  active: boolean;
+  level: ThinkingLevel;
+  steps: ThinkingStep[];
+  currentStepIndex: number;
+  startedAt: number;
+  completedAt?: number;
+  summary?: string;
+};
+
 export type ChatProps = {
   sessionKey: string;
   onSessionKeyChange: (next: string) => void;
@@ -70,6 +84,7 @@ export type ChatProps = {
   sending: boolean;
   canAbort?: boolean;
   compactionStatus?: CompactionIndicatorStatus | null;
+  thinkingStatus?: ThinkingStatus | null;
   messages: unknown[];
   toolMessages: unknown[];
   stream: string | null;
@@ -115,6 +130,17 @@ export type ChatProps = {
   onCloseSidebar?: () => void;
   onSplitRatioChange?: (ratio: number) => void;
   onChatScroll?: (event: Event) => void;
+  // Scroll-to-bottom button props
+  showScrollToBottom?: boolean;
+  newMessageCount?: number;
+  onScrollToBottom?: () => void;
+  // Scroll-to-top button props
+  showScrollToTop?: boolean;
+  onScrollToTop?: () => void;
+  // Voice recorder props
+  voiceRecorderOpen?: boolean;
+  onToggleVoiceRecorder?: () => void;
+  onVoiceTranscription?: (text: string) => void;
 };
 
 const COMPACTION_TOAST_DURATION_MS = 5000;
@@ -149,6 +175,22 @@ function renderCompactionIndicator(status: CompactionIndicatorStatus | null | un
   }
 
   return nothing;
+}
+
+function renderThinkingIndicator(status: ThinkingStatus | null | undefined) {
+  if (!status || !status.active) return nothing;
+
+  return html`
+    <thinking-indicator
+      .level=${status.level}
+      .steps=${status.steps}
+      .currentStepIndex=${status.currentStepIndex}
+      .startedAt=${status.startedAt}
+      .isComplete=${!!status.completedAt}
+      .summary=${status.summary || ""}
+      .compact=${false}
+    ></thinking-indicator>
+  `;
 }
 
 function generateAttachmentId(): string {
@@ -373,6 +415,9 @@ export function renderChat(props: ChatProps) {
                 `
               : nothing
       }
+      
+      ${renderThinkingIndicator(props.thinkingStatus)}
+      
       ${repeat(
         chatItems,
         (item) => item.key,
@@ -438,6 +483,16 @@ export function renderChat(props: ChatProps) {
           style="flex: ${sidebarOpen ? `0 0 ${splitRatio * 100}%` : "1 1 100%"}"
         >
           ${thread}
+        
+        <scroll-to-top-button
+          ?visible=${props.showScrollToTop ?? false}
+          @scroll-to-top=${props.onScrollToTop}
+        ></scroll-to-top-button>
+        <scroll-to-bottom-button
+          ?visible=${props.showScrollToBottom ?? false}
+          .newMessageCount=${props.newMessageCount ?? 0}
+          @scroll-to-bottom=${props.onScrollToBottom}
+        ></scroll-to-bottom-button>
         </div>
 
         ${
@@ -508,6 +563,16 @@ export function renderChat(props: ChatProps) {
             >
               ${icons.paperclip} Attach
             </button>
+            <button 
+              class="chat-input-toolbar__btn ${props.voiceRecorderOpen ? 'active' : ''}" 
+              title="Voice input"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                props.onToggleVoiceRecorder?.();
+              }}
+            >
+              ${icons.mic} Voice
+            </button>
           <button 
             class="chat-input-toolbar__btn ${props.commandsMenuOpen ? 'active' : ''}" 
             title="Quick commands"
@@ -538,6 +603,19 @@ export function renderChat(props: ChatProps) {
           </div>
           
           ${props.commandsMenuOpen ? renderCommandsMenu(props) : nothing}
+          
+          <!-- Voice Recorder -->
+          ${props.voiceRecorderOpen ? html`
+            <voice-recorder
+              .onTranscription=${(text: string) => {
+                props.onVoiceTranscription?.(text);
+                props.onToggleVoiceRecorder?.();
+              }}
+              .onCancel=${() => {
+                props.onToggleVoiceRecorder?.();
+              }}
+            ></voice-recorder>
+          ` : nothing}
           
           <!-- Hidden file input -->
           <input 

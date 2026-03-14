@@ -11,6 +11,7 @@ import { createGatewayTool } from "./tools/gateway-tool.js";
 import { createImageTool } from "./tools/image-tool.js";
 import { createMessageTool } from "./tools/message-tool.js";
 import { createNodesTool } from "./tools/nodes-tool.js";
+import { createOpencodeTool } from "./tools/opencode-tool.js";
 import { createSessionStatusTool } from "./tools/session-status-tool.js";
 import { createSessionsHistoryTool } from "./tools/sessions-history-tool.js";
 import { createSessionsListTool } from "./tools/sessions-list-tool.js";
@@ -92,6 +93,7 @@ export function createOpenClawTools(options?: {
       currentThreadTs: options?.currentThreadTs,
       replyToMode: options?.replyToMode,
       hasRepliedRef: options?.hasRepliedRef,
+      sandboxRoot: options?.sandboxRoot,
     }),
     createTtsTool({
       agentChannel: options?.agentChannel,
@@ -137,6 +139,9 @@ export function createOpenClawTools(options?: {
     ...(webSearchTool ? [webSearchTool] : []),
     ...(webFetchTool ? [webFetchTool] : []),
     ...(imageTool ? [imageTool] : []),
+    createOpencodeTool({
+      agentSessionKey: options?.agentSessionKey,
+    }),
   ];
 
   const pluginTools = resolvePluginTools({
@@ -144,10 +149,12 @@ export function createOpenClawTools(options?: {
       config: options?.config,
       workspaceDir: options?.workspaceDir,
       agentDir: options?.agentDir,
-      agentId: resolveSessionAgentId({
-        sessionKey: options?.agentSessionKey,
-        config: options?.config,
-      }),
+      agentId:
+        options?.requesterAgentIdOverride ??
+        resolveSessionAgentId({
+          sessionKey: options?.agentSessionKey,
+          config: options?.config,
+        }),
       sessionKey: options?.agentSessionKey,
       messageChannel: options?.agentChannel,
       agentAccountId: options?.agentAccountId,

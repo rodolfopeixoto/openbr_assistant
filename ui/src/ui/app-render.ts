@@ -2,6 +2,7 @@ import { html, nothing } from "lit";
 import type { AppViewState } from "./app-view-state";
 import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway";
 import type { UiSettings } from "./storage";
+import { resetAllSettings } from "./storage";
 import type { ThemeMode } from "./theme";
 import type { ThemeTransitionContext } from "./theme-transition";
 import type {
@@ -90,6 +91,19 @@ import { renderNodes } from "./views/nodes";
 import { renderOverview } from "./views/overview";
 import { renderSessions } from "./views/sessions";
 import { renderSkills } from "./views/skills";
+import { renderOnboardingWizard } from "./views/onboarding-wizard";
+import { renderNewsView } from "./views/news";
+import { renderFeaturesView } from "./views/features";
+import { renderContainersView } from "./views/containers";
+import { renderSecurityView } from "./views/security";
+import { renderOpencodeView } from "./views/opencode";
+import { renderMcpView } from "./views/mcp";
+import { renderModelRoutingView } from "./views/model-routing";
+import { renderOllamaView } from "./views/ollama";
+import { renderRateLimitsView } from "./views/rate-limits";
+import { renderBudgetView } from "./views/budget";
+import { renderMetricsView } from "./views/metrics";
+import { renderCacheView } from "./views/cache";
 import "./views/workspace-editor";
 
 const AVATAR_DATA_RE = /^data:/i;
@@ -136,18 +150,7 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 12L12 4L18 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M32 12L28 4L22 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M6 16C6 16 4 24 8 30C12 36 20 38 20 38C20 38 28 36 32 30C36 24 34 16 34 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M11 20C11 20 13 18 15 20C13 22 11 20 11 20Z" fill="currentColor"/>
-                <path d="M29 20C29 20 27 18 25 20C27 22 29 20 29 20Z" fill="currentColor"/>
-                <path d="M18 26L20 28L22 26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 26L14 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M8 28L14 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M32 26L26 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M32 28L26 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-              </svg>
+              <img src="/favicon.svg" alt="OpenClaw" />
             </div>
             <div class="brand-text">
               <div class="brand-title">LYNX</div>
@@ -206,10 +209,23 @@ export function renderApp(state: AppViewState) {
               <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
               <span class="nav-item__text">Docs</span>
             </a>
+            <button
+              class="nav-item"
+              @click=${() => {
+                if (confirm("Reset all settings to defaults? This will reload the page.")) {
+                  resetAllSettings();
+                }
+              }}
+              title="Reset all settings to defaults"
+            >
+              <span class="nav-item__icon" aria-hidden="true">${icons.refreshCw}</span>
+              <span class="nav-item__text">Reset Settings</span>
+            </button>
           </div>
         </div>
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
+        ${state.onboarding ? renderOnboardingWizard(state) : html`
         <section class="content-header">
           <div>
             <div class="page-title">${titleForTab(state.tab)}</div>
@@ -567,6 +583,9 @@ export function renderApp(state: AppViewState) {
                     chatShowTools: !state.settings.chatShowTools,
                   });
                 },
+                voiceRecorderOpen: state.voiceRecorderOpen,
+                onToggleVoiceRecorder: () => state.handleToggleVoiceRecorder(),
+                onVoiceTranscription: (text: string) => state.handleVoiceTranscription(text),
               })
             : nothing
         }
@@ -731,6 +750,20 @@ export function renderApp(state: AppViewState) {
               })
             : nothing
         }
+
+        ${state.tab === "news" ? renderNewsView(state) : nothing}
+        ${state.tab === "features" ? renderFeaturesView(state) : nothing}
+        ${state.tab === "containers" ? renderContainersView(state) : nothing}
+        ${state.tab === "security" ? renderSecurityView(state) : nothing}
+        ${state.tab === "opencode" ? renderOpencodeView(state) : nothing}
+        ${state.tab === "mcp" ? renderMcpView(state) : nothing}
+        ${state.tab === "modelRouting" ? renderModelRoutingView(state) : nothing}
+        ${state.tab === "ollama" ? renderOllamaView(state) : nothing}
+        ${state.tab === "rateLimits" ? renderRateLimitsView(state) : nothing}
+        ${state.tab === "budget" ? renderBudgetView(state) : nothing}
+        ${state.tab === "metrics" ? renderMetricsView(state) : nothing}
+        ${state.tab === "cache" ? renderCacheView(state) : nothing}
+        `}
       </main>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
@@ -746,6 +779,31 @@ export function renderApp(state: AppViewState) {
           @oauth-start=${(e: CustomEvent) => state.handleOAuthStart(e)}
         ></provider-config-wizard>
       ` : null}
+      
+      <!-- Toast Notifications -->
+      ${renderToasts(state)}
+    </div>
+  `;
+}
+
+function renderToasts(state: AppViewState) {
+  if (!state.toasts || state.toasts.length === 0) return nothing;
+  
+  const iconMap = {
+    error: '⚠️',
+    success: '✓',
+    info: 'ℹ️'
+  };
+  
+  return html`
+    <div class="toast-container">
+      ${state.toasts.map(toast => html`
+        <div class="toast ${toast.type}" data-id="${toast.id}">
+          <span class="toast-icon">${iconMap[toast.type]}</span>
+          <span class="toast-content">${toast.message}</span>
+          <button class="toast-close" @click=${() => state.removeToast?.(toast.id)}>×</button>
+        </div>
+      `)}
     </div>
   `;
 }

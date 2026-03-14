@@ -11,6 +11,7 @@ import type {
   ExecApprovalsSnapshot,
 } from "../controllers/exec-approvals";
 import { clampText, formatAgo, formatList } from "../format";
+import { icons } from "../icons";
 
 export type NodesProps = {
   loading: boolean;
@@ -49,80 +50,104 @@ export type NodesProps = {
   onSaveExecApprovals: () => void;
 };
 
+// Platform icons using SVG
+const PLATFORM_ICONS: Record<string, () => ReturnType<typeof html>> = {
+  macos: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M12 2c-1.5 0-2.8.5-3.8 1.5C7.2 4.5 6.7 5.8 6.7 7.3c0 1.5.5 2.8 1.5 3.8.5.5 1.1.9 1.8 1.1-.3.7-.8 1.3-1.4 1.8-.6.5-1.3.8-2.1.8-.4 0-.7-.1-1.1-.2-.3-.1-.6-.3-.9-.5-.3-.2-.5-.3-.8-.3-.2 0-.4.1-.6.2-.2.1-.3.3-.3.5 0 .2.1.4.2.6.1.2.3.4.5.5.5.4 1.1.7 1.7.9.6.2 1.3.3 2 .3.9 0 1.8-.2 2.6-.7.8-.5 1.5-1.1 2-1.9.5.8 1.2 1.4 2 1.9.8.5 1.7.7 2.6.7.7 0 1.4-.1 2-.3.6-.2 1.2-.5 1.7-.9.2-.1.4-.3.5-.5.1-.2.2-.4.2-.6 0-.2-.1-.4-.3-.5-.2-.1-.4-.2-.6-.2-.3 0-.5.1-.8.3-.3.2-.6.4-.9.5-.3.1-.7.2-1.1.2-.8 0-1.5-.3-2.1-.8-.6-.5-1.1-1.1-1.4-1.8.7-.2 1.3-.6 1.8-1.1 1-1 1.5-2.3 1.5-3.8 0-1.5-.5-2.8-1.5-3.8C14.8 2.5 13.5 2 12 2z"/></svg>`,
+  ios: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>`,
+  android: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M5 16v-6a7 7 0 0 1 14 0v6"/><line x1="5" y1="19" x2="5" y2="21"/><line x1="19" y1="19" x2="19" y2="21"/><line x1="9" y1="19" x2="9" y2="21"/><line x1="15" y1="19" x2="15" y2="21"/></svg>`,
+  linux: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M12 3c-1.5 0-2.7.5-3.6 1.4-.9.9-1.4 2.1-1.4 3.6 0 1.2.3 2.2.9 3 .6.8 1.4 1.4 2.4 1.8-.5.5-1.1.9-1.7 1.2-.6.3-1.3.5-2 .5h-.5c-.4 0-.8-.1-1.1-.2-.3-.1-.6-.3-.9-.5-.2-.1-.4-.2-.6-.2-.2 0-.3.1-.5.2-.1.1-.2.3-.2.5 0 .2.1.3.2.5.1.2.3.3.5.4.4.3.9.5 1.4.7.5.2 1.1.2 1.7.2h.5c.8 0 1.5-.2 2.2-.5.7-.3 1.3-.8 1.8-1.4.5.6 1.1 1.1 1.8 1.4.7.3 1.4.5 2.2.5h.5c.6 0 1.2-.1 1.7-.2.5-.2 1-.4 1.4-.7.2-.1.4-.2.5-.4.1-.2.2-.3.2-.5 0-.2-.1-.3-.2-.5-.2-.1-.3-.2-.5-.2-.2 0-.4.1-.6.2-.3.2-.6.4-.9.5-.3.1-.7.2-1.1.2h-.5c-.7 0-1.4-.2-2-.5-.6-.3-1.2-.7-1.7-1.2 1-.4 1.8-1 2.4-1.8.6-.8.9-1.8.9-3 0-1.5-.5-2.7-1.4-3.6C14.7 3.5 13.5 3 12 3z"/><path d="M9 12c-1 0-2 .5-2.5 1.5S6 15.5 6 16.5"/><path d="M15 12c1 0 2 .5 2.5 1.5s.5 2.5.5 3.5"/></svg>`,
+  windows: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`,
+  docker: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M4 10h12"/><path d="M4 14h12"/><path d="M4 18h12"/><path d="M4 6h12"/><path d="M18 10h2"/><path d="M18 14h2"/><path d="M18 6h2"/><path d="M18 18h2"/></svg>`,
+  web: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  cloud: () => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`,
+};
+
+function getPlatformIcon(platform?: string): () => ReturnType<typeof html> {
+  if (!platform) return PLATFORM_ICONS.linux || (() => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`);
+  const normalized = platform.toLowerCase();
+  return PLATFORM_ICONS[normalized] || PLATFORM_ICONS.linux || (() => html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`);
+}
+
+// Capability descriptions for tooltips
+const CAPABILITY_DESCRIPTIONS: Record<string, string> = {
+  "system.run": "Execute system commands and scripts",
+  "fs.read": "Read files from the file system",
+  "fs.write": "Write files to the file system",
+  "net.http": "Make HTTP requests",
+  "net.ws": "WebSocket connections",
+  "db.query": "Query databases",
+  "docker": "Docker container operations",
+  "k8s": "Kubernetes operations",
+  "git": "Git version control operations",
+};
+
 export function renderNodes(props: NodesProps) {
   const bindingState = resolveBindingsState(props);
   const approvalsState = resolveExecApprovalsState(props);
+  
   return html`
-    ${renderExecApprovals(approvalsState)}
-    ${renderBindings(bindingState)}
-    ${renderDevices(props)}
-    <section class="card">
-      <div class="row" style="justify-content: space-between;">
-        <div>
-          <div class="card-title">Nodes</div>
-          <div class="card-sub">Paired devices and live links.</div>
+    <div class="nodes-page">
+      <!-- Help Section -->
+      <div class="nodes-help-section">
+        <div class="help-card">
+          <div class="help-icon">${icons.monitor}</div>
+          <div class="help-content">
+            <h3>What are Nodes?</h3>
+            <p>Nodes are remote devices that execute commands on behalf of the gateway. They can run skills, tools, and automations for you. Examples: your computer, a server, or a cloud instance.</p>
+          </div>
         </div>
-        <button class="btn" ?disabled=${props.loading} @click=${props.onRefresh}>
-          ${props.loading ? "Loading…" : "Refresh"}
-        </button>
+        <div class="help-card">
+          <div class="help-icon">${icons.smartphone}</div>
+          <div class="help-content">
+            <h3>What are Devices?</h3>
+            <p>Devices are applications connected to the gateway (mobile apps, web clients, integrations). They send and receive messages but don't execute commands like nodes do.</p>
+          </div>
+        </div>
       </div>
-      <div class="list" style="margin-top: 16px;">
-        ${
-          props.nodes.length === 0
-            ? html`
-                <div class="muted">No nodes found.</div>
-              `
-            : props.nodes.map((n) => renderNode(n))
-        }
-      </div>
-    </section>
+
+      ${renderExecApprovals(approvalsState)}
+      ${renderBindings(bindingState)}
+      ${renderDevicesSection(props)}
+      ${renderNodesSection(props)}
+    </div>
   `;
 }
 
-function renderDevices(props: NodesProps) {
+function renderDevicesSection(props: NodesProps) {
   const list = props.devicesList ?? { pending: [], paired: [] };
   const pending = Array.isArray(list.pending) ? list.pending : [];
   const paired = Array.isArray(list.paired) ? list.paired : [];
+  
   return html`
-    <section class="card">
-      <div class="row" style="justify-content: space-between;">
-        <div>
-          <div class="card-title">Devices</div>
-          <div class="card-sub">Pairing requests + role tokens.</div>
+    <section class="nodes-section">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <div class="section-icon">${icons.smartphone}</div>
+          <div>
+            <h2 class="section-title">Devices</h2>
+            <p class="section-subtitle">Connected applications and services</p>
+          </div>
         </div>
-        <button class="btn" ?disabled=${props.devicesLoading} @click=${props.onDevicesRefresh}>
-          ${props.devicesLoading ? "Loading…" : "Refresh"}
+        <button class="btn btn--secondary" ?disabled=${props.devicesLoading} @click=${props.onDevicesRefresh}>
+          ${props.devicesLoading ? html`<span class="spinner"></span>Loading...` : html`${icons.refreshCw} Refresh`}
         </button>
       </div>
-      ${
-        props.devicesError
-          ? html`<div class="callout danger" style="margin-top: 12px;">${props.devicesError}</div>`
-          : nothing
-      }
-      <div class="list" style="margin-top: 16px;">
-        ${
-          pending.length > 0
-            ? html`
-              <div class="muted" style="margin-bottom: 8px;">Pending</div>
-              ${pending.map((req) => renderPendingDevice(req, props))}
-            `
-            : nothing
-        }
-        ${
-          paired.length > 0
-            ? html`
-              <div class="muted" style="margin-top: 12px; margin-bottom: 8px;">Paired</div>
-              ${paired.map((device) => renderPairedDevice(device, props))}
-            `
-            : nothing
-        }
-        ${
-          pending.length === 0 && paired.length === 0
-            ? html`
-                <div class="muted">No paired devices.</div>
-              `
-            : nothing
-        }
+      
+      ${props.devicesError
+        ? html`<div class="error-banner">${props.devicesError}</div>`
+        : nothing}
+      
+      <div class="devices-grid">
+        ${pending.length === 0 && paired.length === 0
+          ? html`<div class="empty-state">
+              <div class="empty-icon">${icons.smartphone}</div>
+              <p>No devices connected yet.</p>
+              <p class="empty-hint">Devices will appear here when they request to pair with the gateway.</p>
+            </div>`
+          : nothing}
+          
+        ${pending.map((req) => renderPendingDeviceCard(req, props))}
+        ${paired.map((device) => renderPairedDeviceCard(device, props))}
       </div>
     </section>
   `;
@@ -213,6 +238,263 @@ function renderTokenRow(deviceId: string, token: DeviceTokenSummary, props: Node
             `
         }
       </div>
+    </div>
+  `;
+}
+
+// New card-based render functions
+function renderPendingDeviceCard(req: PendingDevice, props: NodesProps) {
+  const name = req.displayName?.trim() || req.deviceId;
+  const age = typeof req.ts === "number" ? formatAgo(req.ts) : "just now";
+  const ip = req.remoteIp || "Unknown IP";
+  
+  return html`
+    <div class="device-card pending">
+      <div class="device-card-header">
+          <div class="device-icon">${icons.clock}</div>
+        <div class="device-info">
+          <h4 class="device-name">${name}</h4>
+          <span class="device-status">Pending approval</span>
+        </div>
+      </div>
+      
+      <div class="device-details">
+        <div class="detail-row">
+          <span class="detail-label">ID:</span>
+          <span class="detail-value">${clampText(req.deviceId, 30)}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Role:</span>
+          <span class="detail-value">${req.role || "-"}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">IP:</span>
+          <span class="detail-value">${ip}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Requested:</span>
+          <span class="detail-value">${age}${req.isRepair ? " (repair)" : ""}</span>
+        </div>
+      </div>
+      
+      <div class="device-actions">
+        <button class="btn btn--primary" @click=${() => props.onDeviceApprove(req.requestId)}>
+          ${icons.check} Approve
+        </button>
+        <button class="btn btn--secondary" @click=${() => props.onDeviceReject(req.requestId)}>
+          ${icons.x} Reject
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderPairedDeviceCard(device: PairedDevice, props: NodesProps) {
+  const name = device.displayName?.trim() || device.deviceId;
+  const ip = device.remoteIp || "Unknown IP";
+  const roles = device.roles || [];
+  const scopes = device.scopes || [];
+  const tokens = Array.isArray(device.tokens) ? device.tokens : [];
+  
+  return html`
+    <div class="device-card">
+      <div class="device-card-header">
+          <div class="device-icon">${icons.smartphone}</div>
+        <div class="device-info">
+          <h4 class="device-name">${name}</h4>
+          <span class="device-status connected">Connected</span>
+        </div>
+      </div>
+      
+      <div class="device-details">
+        <div class="detail-row">
+          <span class="detail-label">ID:</span>
+          <span class="detail-value">${clampText(device.deviceId, 30)}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">IP:</span>
+          <span class="detail-value">${ip}</span>
+        </div>
+        
+        ${roles.length > 0 ? html`
+          <div class="detail-row">
+            <span class="detail-label">Roles:</span>
+            <span class="detail-value">${formatList(roles)}</span>
+          </div>
+        ` : nothing}
+        
+        ${scopes.length > 0 ? html`
+          <div class="detail-row">
+            <span class="detail-label">Scopes:</span>
+            <span class="detail-value">${formatList(scopes)}</span>
+          </div>
+        ` : nothing}
+      </div>
+      
+      ${tokens.length > 0 ? html`
+        <div class="device-tokens">
+          <h5>Access Tokens</h5>
+          ${tokens.map((token) => renderTokenCard(device.deviceId, token, props))}
+        </div>
+      ` : nothing}
+    </div>
+  `;
+}
+
+function renderTokenCard(deviceId: string, token: DeviceTokenSummary, props: NodesProps) {
+  const isRevoked = Boolean(token.revokedAtMs);
+  const status = isRevoked ? "Revoked" : "Active";
+  const when = formatAgo(token.rotatedAtMs ?? token.createdAtMs ?? token.lastUsedAtMs ?? null);
+  
+  return html`
+    <div class="token-card ${isRevoked ? "revoked" : ""}">
+      <div class="token-info">
+        <span class="token-role">${token.role}</span>
+        <span class="token-status ${isRevoked ? "revoked" : "active"}">${status}</span>
+        ${token.scopes?.length ? html`<span class="token-scopes">${formatList(token.scopes)}</span>` : nothing}
+        <span class="token-time">${when}</span>
+      </div>
+      
+      <div class="token-actions">
+        <button 
+          class="btn btn--sm btn--secondary" 
+          @click=${() => props.onDeviceRotate(deviceId, token.role, token.scopes)}
+          title="Rotate token - generates a new token"
+        >
+          ${icons.refreshCw}
+        </button>
+        
+        ${!isRevoked ? html`
+          <button 
+            class="btn btn--sm btn--danger" 
+            @click=${() => props.onDeviceRevoke(deviceId, token.role)}
+            title="Revoke token - permanently disables this token"
+          >
+            ${icons.trash}
+          </button>
+        ` : nothing}
+      </div>
+    </div>
+  `;
+}
+
+function renderNodesSection(props: NodesProps) {
+  return html`
+    <section class="nodes-section">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <div class="section-icon">${icons.monitor}</div>
+          <div>
+            <h2 class="section-title">Nodes</h2>
+            <p class="section-subtitle">Remote execution devices and connected services</p>
+          </div>
+        </div>
+        <button class="btn btn--secondary" ?disabled=${props.loading} @click=${props.onRefresh}>
+          ${props.loading ? html`<span class="spinner"></span>Loading...` : html`${icons.refreshCw} Refresh`}
+        </button>
+      </div>
+      
+      <div class="nodes-grid">
+        ${props.nodes.length === 0
+          ? html`<div class="empty-state">
+              <div class="empty-icon">${icons.monitor}</div>
+              <p>No nodes connected yet.</p>
+              <p class="empty-hint">Nodes are remote devices that can execute commands for you. They will appear here when paired.</p>
+            </div>`
+          : props.nodes.map((node) => renderNodeCard(node))}
+      </div>
+    </section>
+  `;
+}
+
+function renderNodeCard(node: Record<string, unknown>) {
+  const connected = Boolean(node.connected);
+  const paired = Boolean(node.paired);
+  const title = (typeof node.displayName === "string" && node.displayName.trim()) ||
+    (typeof node.nodeId === "string" ? node.nodeId : "Unknown Node");
+  
+  const caps = Array.isArray(node.caps) ? (node.caps as unknown[]) : [];
+  const commands = Array.isArray(node.commands) ? (node.commands as unknown[]) : [];
+  
+  // Get platform icon
+  const platform = typeof node.platform === "string" ? node.platform.toLowerCase() : "";
+  const platformIcon = getPlatformIcon(platform);
+  
+  return html`
+    <div class="node-card ${connected ? "connected" : "offline"}">
+      <div class="node-card-header">
+        <div class="node-platform-icon">${platformIcon}</div>
+        <div class="node-info">
+          <h4 class="node-name">${title}</h4>
+          <div class="node-badges">
+            ${paired ? html`<span class="badge">Paired</span>` : html`<span class="badge badge--warning">Unpaired</span>`}
+            ${connected 
+              ? html`<span class="badge badge--success">🟢 Connected</span>` 
+              : html`<span class="badge badge--error">🔴 Offline</span>`}
+          </div>
+        </div>
+      </div>
+      
+      <div class="node-details">
+        <div class="detail-row">
+          <span class="detail-label">Node ID:</span>
+          <span class="detail-value">${clampText(String(node.nodeId || "Unknown"), 30)}</span>
+        </div>
+        
+        ${node.remoteIp ? html`
+          <div class="detail-row">
+            <span class="detail-label">IP Address:</span>
+            <span class="detail-value">${node.remoteIp}</span>
+          </div>
+        ` : nothing}
+        
+        ${node.version ? html`
+          <div class="detail-row">
+            <span class="detail-label">Version:</span>
+            <span class="detail-value">${node.version}</span>
+          </div>
+        ` : nothing}
+        
+        ${node.platform ? html`
+          <div class="detail-row">
+            <span class="detail-label">Platform:</span>
+            <span class="detail-value">${node.platform}${node.deviceFamily ? ` (${node.deviceFamily})` : ""}</span>
+          </div>
+        ` : nothing}
+        
+        ${node.connectedAtMs ? html`
+          <div class="detail-row">
+            <span class="detail-label">Connected since:</span>
+            <span class="detail-value">${formatAgo(node.connectedAtMs as number)}</span>
+          </div>
+        ` : nothing}
+      </div>
+      
+      ${caps.length > 0 ? html`
+        <div class="node-capabilities">
+          <h5>Capabilities</h5>
+          <div class="capability-list">
+            ${caps.map((c) => {
+              const capName = String(c);
+              const description = CAPABILITY_DESCRIPTIONS[capName] || `This node can perform ${capName} operations`;
+              return html`<span class="capability-chip" title="${description}">${capName}</span>`;
+            })}
+          </div>
+        </div>
+      ` : nothing}
+      
+      ${commands.length > 0 ? html`
+        <div class="node-commands">
+          <h5>Available Commands</h5>
+          <div class="command-list">
+            ${commands.map((c) => html`<span class="command-chip" title="Command: ${String(c)}">${String(c)}</span>`)}
+          </div>
+        </div>
+      ` : nothing}
     </div>
   `;
 }

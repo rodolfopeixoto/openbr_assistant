@@ -92,4 +92,79 @@ describe("chat view", () => {
     expect(onNewSession).toHaveBeenCalledTimes(1);
     expect(container.textContent).not.toContain("Stop");
   });
+
+  it("renders scroll-to-bottom button when showScrollToBottom is true", () => {
+    const container = document.createElement("div");
+    const onScrollToBottom = vi.fn();
+    render(
+      renderChat(
+        createProps({
+          showScrollToBottom: true,
+          onScrollToBottom,
+        }),
+      ),
+      container,
+    );
+
+    const button = container.querySelector("scroll-to-bottom-button");
+    expect(button).not.toBeNull();
+  });
+
+  it("hides scroll-to-bottom button when showScrollToBottom is false", () => {
+    const container = document.createElement("div");
+    render(
+      renderChat(
+        createProps({
+          showScrollToBottom: false,
+        }),
+      ),
+      container,
+    );
+
+    const button = container.querySelector("scroll-to-bottom-button");
+    // Button should still be in DOM but not visible
+    expect(button).not.toBeNull();
+    expect(button?.hasAttribute("visible")).toBe(false);
+  });
+
+  it("passes newMessageCount to scroll-to-bottom button", () => {
+    const container = document.createElement("div");
+    render(
+      renderChat(
+        createProps({
+          showScrollToBottom: true,
+          newMessageCount: 5,
+        }),
+      ),
+      container,
+    );
+
+    const button = container.querySelector("scroll-to-bottom-button");
+    expect(button).not.toBeNull();
+    expect((button as any)?.newMessageCount).toBe(5);
+  });
+
+  it("dispatches scroll-to-bottom event", () => {
+    const container = document.createElement("div");
+    const onScrollToBottom = vi.fn();
+    render(
+      renderChat(
+        createProps({
+          showScrollToBottom: true,
+          onScrollToBottom,
+        }),
+      ),
+      container,
+    );
+
+    const button = container.querySelector("scroll-to-bottom-button");
+    expect(button).not.toBeNull();
+    
+    // Dispatch event from the button
+    button?.dispatchEvent(
+      new CustomEvent("scroll-to-bottom", { bubbles: true, composed: true })
+    );
+    
+    expect(onScrollToBottom).toHaveBeenCalledTimes(1);
+  });
 });

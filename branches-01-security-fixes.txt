@@ -1,0 +1,7 @@
+fix/2692-whatsapp-accountid-path-traversal
+fix/3805-message-tool-sandbox-bypass
+fix/elevated-ask-security
+fix/lfi-media-parse
+fix/mintlify-security-subdir-conflict
+fix/security-audit-gateway-auth
+fix/security-sanitize-env-vars

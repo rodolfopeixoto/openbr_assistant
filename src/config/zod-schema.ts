@@ -590,6 +590,133 @@ export const OpenClawSchema = z
       })
       .strict()
       .optional(),
+    mcpServers: z
+      .array(
+        z
+          .object({
+            id: z.string(),
+            name: z.string(),
+            description: z.string().optional(),
+            url: z.string(),
+            transport: z.union([z.literal("stdio"), z.literal("http"), z.literal("websocket")]),
+            category: z.string().optional(),
+            enabled: z.boolean(),
+            auth: z
+              .object({
+                type: z.union([z.literal("bearer"), z.literal("api-key"), z.literal("basic")]),
+                token: z.string().optional(),
+                apiKey: z.string().optional(),
+                username: z.string().optional(),
+                password: z.string().optional(),
+              })
+              .strict()
+              .optional(),
+            env: z.record(z.string(), z.string()).optional(),
+          })
+          .strict(),
+      )
+      .optional(),
+    opencode: z
+      .object({
+        enabled: z.boolean(),
+        version: z.string().optional(),
+        container: z
+          .object({
+            runtime: z.union([
+              z.literal("docker"),
+              z.literal("podman"),
+              z.literal("container"),
+              z.literal("auto"),
+            ]),
+            image: z.string(),
+            resources: z
+              .object({
+                memory: z.number().int().positive(),
+                cpus: z.number().positive(),
+                timeout: z.number().int().positive(),
+              })
+              .strict(),
+            network: z
+              .object({
+                enabled: z.boolean(),
+                ports: z.array(z.number().int().positive()).optional(),
+              })
+              .strict(),
+            security: z
+              .object({
+                readOnly: z.boolean(),
+                dropCapabilities: z.boolean(),
+                seccompProfile: z.union([
+                  z.literal("default"),
+                  z.literal("strict"),
+                  z.literal("custom"),
+                ]),
+              })
+              .strict(),
+          })
+          .strict(),
+        workspace: z
+          .object({
+            basePath: z.string(),
+            allowedProjects: z
+              .object({
+                mode: z.union([z.literal("all"), z.literal("whitelist")]),
+                whitelist: z.array(z.string()),
+              })
+              .strict(),
+            protectedPatterns: z.array(z.string()),
+          })
+          .strict(),
+        security: z
+          .object({
+            approvalMode: z.union([z.literal("always"), z.literal("on-miss"), z.literal("auto")]),
+            autoApproveSafe: z.boolean(),
+            commands: z
+              .object({
+                allowlist: z
+                  .object({
+                    enabled: z.boolean(),
+                    commands: z.array(z.string()),
+                  })
+                  .strict(),
+                blocklist: z
+                  .object({
+                    enabled: z.boolean(),
+                    commands: z.array(z.string()),
+                  })
+                  .strict(),
+              })
+              .strict(),
+            paths: z
+              .object({
+                whitelist: z.array(z.string()),
+                blacklist: z.array(z.string()),
+              })
+              .strict(),
+          })
+          .strict(),
+        notifications: z
+          .object({
+            desktop: z.boolean(),
+            mobile: z.boolean(),
+            email: z.boolean(),
+          })
+          .strict(),
+        audit: z
+          .object({
+            enabled: z.boolean(),
+            retentionDays: z.number().int().positive(),
+            logLevel: z.union([
+              z.literal("debug"),
+              z.literal("info"),
+              z.literal("warn"),
+              z.literal("error"),
+            ]),
+          })
+          .strict(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((cfg, ctx) => {

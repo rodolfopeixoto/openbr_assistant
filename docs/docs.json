@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "OpenClaw",
+  "name": "Clawdbot",
   "theme": "mint",
   "logo": {
     "light": "/assets/pixel-lobster.svg",
@@ -13,11 +13,11 @@
   "topbarLinks": [
     {
       "name": "GitHub",
-      "url": "https://github.com/openclaw/openclaw"
+      "url": "https://github.com/clawdbot/clawdbot"
     },
     {
       "name": "Releases",
-      "url": "https://github.com/openclaw/openclaw/releases"
+      "url": "https://github.com/clawdbot/clawdbot/releases"
     }
   ],
   "redirects": [
@@ -68,14 +68,6 @@
     {
       "source": "/minimax/",
       "destination": "/providers/minimax"
-    },
-    {
-      "source": "/xiaomi",
-      "destination": "/providers/xiaomi"
-    },
-    {
-      "source": "/xiaomi/",
-      "destination": "/providers/xiaomi"
     },
     {
       "source": "/openai",
@@ -359,27 +351,11 @@
     },
     {
       "source": "/clawd",
-      "destination": "/start/openclaw"
-    },
-    {
-      "source": "/start/clawd",
-      "destination": "/start/openclaw"
-    },
-    {
-      "source": "/start/clawd/",
-      "destination": "/start/openclaw"
-    },
-    {
-      "source": "/clawhub",
-      "destination": "/tools/clawhub"
+      "destination": "/start/clawd"
     },
     {
       "source": "/clawdhub",
-      "destination": "/tools/clawhub"
-    },
-    {
-      "source": "/tools/clawdhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/clawdhub"
     },
     {
       "source": "/configuration",
@@ -848,7 +824,7 @@
           "start/wizard",
           "start/setup",
           "start/pairing",
-          "start/openclaw",
+          "start/clawd",
           "start/showcase",
           "start/hubs",
           "start/onboarding",
@@ -857,7 +833,11 @@
       },
       {
         "group": "Help",
-        "pages": ["help/index", "help/troubleshooting", "help/faq"]
+        "pages": [
+          "help/index",
+          "help/troubleshooting",
+          "help/faq"
+        ]
       },
       {
         "group": "Install & Updates",
@@ -956,7 +936,7 @@
       {
         "group": "Gateway & Ops",
         "pages": [
-          "gateway/index",
+          "gateway",
           "gateway/protocol",
           "gateway/bridge-protocol",
           "gateway/pairing",
@@ -975,8 +955,8 @@
           "gateway/heartbeat",
           "gateway/doctor",
           "gateway/logging",
-          "gateway/security/index",
-          "security/formal-verification",
+          "gateway/security",
+          "gateway/security-formal-verification",
           "gateway/sandbox-vs-tool-policy-vs-elevated",
           "gateway/sandboxing",
           "gateway/troubleshooting",
@@ -990,7 +970,13 @@
       },
       {
         "group": "Web & Interfaces",
-        "pages": ["web/index", "web/control-ui", "web/dashboard", "web/webchat", "tui"]
+        "pages": [
+          "web",
+          "web/control-ui",
+          "web/dashboard",
+          "web/webchat",
+          "tui"
+        ]
       },
       {
         "group": "Channels",
@@ -1049,7 +1035,7 @@
       {
         "group": "Tools & Skills",
         "pages": [
-          "tools/index",
+          "tools",
           "tools/lobster",
           "tools/llm-task",
           "plugin",
@@ -1071,13 +1057,13 @@
           "tools/reactions",
           "tools/skills",
           "tools/skills-config",
-          "tools/clawhub"
+          "tools/clawdhub"
         ]
       },
       {
         "group": "Nodes & Media",
         "pages": [
-          "nodes/index",
+          "nodes",
           "nodes/camera",
           "nodes/images",
           "nodes/audio",
@@ -1089,7 +1075,7 @@
       {
         "group": "Platforms",
         "pages": [
-          "platforms/index",
+          "platforms",
           "platforms/macos",
           "platforms/macos-vm",
           "platforms/ios",

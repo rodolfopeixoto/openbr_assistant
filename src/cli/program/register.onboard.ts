@@ -102,6 +102,8 @@ export function registerOnboardCommand(program: Command) {
     .option("--skip-ui", "Skip Control UI/TUI prompts")
     .option("--node-manager <name>", "Node manager for skills: npm|pnpm|bun")
     .option("--json", "Output JSON summary", false)
+    .option("--wizard", "Run the interactive GUI wizard after CLI setup", false)
+    .option("--no-open-dashboard", "Don't open browser automatically (use with --wizard)")
     .action(async (opts, command) => {
       await runCommandWithRuntime(defaultRuntime, async () => {
         const installDaemon = resolveInstallDaemonFlag(command, {
@@ -155,6 +157,8 @@ export function registerOnboardCommand(program: Command) {
             skipUi: Boolean(opts.skipUi),
             nodeManager: opts.nodeManager as NodeManagerChoice | undefined,
             json: Boolean(opts.json),
+            wizard: Boolean(opts.wizard),
+            openDashboard: opts.openDashboard !== false, // default true unless --no-open-dashboard
           },
           defaultRuntime,
         );

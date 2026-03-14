@@ -407,7 +407,14 @@ export function attachGatewayWsMessageHandler(params: {
           }
 
           // Allow token-authenticated connections (e.g., control-ui) to skip device identity
-          if (!canSkipDevice) {
+          // Also allow localhost connections for development
+          const isLocalhost =
+            remoteAddr === "127.0.0.1" ||
+            remoteAddr === "::1" ||
+            remoteAddr?.startsWith("192.168.") ||
+            remoteAddr?.startsWith("10.") ||
+            remoteAddr?.startsWith("172.");
+          if (!canSkipDevice && !isLocalhost) {
             setHandshakeState("failed");
             setCloseCause("device-required", {
               client: connectParams.client.id,
