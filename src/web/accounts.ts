@@ -3,7 +3,7 @@ import path from "node:path";
 import type { OpenClawConfig } from "../config/config.js";
 import type { DmPolicy, GroupPolicy, WhatsAppAccountConfig } from "../config/types.js";
 import { resolveOAuthDir } from "../config/paths.js";
-import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 import { hasWebCredsSync } from "./auth-store.js";
 
@@ -28,6 +28,8 @@ export type ResolvedWhatsAppAccount = {
   groups?: WhatsAppAccountConfig["groups"];
   debounceMs?: number;
 };
+
+const SAFE_ACCOUNT_SEGMENT_RE = /^[a-z0-9_-]+$/i;
 
 function listConfiguredAccountIds(cfg: OpenClawConfig): string[] {
   const accounts = cfg.channels?.whatsapp?.accounts;
@@ -95,7 +97,30 @@ function resolveAccountConfig(
 }
 
 function resolveDefaultAuthDir(accountId: string): string {
-  return path.join(resolveOAuthDir(), "whatsapp", accountId);
+  const baseDir = path.join(resolveOAuthDir(), "whatsapp");
+  const normalized = normalizeAccountId(accountId);
+  const normalizedDir = path.join(baseDir, normalized);
+
+  const trimmed = accountId.trim();
+  if (trimmed && trimmed !== normalized && SAFE_ACCOUNT_SEGMENT_RE.test(trimmed)) {
+    const legacyDir = path.join(baseDir, trimmed);
+    try {
+      if (fs.existsSync(legacyDir)) {
+        if (!fs.existsSync(normalizedDir)) {
+          return legacyDir;
+        }
+        const legacyStat = fs.statSync(legacyDir);
+        const normalizedStat = fs.statSync(normalizedDir);
+        if (legacyStat.dev === normalizedStat.dev && legacyStat.ino === normalizedStat.ino) {
+          return legacyDir;
+        }
+      }
+    } catch {
+      // ignore fs errors and fall back to normalized path
+    }
+  }
+
+  return normalizedDir;
 }
 
 function resolveLegacyAuthDir(): string {
