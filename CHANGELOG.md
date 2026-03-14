@@ -6,27 +6,23 @@ Docs: https://docs.openclaw.ai
 
 ### Changes
 
-- Docs: onboarding/install/i18n/exec-approvals/Control UI/exe.dev/cacheRetention updates + misc nav/typos.
+- Docs: add direct BotFather link and verification reminder in Telegram setup. (#4064) Thanks @shatner.
+- Docs: add Mintlify language navigation for zh-Hans. (#6416) Thanks @joshp123.
 - Telegram: use shared pairing store. (#6127) Thanks @obviyus.
 - Agents: add OpenRouter app attribution headers. (#5050) Thanks @alexanderatallah.
-- Agents: add system prompt safety guardrails. (#5445) Thanks @joshp123.
-- Agents: update pi-ai to 0.50.9 and rename cacheControlTtl -> cacheRetention (with back-compat mapping).
-- Discord: inherit thread parent bindings for routing. (#3892) Thanks @aerolalit.
 
 ### Fixes
 
-- Web: sanitize WhatsApp accountId auth directories and preserve legacy casing. (#4610) Thanks @leszekszpunar.
+- Agents: enforce sandbox validation for message media/file paths. (#6398) Thanks @leszekszpunar.
+- Docs: run oxfmt to fix format checks. (#6513) Thanks @app/clawdinator.
 - Auto-reply: avoid referencing workspace files in /new greeting prompt. (#5706) Thanks @bravostation.
 - Process: resolve Windows `spawn()` failures for npm-family CLIs by appending `.cmd` when needed. (#5815) Thanks @thejhinvirtuoso.
+- Docs: update MiniMax OAuth setup commands; Extensions: use OpenClaw plugin SDK for MiniMax OAuth. (#5402) Thanks @Maosghoul.
 - Discord: resolve PluralKit proxied senders for allowlists and labels. (#5838) Thanks @thewilloftheshadow.
-- Agents: ensure OpenRouter attribution headers apply in the embedded runner.
-- Agents: cap context window resolution for compaction safeguard. (#6187) Thanks @iamEvanYT.
-- System prompt: hint using session_status for current date/time. (#1897, #1928, #2108)
 - Telegram: restore draft streaming partials. (#5543) Thanks @obviyus.
-- Onboarding: friendlier Windows onboarding message. (#6242) Thanks @shanselman.
-- TUI: prevent crash when searching with digits in the model selector.
-- Browser: secure Chrome extension relay CDP sessions.
 - Docker: use container port for gateway command instead of host port. (#5110) Thanks @mise42.
+- Docs: add zh-CN frontmatter titles for localized metadata. (#6487) Thanks @joshp123.
+- Docs: clarify Moonshot endpoints. (#4763) Thanks @hansbbans.
 - fix(lobster): block arbitrary exec via lobsterPath/cwd injection (GHSA-4mhr-g7xj-cg8j). (#5335) Thanks @vignesh07.
 
 ## 2026.1.30
@@ -142,6 +138,7 @@ Docs: https://docs.openclaw.ai
 - Mentions: honor mentionPatterns even when explicit mentions are present. (#3303) Thanks @HirokiKobayashi-R.
 - Discord: restore username directory lookup in target resolution. (#3131) Thanks @bonald.
 - Agents: align MiniMax base URL test expectation with default provider config. (#3131) Thanks @bonald.
+- Agents: respect configured context window cap for compaction safeguard. (#6187) Thanks @iamEvanYT.
 - Agents: prevent retries on oversized image errors and surface size limits. (#2871) Thanks @Suksham-sharma.
 - Agents: inherit provider baseUrl/api for inline models. (#2740) Thanks @lploc94.
 - Memory Search: keep auto provider model defaults and only include remote when configured. (#2576) Thanks @papago2355.
@@ -1342,40 +1339,3 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Discord: avoid duplicate replies when OpenAI emits repeated `message_end` events.
 - Commands: unify /status (inline) and command auth across providers; group bypass for authorized control commands; remove Discord /clawd slash handler.
 - CLI: run `openclaw agent` via the Gateway by default; use `--local` to force embedded mode.
-
-## [2.0.0] - 2025-02-18
-
-### 🔒 Security Hardening Release
-
-13 novas features de segurança implementadas:
-
-#### Core Security
-- **SEC-001**: Remove Default Secret - Validação obrigatória de chaves de criptografia
-- **SEC-002**: Argon2id Migration - Migração de PBKDF2 para Argon2id
-- **SEC-003**: Keyring Implementation - Suporte a keychain do sistema
-
-#### API & Web Security  
-- **SEC-004**: CORS Implementation - Proteção CORS configurável
-- **SEC-005**: CSRF Protection - Tokens CSRF para proteção web
-- **SEC-006**: WebSocket Security - Validação de origin e challenge-response
-
-#### Infrastructure
-- **SEC-007**: Rate Limiting - Limitação de requisições com X-RateLimit headers
-- **SEC-008**: Security Headers - CSP, HSTS, X-Frame-Options, etc
-- **SEC-009**: Audio Validation - Validação de magic bytes e ffprobe
-
-#### Application Security
-- **SEC-010**: UI Access Control - Controle de acesso à UI
-- **SEC-011**: LLM Security Controls - Detecção de prompt injection
-- **SEC-012**: Audit Logging - Logging estruturado de eventos de segurança
-- **SEC-013**: API Security - Proteção contra XSS, SQL injection, path traversal
-
-### ✅ Testes
-- 140+ novos testes de segurança
-- Cobertura de testes significativamente aumentada
-- Todos os testes passando
-
-### 📝 Documentação
-- Guia de troubleshooting do keychain
-- Documentação completa do time de segurança
-- Scripts de setup e diagnóstico
