@@ -22,6 +22,13 @@ import type {
   TtsProvider,
   TtsModelOverrideConfig,
 } from "../config/types.tts.js";
+<<<<<<< HEAD
+=======
+import { logVerbose } from "../globals.js";
+import { isVoiceCompatibleAudio } from "../media/audio.js";
+import { saveMediaSource } from "../media/store.js";
+import { CONFIG_DIR, resolveUserPath } from "../utils.js";
+>>>>>>> origin/fix/lfi-media-parse
 import { getApiKeyForModel, requireApiKey } from "../agents/model-auth.js";
 import {
   buildModelAliasIndex,
@@ -1242,12 +1249,18 @@ export async function textToSpeech(params: {
           }
         }
 
-        scheduleCleanup(tempDir);
-        const voiceCompatible = isVoiceCompatibleAudio({ fileName: edgeResult.audioPath });
+        let savedPath = edgeResult.audioPath;
+        try {
+          const saved = await saveMediaSource(edgeResult.audioPath, undefined, "tts");
+          savedPath = saved.path;
+        } finally {
+          scheduleCleanup(tempDir);
+        }
+        const voiceCompatible = isVoiceCompatibleAudio({ fileName: savedPath });
 
         return {
           success: true,
-          audioPath: edgeResult.audioPath,
+          audioPath: savedPath,
           latencyMs: Date.now() - providerStart,
           provider,
           outputFormat: edgeResult.outputFormat,
@@ -1303,11 +1316,17 @@ export async function textToSpeech(params: {
       const tempDir = mkdtempSync(path.join(tmpdir(), "tts-"));
       const audioPath = path.join(tempDir, `voice-${Date.now()}${output.extension}`);
       writeFileSync(audioPath, audioBuffer);
-      scheduleCleanup(tempDir);
+      let savedPath = audioPath;
+      try {
+        const saved = await saveMediaSource(audioPath, undefined, "tts");
+        savedPath = saved.path;
+      } finally {
+        scheduleCleanup(tempDir);
+      }
 
       return {
         success: true,
-        audioPath,
+        audioPath: savedPath,
         latencyMs,
         provider,
         outputFormat: provider === "openai" ? output.openai : output.elevenlabs,
