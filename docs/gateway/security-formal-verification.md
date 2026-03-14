@@ -1,7 +1,7 @@
 ---
 title: Formal Verification (Security Models)
-summary: Machine-checked security models for OpenClaw’s highest-risk paths.
-permalink: /security/formal-verification/
+summary: Machine-checked security models for Clawdbot's highest-risk paths.
+permalink: /gateway/security-formal-verification/
 ---
 
 # Formal Verification (Security Models)
@@ -23,7 +23,7 @@ misconfiguration safety), under explicit assumptions.
 
 ## Where the models live
 
-Models are maintained in a separate repo: [vignesh07/openclaw-formal-models](https://github.com/vignesh07/openclaw-formal-models).
+Models are maintained in a separate repo: [github.com/vignesh07/clawdbot-formal-models](https://github.com/vignesh07/clawdbot-formal-models).
 
 ## Important caveats
 

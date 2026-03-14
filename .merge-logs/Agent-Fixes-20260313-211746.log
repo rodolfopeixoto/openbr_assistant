@@ -1,0 +1,815 @@
+==========================================
+🔧 Agent-Fixes - MERGE DE FIXES
+   Prioridade: MÉDIO
+==========================================
+[0;33m[Agent-Fixes][0m Buscando branches de fixes...
+[0;33m[Agent-Fixes][0m Encontradas      124 branches de fixes
+
+Branches a processar:
+     1	  fix/1056-ignore-heavy-watch-paths
+     2	  fix/1540-openai-reasoning-transcript
+     3	  fix/4855-control-ui-assets-global-install
+     4	  fix/5266-tlon-sse-timeout
+     5	  fix/abort-error-graceful-handling
+     6	  fix/avatar-relative-url-validation
+     7	  fix/background-abort-sigkill
+     8	  fix/bluebubbles-gc-guid-resolution
+     9	  fix/bluebubbles-message-routing
+    10	  fix/build-errors-missing-imports
+    11	  fix/capabilities-object-format
+    12	  fix/chrome-restore-prompt
+    13	  fix/cleanup-suspended-clawdbot-processes
+    14	  fix/cli-install-version-suffix
+    15	  fix/cli-launchd-enable-before-bootstrap
+    16	  fix/cli-quick-reference-system-prompt
+    17	  fix/cli-subcommand-registration-lazy-loading
+    18	  fix/codesign-ad-hoc-fallback
+    19	  fix/codesign-adhoc
+    20	  fix/compaction-failure-silent-reset
+    21	  fix/config-title-overflow-1728
+    22	  fix/console-settings-recursion
+    23	  fix/cron-edit-preserve-delivery-on-message
+    24	  fix/cron-session-allowagents
+    25	  fix/cron-tool-jobid-to-id
+    26	  fix/discord-exec-resolvedpath-validation
+    27	  fix/dockerfile-install-bun
+    28	  fix/docs-typo-7399
+    29	  fix/duplicate-assistant-texts
+    30	  fix/elevated-default-off
+    31	  fix/evaluate-esbuild-name-helper
+    32	  fix/exec-allowlist-agentid-derivation
+    33	  fix/export-section-meta
+    34	  fix/failover-cooldown-skip
+    35	  fix/fish-shell-bash
+    36	  fix/gateway-connection-diagnostics
+    37	  fix/gateway-ios-client-id
+    38	  fix/gateway-token-resolution-mode-check
+    39	  fix/gemini-compatibility
+    40	  fix/gemini-schema-sanitization
+    41	  fix/gemini-session-corruption-recovery
+    42	  fix/gog-gmail-search-gotcha
+    43	  fix/google-antigravity-history
+    44	  fix/ignore-aborted-tool-calls
+    45	  fix/imessage-echo-loop
+    46	  fix/imessage-groupish-threads
+    47	  fix/imessage-timeout-config
+    48	  fix/immediate-callback-answer
+    49	  fix/imsg-remote-attachments
+    50	  fix/ios-talkmode-simulator
+    51	  fix/issue-1020-sessions-perms
+    52	  fix/issue-1107-semver-prerelease-suffix
+    53	  fix/issue-1269-sanitize-tool-call-text
+    54	  fix/issue-6995-zh-cn-i18n
+    55	  fix/issue-7323-transcript-repair
+    56	  fix/issue-99-watchdog
+    57	  fix/line-webhook-timing-attack
+    58	  fix/linux-service-path-user-dirs
+    59	  fix/local-embedding-l2-normalization
+    60	  fix/logs-follow-output
+    61	  fix/logs-follow-spinner
+    62	  fix/mac-node-approvals
+    63	  fix/mac-node-bridge-tunnel-865
+    64	  fix/mdns-info-disclosure
+    65	  fix/memory-cli-hang-1121
+    66	  fix/memory-slot-none
+    67	  fix/message-command-plugins
+    68	  fix/message-truncate-reasoning-tag
+    69	  fix/minimax-api-endpoint
+    70	  fix/model-catalog-cache-poison
+    71	  fix/model-retry-fallback-rate-limits
+    72	  fix/model-selector-codex
+    73	  fix/model-switch-persist-1435
+    74	  fix/node-daemon-run
+    75	  fix/node-invoke-deadlock
+    76	  fix/node-invoke-timeout
+    77	  fix/npm-extensions-workspace
+    78	  fix/opencode-zen-comment-accuracy
+    79	  fix/overloaded-error-handling
+    80	  fix/pairing-cli-plugin-initialization
+    81	  fix/perplexity-web-search-provider
+    82	  fix/preserve-command-arg-casing
+    83	  fix/prompt-failover
+    84	  fix/remove-google-docs-editor-showcase
+    85	  fix/restart-channel-routing
+    86	  fix/restore-reasoning-tag-check
+    87	  fix/session-lock-cleanup
+    88	  fix/session-memory-suppress-confirmation
+    89	  fix/session-reset-token-counts
+    90	  fix/settings-scroll-1743
+    91	  fix/sidebar-scroll
+    92	  fix/signal-reaction-own-mode-uuid-match
+    93	  fix/slack-filetype-deprecation
+    94	  fix/slack-open-group-policy
+    95	  fix/slack-top-level-require-mention
+    96	  fix/stable-launchagent-path
+    97	  fix/subagent-announce-channel-routing
+    98	  fix/subagent-skills-inheritance
+    99	  fix/synology-docker
+   100	  fix/systemd-execstart-whitespace
+   101	  fix/telegram-caption-split
+   102	  fix/telegram-general-topic-messages
+   103	  fix/telegram-gif-animation
+   104	  fix/telegram-node22-network-stability
+   105	  fix/telegram-timed-out-recovery
+   106	  fix/telegram-topic-announcement
+   107	  fix/tmux-send-keys-tui
+   108	  fix/token-count-after-compaction
+   109	  fix/tool-call-id-maxlen-40
+   110	  fix/tool-error-fallback
+   111	  fix/tool-typing-race-condition
+   112	  fix/trigger-word-mac
+   113	  fix/tts-base-url-runtime-read-2816
+   114	  fix/tui-final-tag-strip
+   115	  fix/tui-token-refresh
+   116	  fix/ui-save-button-1609
+   117	  fix/unhandled-fetch-rejections
+   118	  fix/versioned-node-binary
+   119	  fix/voice-call-statuscallback
+   120	  fix/voice-call-tts-overlap
+   121	  fix/voicecall-tailscale-path
+   122	  fix/webchat-scroll-position
+   123	  fix/windows-gateway-startup
+   124	  fix/zalo-pairing-and-webhook
+
+[0;33m[Agent-Fixes][0m Criando branch de trabalho: work/agent-fixes-1773447466
+Switched to a new branch 'work/agent-fixes-1773447466'
+M	scripts/coordinator.sh
+branch 'work/agent-fixes-1773447466' set up to track 'origin/develop'.
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [1/     124] Processando:   fix/1056-ignore-heavy-watch-paths
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [2/     124] Processando:   fix/1540-openai-reasoning-transcript
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [3/     124] Processando:   fix/4855-control-ui-assets-global-install
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [4/     124] Processando:   fix/5266-tlon-sse-timeout
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [5/     124] Processando:   fix/abort-error-graceful-handling
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 5 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 5
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [6/     124] Processando:   fix/avatar-relative-url-validation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [7/     124] Processando:   fix/background-abort-sigkill
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [8/     124] Processando:   fix/bluebubbles-gc-guid-resolution
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [9/     124] Processando:   fix/bluebubbles-message-routing
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [10/     124] Processando:   fix/build-errors-missing-imports
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 10 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 10
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [11/     124] Processando:   fix/capabilities-object-format
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [12/     124] Processando:   fix/chrome-restore-prompt
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [13/     124] Processando:   fix/cleanup-suspended-clawdbot-processes
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [14/     124] Processando:   fix/cli-install-version-suffix
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [15/     124] Processando:   fix/cli-launchd-enable-before-bootstrap
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 15 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 15
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [16/     124] Processando:   fix/cli-quick-reference-system-prompt
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [17/     124] Processando:   fix/cli-subcommand-registration-lazy-loading
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [18/     124] Processando:   fix/codesign-ad-hoc-fallback
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [19/     124] Processando:   fix/codesign-adhoc
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [20/     124] Processando:   fix/compaction-failure-silent-reset
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 20 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 20
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [21/     124] Processando:   fix/config-title-overflow-1728
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [22/     124] Processando:   fix/console-settings-recursion
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [23/     124] Processando:   fix/cron-edit-preserve-delivery-on-message
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [24/     124] Processando:   fix/cron-session-allowagents
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [25/     124] Processando:   fix/cron-tool-jobid-to-id
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 25 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 25
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [26/     124] Processando:   fix/discord-exec-resolvedpath-validation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [27/     124] Processando:   fix/dockerfile-install-bun
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [28/     124] Processando:   fix/docs-typo-7399
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [29/     124] Processando:   fix/duplicate-assistant-texts
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [30/     124] Processando:   fix/elevated-default-off
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 30 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 30
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [31/     124] Processando:   fix/evaluate-esbuild-name-helper
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [32/     124] Processando:   fix/exec-allowlist-agentid-derivation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [33/     124] Processando:   fix/export-section-meta
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [34/     124] Processando:   fix/failover-cooldown-skip
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [35/     124] Processando:   fix/fish-shell-bash
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 35 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 35
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [36/     124] Processando:   fix/gateway-connection-diagnostics
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [37/     124] Processando:   fix/gateway-ios-client-id
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [38/     124] Processando:   fix/gateway-token-resolution-mode-check
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [39/     124] Processando:   fix/gemini-compatibility
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [40/     124] Processando:   fix/gemini-schema-sanitization
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 40 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 40
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [41/     124] Processando:   fix/gemini-session-corruption-recovery
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [42/     124] Processando:   fix/gog-gmail-search-gotcha
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [43/     124] Processando:   fix/google-antigravity-history
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [44/     124] Processando:   fix/ignore-aborted-tool-calls
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [45/     124] Processando:   fix/imessage-echo-loop
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 45 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 45
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [46/     124] Processando:   fix/imessage-groupish-threads
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [47/     124] Processando:   fix/imessage-timeout-config
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [48/     124] Processando:   fix/immediate-callback-answer
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [49/     124] Processando:   fix/imsg-remote-attachments
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [50/     124] Processando:   fix/ios-talkmode-simulator
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 50 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 50
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [51/     124] Processando:   fix/issue-1020-sessions-perms
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [52/     124] Processando:   fix/issue-1107-semver-prerelease-suffix
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [53/     124] Processando:   fix/issue-1269-sanitize-tool-call-text
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [54/     124] Processando:   fix/issue-6995-zh-cn-i18n
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [55/     124] Processando:   fix/issue-7323-transcript-repair
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 55 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 55
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [56/     124] Processando:   fix/issue-99-watchdog
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [57/     124] Processando:   fix/line-webhook-timing-attack
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [58/     124] Processando:   fix/linux-service-path-user-dirs
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [59/     124] Processando:   fix/local-embedding-l2-normalization
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [60/     124] Processando:   fix/logs-follow-output
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 60 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 60
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [61/     124] Processando:   fix/logs-follow-spinner
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [62/     124] Processando:   fix/mac-node-approvals
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [63/     124] Processando:   fix/mac-node-bridge-tunnel-865
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [64/     124] Processando:   fix/mdns-info-disclosure
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [65/     124] Processando:   fix/memory-cli-hang-1121
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 65 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 65
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [66/     124] Processando:   fix/memory-slot-none
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [67/     124] Processando:   fix/message-command-plugins
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [68/     124] Processando:   fix/message-truncate-reasoning-tag
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [69/     124] Processando:   fix/minimax-api-endpoint
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [70/     124] Processando:   fix/model-catalog-cache-poison
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 70 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 70
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [71/     124] Processando:   fix/model-retry-fallback-rate-limits
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [72/     124] Processando:   fix/model-selector-codex
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [73/     124] Processando:   fix/model-switch-persist-1435
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [74/     124] Processando:   fix/node-daemon-run
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [75/     124] Processando:   fix/node-invoke-deadlock
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 75 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 75
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [76/     124] Processando:   fix/node-invoke-timeout
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [77/     124] Processando:   fix/npm-extensions-workspace
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [78/     124] Processando:   fix/opencode-zen-comment-accuracy
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [79/     124] Processando:   fix/overloaded-error-handling
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [80/     124] Processando:   fix/pairing-cli-plugin-initialization
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 80 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 80
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [81/     124] Processando:   fix/perplexity-web-search-provider
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [82/     124] Processando:   fix/preserve-command-arg-casing
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [83/     124] Processando:   fix/prompt-failover
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [84/     124] Processando:   fix/remove-google-docs-editor-showcase
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [85/     124] Processando:   fix/restart-channel-routing
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 85 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 85
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [86/     124] Processando:   fix/restore-reasoning-tag-check
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [87/     124] Processando:   fix/session-lock-cleanup
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [88/     124] Processando:   fix/session-memory-suppress-confirmation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [89/     124] Processando:   fix/session-reset-token-counts
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [90/     124] Processando:   fix/settings-scroll-1743
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 90 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 90
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [91/     124] Processando:   fix/sidebar-scroll
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [92/     124] Processando:   fix/signal-reaction-own-mode-uuid-match
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [93/     124] Processando:   fix/slack-filetype-deprecation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [94/     124] Processando:   fix/slack-open-group-policy
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [95/     124] Processando:   fix/slack-top-level-require-mention
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 95 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 95
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [96/     124] Processando:   fix/stable-launchagent-path
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [97/     124] Processando:   fix/subagent-announce-channel-routing
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [98/     124] Processando:   fix/subagent-skills-inheritance
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [99/     124] Processando:   fix/synology-docker
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [100/     124] Processando:   fix/systemd-execstart-whitespace
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 100 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 100
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [101/     124] Processando:   fix/telegram-caption-split
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [102/     124] Processando:   fix/telegram-general-topic-messages
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [103/     124] Processando:   fix/telegram-gif-animation
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [104/     124] Processando:   fix/telegram-node22-network-stability
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [105/     124] Processando:   fix/telegram-timed-out-recovery
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 105 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 105
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [106/     124] Processando:   fix/telegram-topic-announcement
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [107/     124] Processando:   fix/tmux-send-keys-tui
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [108/     124] Processando:   fix/token-count-after-compaction
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [109/     124] Processando:   fix/tool-call-id-maxlen-40
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [110/     124] Processando:   fix/tool-error-fallback
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 110 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 110
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [111/     124] Processando:   fix/tool-typing-race-condition
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [112/     124] Processando:   fix/trigger-word-mac
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [113/     124] Processando:   fix/tts-base-url-runtime-read-2816
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [114/     124] Processando:   fix/tui-final-tag-strip
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [115/     124] Processando:   fix/tui-token-refresh
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 115 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 115
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [116/     124] Processando:   fix/ui-save-button-1609
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [117/     124] Processando:   fix/unhandled-fetch-rejections
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [118/     124] Processando:   fix/versioned-node-binary
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [119/     124] Processando:   fix/voice-call-statuscallback
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [120/     124] Processando:   fix/voice-call-tts-overlap
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+[0;33m[Agent-Fixes][0m Checkpoint: 120 branches processadas
+[0;33m[Agent-Fixes][0m Sucessos: 0 | Falhas: 120
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [121/     124] Processando:   fix/voicecall-tailscale-path
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [122/     124] Processando:   fix/webchat-scroll-position
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [123/     124] Processando:   fix/windows-gateway-startup
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+----------------------------------------
+[0;33m[Agent-Fixes][0m [124/     124] Processando:   fix/zalo-pairing-and-webhook
+----------------------------------------
+[0;31m[Agent-Fixes][0m ✗ Merge falhou
+
+==========================================
+[0;32m[Agent-Fixes][0m RESUMO - Agent-Fixes
+==========================================
+Processadas:      124
+[0;32mSucessos: 0[0m
+[0;31mFalhas: 124[0m
+
+[1;33m[Agent-Fixes][0m ⚠️  Alguns fixes falharam
+Branch de trabalho: work/agent-fixes-1773447466 (parcial)
