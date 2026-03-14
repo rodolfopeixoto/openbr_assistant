@@ -9,11 +9,7 @@ title: "Security"
 
 ## Quick check: `openclaw security audit`
 
-<<<<<<< HEAD:docs/gateway/security/index.md
-See also: [Formal Verification (Security Models)](/security/formal-verification/)
-=======
 See also: [Formal Verification (Security Models)](/gateway/security-formal-verification/)
->>>>>>> origin/fix/mintlify-security-subdir-conflict:docs/gateway/security.md
 
 Run this regularly (especially after changing config or exposing network surfaces):
 

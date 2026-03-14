@@ -97,34 +97,7 @@ function resolveAccountConfig(
 }
 
 function resolveDefaultAuthDir(accountId: string): string {
-<<<<<<< HEAD
-  const baseDir = path.join(resolveOAuthDir(), "whatsapp");
-  const normalized = normalizeAccountId(accountId);
-  const normalizedDir = path.join(baseDir, normalized);
-
-  const trimmed = accountId.trim();
-  if (trimmed && trimmed !== normalized && SAFE_ACCOUNT_SEGMENT_RE.test(trimmed)) {
-    const legacyDir = path.join(baseDir, trimmed);
-    try {
-      if (fs.existsSync(legacyDir)) {
-        if (!fs.existsSync(normalizedDir)) {
-          return legacyDir;
-        }
-        const legacyStat = fs.statSync(legacyDir);
-        const normalizedStat = fs.statSync(normalizedDir);
-        if (legacyStat.dev === normalizedStat.dev && legacyStat.ino === normalizedStat.ino) {
-          return legacyDir;
-        }
-      }
-    } catch {
-      // ignore fs errors and fall back to normalized path
-    }
-  }
-
-  return normalizedDir;
-=======
   return path.join(resolveOAuthDir(), "whatsapp", normalizeAccountId(accountId));
->>>>>>> origin/fix/security-sanitize-env-vars
 }
 
 function resolveLegacyAuthDir(): string {

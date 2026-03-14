@@ -1012,36 +1012,9 @@ describe("security audit", () => {
   });
 
   describe("maybeProbeGateway auth selection", () => {
-<<<<<<< HEAD
-    const originalEnvToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    const originalEnvPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
-
-    beforeEach(() => {
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
-      delete process.env.OPENCLAW_GATEWAY_PASSWORD;
-    });
-
-    afterEach(() => {
-      if (originalEnvToken == null) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
-      } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = originalEnvToken;
-      }
-      if (originalEnvPassword == null) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
-      } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = originalEnvPassword;
-      }
-    });
-
-    it("uses local auth when gateway.mode is local", async () => {
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-=======
     it("uses local auth when gateway.mode is local", async () => {
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: ClawdbotConfig = {
->>>>>>> origin/fix/security-audit-gateway-auth
         gateway: {
           mode: "local",
           auth: { token: "local-token-abc123" },
@@ -1073,50 +1046,9 @@ describe("security audit", () => {
       expect(capturedAuth?.token).toBe("local-token-abc123");
     });
 
-<<<<<<< HEAD
-    it("prefers env token over local config token", async () => {
-      process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-        gateway: {
-          mode: "local",
-          auth: { token: "local-token" },
-        },
-      };
-
-      await runSecurityAudit({
-        config: cfg,
-        deep: true,
-        deepTimeoutMs: 50,
-        includeFilesystem: false,
-        includeChannelSecurity: false,
-        probeGatewayFn: async (opts) => {
-          capturedAuth = opts.auth;
-          return {
-            ok: true,
-            url: opts.url,
-            connectLatencyMs: 10,
-            error: null,
-            close: null,
-            health: null,
-            status: null,
-            presence: null,
-            configSnapshot: null,
-          };
-        },
-      });
-
-      expect(capturedAuth?.token).toBe("env-token");
-    });
-
-    it("uses local auth when gateway.mode is undefined (default)", async () => {
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-=======
     it("uses local auth when gateway.mode is undefined (default)", async () => {
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: ClawdbotConfig = {
->>>>>>> origin/fix/security-audit-gateway-auth
         gateway: {
           auth: { token: "default-local-token" },
         },
@@ -1149,11 +1081,7 @@ describe("security audit", () => {
 
     it("uses remote auth when gateway.mode is remote with URL", async () => {
       let capturedAuth: { token?: string; password?: string } | undefined;
-<<<<<<< HEAD
-      const cfg: OpenClawConfig = {
-=======
       const cfg: ClawdbotConfig = {
->>>>>>> origin/fix/security-audit-gateway-auth
         gateway: {
           mode: "remote",
           auth: { token: "local-token-should-not-use" },
@@ -1189,129 +1117,9 @@ describe("security audit", () => {
       expect(capturedAuth?.token).toBe("remote-token-xyz789");
     });
 
-<<<<<<< HEAD
-    it("ignores env token when gateway.mode is remote", async () => {
-      process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-        gateway: {
-          mode: "remote",
-          auth: { token: "local-token-should-not-use" },
-          remote: {
-            url: "ws://remote.example.com:18789",
-            token: "remote-token",
-          },
-        },
-      };
-
-      await runSecurityAudit({
-        config: cfg,
-        deep: true,
-        deepTimeoutMs: 50,
-        includeFilesystem: false,
-        includeChannelSecurity: false,
-        probeGatewayFn: async (opts) => {
-          capturedAuth = opts.auth;
-          return {
-            ok: true,
-            url: opts.url,
-            connectLatencyMs: 10,
-            error: null,
-            close: null,
-            health: null,
-            status: null,
-            presence: null,
-            configSnapshot: null,
-          };
-        },
-      });
-
-      expect(capturedAuth?.token).toBe("remote-token");
-    });
-
-    it("uses remote password when env is unset", async () => {
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-        gateway: {
-          mode: "remote",
-          remote: {
-            url: "ws://remote.example.com:18789",
-            password: "remote-pass",
-          },
-        },
-      };
-
-      await runSecurityAudit({
-        config: cfg,
-        deep: true,
-        deepTimeoutMs: 50,
-        includeFilesystem: false,
-        includeChannelSecurity: false,
-        probeGatewayFn: async (opts) => {
-          capturedAuth = opts.auth;
-          return {
-            ok: true,
-            url: opts.url,
-            connectLatencyMs: 10,
-            error: null,
-            close: null,
-            health: null,
-            status: null,
-            presence: null,
-            configSnapshot: null,
-          };
-        },
-      });
-
-      expect(capturedAuth?.password).toBe("remote-pass");
-    });
-
-    it("prefers env password over remote password", async () => {
-      process.env.OPENCLAW_GATEWAY_PASSWORD = "env-pass";
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-        gateway: {
-          mode: "remote",
-          remote: {
-            url: "ws://remote.example.com:18789",
-            password: "remote-pass",
-          },
-        },
-      };
-
-      await runSecurityAudit({
-        config: cfg,
-        deep: true,
-        deepTimeoutMs: 50,
-        includeFilesystem: false,
-        includeChannelSecurity: false,
-        probeGatewayFn: async (opts) => {
-          capturedAuth = opts.auth;
-          return {
-            ok: true,
-            url: opts.url,
-            connectLatencyMs: 10,
-            error: null,
-            close: null,
-            health: null,
-            status: null,
-            presence: null,
-            configSnapshot: null,
-          };
-        },
-      });
-
-      expect(capturedAuth?.password).toBe("env-pass");
-    });
-
-    it("falls back to local auth when gateway.mode is remote but URL is missing", async () => {
-      let capturedAuth: { token?: string; password?: string } | undefined;
-      const cfg: OpenClawConfig = {
-=======
     it("falls back to local auth when gateway.mode is remote but URL is missing", async () => {
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: ClawdbotConfig = {
->>>>>>> origin/fix/security-audit-gateway-auth
         gateway: {
           mode: "remote",
           auth: { token: "fallback-local-token" },

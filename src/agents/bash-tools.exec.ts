@@ -1029,15 +1029,6 @@ export function createExecTool(
 
       const mergedEnv = params.env ? { ...baseEnv, ...params.env } : baseEnv;
 
-<<<<<<< HEAD
-      // Security: Validate environment variables for host execution (non-sandboxed)
-      // This prevents library injection and code execution attacks via env vars
-      if (!sandbox && params.env && (host === "gateway" || host === "node")) {
-        validateHostEnv(params.env);
-      }
-
-=======
->>>>>>> origin/fix/security-sanitize-env-vars
       const env = sandbox
         ? buildSandboxEnv({
             defaultPath: DEFAULT_PATH,

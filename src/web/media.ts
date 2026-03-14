@@ -1,17 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-<<<<<<< HEAD
-import { logVerbose, shouldLogVerbose } from "../globals.js";
-import { type MediaKind, maxBytesForKind, mediaKindFromMime } from "../media/constants.js";
-=======
-
+import { assertSandboxPath } from "../agents/sandbox-paths.js";
 import { loadConfig } from "../config/config.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
 import { type MediaKind, maxBytesForKind, mediaKindFromMime } from "../media/constants.js";
-import { resolveMediaLocalRoots } from "../media/local-roots.js";
-import { resolveUserPath } from "../utils.js";
->>>>>>> origin/fix/lfi-media-parse
 import { fetchRemoteMedia } from "../media/fetch.js";
 import {
   convertHeicToJpeg,
@@ -19,12 +12,9 @@ import {
   optimizeImageToPng,
   resizeToJpeg,
 } from "../media/image-ops.js";
+import { resolveMediaLocalRoots } from "../media/local-roots.js";
 import { detectMime, extensionForMime } from "../media/mime.js";
-<<<<<<< HEAD
 import { resolveUserPath } from "../utils.js";
-=======
-import { assertSandboxPath } from "../agents/sandbox-paths.js";
->>>>>>> origin/fix/lfi-media-parse
 
 export type WebMediaResult = {
   buffer: Buffer;

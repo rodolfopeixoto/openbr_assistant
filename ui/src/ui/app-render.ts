@@ -150,22 +150,7 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-<<<<<<< HEAD
-              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 12L12 4L18 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M32 12L28 4L22 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M6 16C6 16 4 24 8 30C12 36 20 38 20 38C20 38 28 36 32 30C36 24 34 16 34 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M11 20C11 20 13 18 15 20C13 22 11 20 11 20Z" fill="currentColor"/>
-                <path d="M29 20C29 20 27 18 25 20C27 22 29 20 29 20Z" fill="currentColor"/>
-                <path d="M18 26L20 28L22 26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 26L14 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M8 28L14 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M32 26L26 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-                <path d="M32 28L26 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-              </svg>
-=======
               <img src="/favicon.svg" alt="OpenClaw" />
->>>>>>> origin/fix/security-sanitize-env-vars
             </div>
             <div class="brand-text">
               <div class="brand-title">LYNX</div>

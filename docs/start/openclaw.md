@@ -211,12 +211,8 @@ Inbound attachments (images/audio/docs) can be surfaced to your command via temp
 Outbound attachments from the agent: include `MEDIA:<path-or-url>` on its own line (no spaces). Local paths must live under the agent workspace or `~/.openclaw/media`. Example:
 
 ```
-Here’s the screenshot.
-<<<<<<< HEAD
-MEDIA:https://example.com/screenshot.png
-=======
+Here's the screenshot.
 MEDIA:~/.openclaw/media/inbound/screenshot.png
->>>>>>> origin/fix/lfi-media-parse
 ```
 
 OpenClaw extracts these and sends them as media alongside the text.
