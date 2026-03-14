@@ -150,6 +150,7 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
+<<<<<<< HEAD
               <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 12L12 4L18 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M32 12L28 4L22 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -162,6 +163,9 @@ export function renderApp(state: AppViewState) {
                 <path d="M32 26L26 27" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
                 <path d="M32 28L26 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
               </svg>
+=======
+              <img src="/favicon.svg" alt="OpenClaw" />
+>>>>>>> origin/fix/security-sanitize-env-vars
             </div>
             <div class="brand-text">
               <div class="brand-title">LYNX</div>

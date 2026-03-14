@@ -97,6 +97,7 @@ function resolveAccountConfig(
 }
 
 function resolveDefaultAuthDir(accountId: string): string {
+<<<<<<< HEAD
   const baseDir = path.join(resolveOAuthDir(), "whatsapp");
   const normalized = normalizeAccountId(accountId);
   const normalizedDir = path.join(baseDir, normalized);
@@ -121,6 +122,9 @@ function resolveDefaultAuthDir(accountId: string): string {
   }
 
   return normalizedDir;
+=======
+  return path.join(resolveOAuthDir(), "whatsapp", normalizeAccountId(accountId));
+>>>>>>> origin/fix/security-sanitize-env-vars
 }
 
 function resolveLegacyAuthDir(): string {
