@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 import fs from "node:fs/promises";

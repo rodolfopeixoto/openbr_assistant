@@ -1,0 +1,1400 @@
+═══════════════════════════════════════════════════════════════
+🚀 INTEGRAÇÃO MASSIVA - 145 BRANCHES
+Início: sáb 14 mar 2026 08:10:55 -03
+═══════════════════════════════════════════════════════════════
+
+Already on 'develop'
+Your branch is ahead of 'origin/develop' by 9 commits.
+  (use "git push" to publish your local commits)
+From personal.github.com:rodolfopeixoto/rogpe_claw
+ * branch                develop    -> FETCH_HEAD
+Already up to date.
+Gerando lista de branches...
+
+📊 ESTATÍSTICAS:
+  Total:      183
+  Já mergeadas:       39
+  Pendentes: 144
+
+
+[1/     183] Processando: feat/agent-model-fallbacks
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[2/     183] Processando: feat/android-notification-tap
+----------------------------------------
+Auto-merging CHANGELOG.md
+CONFLICT (content): Merge conflict in CHANGELOG.md
+Auto-merging apps/android/app/build.gradle.kts
+CONFLICT (content): Merge conflict in apps/android/app/build.gradle.kts
+Auto-merging apps/android/app/src/main/java/ai/openclaw/android/NodeForegroundService.kt
+CONFLICT (file location): apps/android/app/src/test/java/com/clawdbot/android/NodeForegroundServiceTest.kt added in origin/feat/android-notification-tap inside a directory that was renamed in HEAD, suggesting it should perhaps be moved to apps/android/app/src/test/java/ai/openclaw/android/NodeForegroundServiceTest.kt.
+Auto-merging apps/android/app/src/test/java/ai/openclaw/android/NodeForegroundServiceTest.kt
+CONFLICT (add/add): Merge conflict in apps/android/app/src/test/java/ai/openclaw/android/NodeForegroundServiceTest.kt
+Automatic merge failed; fix conflicts and then commit the result.
+  ✅ SUCESSO - Merge limpo
+
+[3/     183] Processando: feat/antigravity-integration
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[4/     183] Processando: feat/bedrock-converse-stream-api
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[5/     183] Processando: feat/boot-md
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[6/     183] Processando: feat/chat-ux-improvements
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[7/     183] Processando: feat/compaction-safeguard-improvements
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[8/     183] Processando: feat/config-ui-sections
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[9/     183] Processando: feat/custom-tts-endpoint
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[10/     183] Processando: feat/device-pair-plugin-command
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [10/     183]:        8 sucessos,        0 falhas
+
+
+[11/     183] Processando: feat/gateway-config-patch
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[12/     183] Processando: feat/heartbeat-session-target
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[13/     183] Processando: feat/llm-task-tool
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[14/     183] Processando: feat/lobster-plugin
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[15/     183] Processando: feat/mattermost-channel
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[16/     183] Processando: feat/minimax_oauth
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[17/     183] Processando: feat/models-command
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[18/     183] Processando: feat/multi-account-ui-clean
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[19/     183] Processando: feat/newline-chunk-mode
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[20/     183] Processando: feat/nostr-nip17-nip65
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [20/     183]:       17 sucessos,        0 falhas
+
+
+[21/     183] Processando: feat/per-channel-response-prefix
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[22/     183] Processando: feat/perplexity-search-provider
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[23/     183] Processando: feat/plan-mode
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[24/     183] Processando: feat/plugin-command-api
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[25/     183] Processando: feat/prek-precommit-hooks
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[26/     183] Processando: feat/reaction-improvements
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[27/     183] Processando: feat/security-container-isolation
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[28/     183] Processando: feat/slack-dm-reply-to-mode
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[29/     183] Processando: feat/slash-bash-command
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[30/     183] Processando: feat/spec-b1-features-dashboard
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+📈 PROGRESSO [30/     183]:       25 sucessos,        0 falhas
+
+
+[31/     183] Processando: feat/specs-implementation
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[32/     183] Processando: feat/swift6-compatibility
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[33/     183] Processando: feat/table-to-bullets-telegram
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[34/     183] Processando: feat/telegram-custom-commands
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[35/     183] Processando: feat/telegram-dm-threads
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[36/     183] Processando: feat/telegram-link-preview-config
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[37/     183] Processando: feat/telegram-reactions
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[38/     183] Processando: feat/tool-dispatch-skill-commands
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[39/     183] Processando: feat/tools-alsoAllow
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[40/     183] Processando: feat/tui-syntax-highlighting
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [40/     183]:       32 sucessos,        0 falhas
+
+
+[41/     183] Processando: feat/venice-provider
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[42/     183] Processando: feat/web-search-freshness
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[43/     183] Processando: feat/webchat-heartbeat-visibility
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[44/     183] Processando: feat/whatsapp-send-read-receipts-option
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[45/     183] Processando: fix/1056-ignore-heavy-watch-paths
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[46/     183] Processando: fix/1540-openai-reasoning-transcript
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[47/     183] Processando: fix/2692-whatsapp-accountid-path-traversal
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[48/     183] Processando: fix/3805-message-tool-sandbox-bypass
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[49/     183] Processando: fix/4855-control-ui-assets-global-install
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[50/     183] Processando: fix/5266-tlon-sse-timeout
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+📈 PROGRESSO [50/     183]:       38 sucessos,        0 falhas
+
+
+[51/     183] Processando: fix/abort-error-graceful-handling
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[52/     183] Processando: fix/anthropic-oauth-profile-id-2
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[53/     183] Processando: fix/audio-text-extraction-bypass
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[54/     183] Processando: fix/avatar-relative-url-validation
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[55/     183] Processando: fix/background-abort-sigkill
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[56/     183] Processando: fix/bluebubbles-gc-guid-resolution
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[57/     183] Processando: fix/bluebubbles-message-routing
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[58/     183] Processando: fix/build-errors-missing-imports
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[59/     183] Processando: fix/capabilities-object-format
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[60/     183] Processando: fix/chrome-restore-prompt
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [60/     183]:       48 sucessos,        0 falhas
+
+
+[61/     183] Processando: fix/cleanup-suspended-clawdbot-processes
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[62/     183] Processando: fix/cli-install-version-suffix
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[63/     183] Processando: fix/cli-launchd-enable-before-bootstrap
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[64/     183] Processando: fix/cli-quick-reference-system-prompt
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[65/     183] Processando: fix/cli-subcommand-registration-lazy-loading
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[66/     183] Processando: fix/codesign-ad-hoc-fallback
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[67/     183] Processando: fix/codesign-adhoc
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[68/     183] Processando: fix/compaction-failure-silent-reset
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[69/     183] Processando: fix/config-title-overflow-1728
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[70/     183] Processando: fix/console-settings-recursion
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [70/     183]:       54 sucessos,        0 falhas
+
+
+[71/     183] Processando: fix/control-ui-token-auth
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[72/     183] Processando: fix/cron-edit-preserve-delivery-on-message
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[73/     183] Processando: fix/cron-session-allowagents
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[74/     183] Processando: fix/cron-tool-jobid-to-id
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[75/     183] Processando: fix/direct-token-auth
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[76/     183] Processando: fix/discord-exec-resolvedpath-validation
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[77/     183] Processando: fix/dockerfile-install-bun
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[78/     183] Processando: fix/docs-typo-7399
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[79/     183] Processando: fix/duplicate-assistant-texts
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[80/     183] Processando: fix/elevated-ask-security
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+📈 PROGRESSO [80/     183]:       60 sucessos,        0 falhas
+
+
+[81/     183] Processando: fix/elevated-default-off
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[82/     183] Processando: fix/evaluate-esbuild-name-helper
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[83/     183] Processando: fix/exec-allowlist-agentid-derivation
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[84/     183] Processando: fix/export-section-meta
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[85/     183] Processando: fix/failover-cooldown-skip
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[86/     183] Processando: fix/fallback-authprofile-provider-scope
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[87/     183] Processando: fix/fish-shell-bash
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[88/     183] Processando: fix/format-parameter-and-subagent-auth
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[89/     183] Processando: fix/gateway-connection-diagnostics
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[90/     183] Processando: fix/gateway-ios-client-id
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+📈 PROGRESSO [90/     183]:       67 sucessos,        0 falhas
+
+
+[91/     183] Processando: fix/gateway-token-resolution-mode-check
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[92/     183] Processando: fix/gemini-cli-oauth-auto-credentials
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[93/     183] Processando: fix/gemini-compatibility
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[94/     183] Processando: fix/gemini-schema-sanitization
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[95/     183] Processando: fix/gemini-session-corruption-recovery
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[96/     183] Processando: fix/gog-gmail-search-gotcha
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[97/     183] Processando: fix/google-antigravity-history
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[98/     183] Processando: fix/ignore-aborted-tool-calls
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[99/     183] Processando: fix/imessage-echo-loop
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[100/     183] Processando: fix/imessage-groupish-threads
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [100/     183]:       76 sucessos,        0 falhas
+
+
+[101/     183] Processando: fix/imessage-timeout-config
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[102/     183] Processando: fix/immediate-callback-answer
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[103/     183] Processando: fix/imsg-remote-attachments
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[104/     183] Processando: fix/infer-auth-choice-from-api-key-flags
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[105/     183] Processando: fix/ios-talkmode-simulator
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[106/     183] Processando: fix/issue-1020-sessions-perms
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[107/     183] Processando: fix/issue-1107-semver-prerelease-suffix
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[108/     183] Processando: fix/issue-1269-sanitize-tool-call-text
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[109/     183] Processando: fix/issue-6995-zh-cn-i18n
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[110/     183] Processando: fix/issue-7323-transcript-repair
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [110/     183]:       86 sucessos,        0 falhas
+
+
+[111/     183] Processando: fix/issue-99-watchdog
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[112/     183] Processando: fix/lfi-media-parse
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[113/     183] Processando: fix/line-webhook-timing-attack
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[114/     183] Processando: fix/linux-service-path-user-dirs
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[115/     183] Processando: fix/local-embedding-l2-normalization
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[116/     183] Processando: fix/logs-follow-output
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[117/     183] Processando: fix/logs-follow-spinner
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[118/     183] Processando: fix/mac-node-approvals
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[119/     183] Processando: fix/mac-node-bridge-tunnel-865
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[120/     183] Processando: fix/mdns-info-disclosure
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [120/     183]:       93 sucessos,        0 falhas
+
+
+[121/     183] Processando: fix/memory-cli-hang-1121
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[122/     183] Processando: fix/memory-slot-none
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[123/     183] Processando: fix/message-command-plugins
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[124/     183] Processando: fix/message-truncate-reasoning-tag
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[125/     183] Processando: fix/minimax-api-endpoint
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[126/     183] Processando: fix/mintlify-security-subdir-conflict
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[127/     183] Processando: fix/model-catalog-cache-poison
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[128/     183] Processando: fix/model-retry-fallback-rate-limits
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[129/     183] Processando: fix/model-selector-codex
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[130/     183] Processando: fix/model-switch-persist-1435
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [130/     183]:      100 sucessos,        0 falhas
+
+
+[131/     183] Processando: fix/node-daemon-run
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[132/     183] Processando: fix/node-invoke-deadlock
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[133/     183] Processando: fix/node-invoke-timeout
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[134/     183] Processando: fix/npm-extensions-workspace
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[135/     183] Processando: fix/opencode-zen-comment-accuracy
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[136/     183] Processando: fix/overloaded-error-handling
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[137/     183] Processando: fix/pairing-cli-plugin-initialization
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[138/     183] Processando: fix/perplexity-web-search-provider
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[139/     183] Processando: fix/preserve-command-arg-casing
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[140/     183] Processando: fix/prompt-failover
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [140/     183]:      108 sucessos,        0 falhas
+
+
+[141/     183] Processando: fix/remove-google-docs-editor-showcase
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[142/     183] Processando: fix/restart-channel-routing
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[143/     183] Processando: fix/restore-reasoning-tag-check
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[144/     183] Processando: fix/security-audit-gateway-auth
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[145/     183] Processando: fix/security-sanitize-env-vars
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[146/     183] Processando: fix/session-lock-cleanup
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[147/     183] Processando: fix/session-memory-suppress-confirmation
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[148/     183] Processando: fix/session-reset-token-counts
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[149/     183] Processando: fix/settings-scroll-1743
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[150/     183] Processando: fix/sidebar-scroll
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [150/     183]:      114 sucessos,        0 falhas
+
+
+[151/     183] Processando: fix/signal-reaction-own-mode-uuid-match
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[152/     183] Processando: fix/slack-filetype-deprecation
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[153/     183] Processando: fix/slack-open-group-policy
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[154/     183] Processando: fix/slack-top-level-require-mention
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[155/     183] Processando: fix/stable-launchagent-path
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[156/     183] Processando: fix/subagent-announce-channel-routing
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[157/     183] Processando: fix/subagent-skills-inheritance
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[158/     183] Processando: fix/synology-docker
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[159/     183] Processando: fix/systemd-execstart-whitespace
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[160/     183] Processando: fix/telegram-caption-split
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [160/     183]:      123 sucessos,        0 falhas
+
+
+[161/     183] Processando: fix/telegram-general-topic-messages
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[162/     183] Processando: fix/telegram-gif-animation
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[163/     183] Processando: fix/telegram-node22-network-stability
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[164/     183] Processando: fix/telegram-timed-out-recovery
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[165/     183] Processando: fix/telegram-topic-announcement
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[166/     183] Processando: fix/tmux-send-keys-tui
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[167/     183] Processando: fix/token-count-after-compaction
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[168/     183] Processando: fix/tool-call-id-maxlen-40
+----------------------------------------
+  ⏭️  Já mergeada, pulando...
+
+[169/     183] Processando: fix/tool-error-fallback
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[170/     183] Processando: fix/tool-typing-race-condition
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [170/     183]:      131 sucessos,        0 falhas
+
+
+[171/     183] Processando: fix/trigger-word-mac
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[172/     183] Processando: fix/tts-base-url-runtime-read-2816
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[173/     183] Processando: fix/tui-final-tag-strip
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[174/     183] Processando: fix/tui-token-refresh
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[175/     183] Processando: fix/ui-save-button-1609
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[176/     183] Processando: fix/unhandled-fetch-rejections
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[177/     183] Processando: fix/versioned-node-binary
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[178/     183] Processando: fix/voice-call-statuscallback
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[179/     183] Processando: fix/voice-call-tts-overlap
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[180/     183] Processando: fix/voicecall-tailscale-path
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+📈 PROGRESSO [180/     183]:      141 sucessos,        0 falhas
+
+
+[181/     183] Processando: fix/webchat-scroll-position
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[182/     183] Processando: fix/windows-gateway-startup
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+[183/     183] Processando: fix/zalo-pairing-and-webhook
+----------------------------------------
+error: Merging is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+  ✅ SUCESSO - Merge limpo
+
+═══════════════════════════════════════════════════════════════
+📊 RESULTADO FINAL
+═══════════════════════════════════════════════════════════════
+  ✅ Sucessos:      144
+  ❌ Falhas:        0
+  📦 Total processado: 183
+
+🔨 Validando build...
+  ✅ BUILD PASSOU!
+
+Fim: sáb 14 mar 2026 08:11:52 -03
+Log completo: .mass-integration-20260314-081055.log
+Sucessos: .branches-success.txt
+Falhas: .branches-failed-manual.txt

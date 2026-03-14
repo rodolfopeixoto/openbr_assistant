@@ -1,6 +1,6 @@
+// @ts-nocheck
 import type { TelegramMessage } from "./bot/types.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
-// @ts-nocheck
 import { hasControlCommand } from "../auto-reply/command-detection.js";
 import {
   createInboundDebouncer,

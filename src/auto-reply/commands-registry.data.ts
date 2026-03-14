@@ -173,6 +173,20 @@ function buildChatCommands(): ChatCommandDefinition[] {
       category: "status",
     }),
     defineChatCommand({
+      key: "plan",
+      nativeName: "plan",
+      description: "Interactive project planning (/plan) with saved artifacts.",
+      textAlias: "/plan",
+      acceptsArgs: true,
+    }),
+    defineChatCommand({
+      key: "plans",
+      nativeName: "plans",
+      description: "List/show/rename saved /plan artifacts.",
+      textAlias: "/plans",
+      acceptsArgs: true,
+    }),
+    defineChatCommand({
       key: "allowlist",
       description: "List/add/remove allowlist entries.",
       textAlias: "/allowlist",

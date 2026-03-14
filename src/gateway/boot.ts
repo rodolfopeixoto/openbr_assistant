@@ -5,7 +5,7 @@ import type { OpenClawConfig } from "../config/config.js";
 import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { agentCommand } from "../commands/agent.js";
 import { resolveMainSessionKey } from "../config/sessions/main-session.js";
-import { createSubsystemLogger } from "../logging/subsystem.js";
+import { createSubsystemLogger } from "../logging.js";
 import { type RuntimeEnv, defaultRuntime } from "../runtime.js";
 
 const log = createSubsystemLogger("gateway/boot");
@@ -37,15 +37,11 @@ async function loadBootFile(
   try {
     const content = await fs.readFile(bootPath, "utf-8");
     const trimmed = content.trim();
-    if (!trimmed) {
-      return { status: "empty" };
-    }
+    if (!trimmed) return { status: "empty" };
     return { status: "ok", content: trimmed };
   } catch (err) {
     const anyErr = err as { code?: string };
-    if (anyErr.code === "ENOENT") {
-      return { status: "missing" };
-    }
+    if (anyErr.code === "ENOENT") return { status: "missing" };
     throw err;
   }
 }

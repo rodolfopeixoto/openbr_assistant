@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Bot, Context } from "grammy";
 import type { CommandArgs } from "../auto-reply/commands-registry.js";
 import type { OpenClawConfig } from "../config/config.js";

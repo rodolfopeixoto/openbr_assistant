@@ -55,6 +55,10 @@ android {
   testOptions {
     unitTests.isIncludeAndroidResources = true
   }
+
+  testOptions {
+    unitTests.isIncludeAndroidResources = true
+  }
 }
 
 androidComponents {
@@ -120,7 +124,7 @@ dependencies {
   testImplementation("io.kotest:kotest-runner-junit5-jvm:6.0.7")
   testImplementation("io.kotest:kotest-assertions-core-jvm:6.0.7")
   testImplementation("org.robolectric:robolectric:4.16")
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.0.2")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.13.3")
 }
 
 tasks.withType<Test>().configureEach {

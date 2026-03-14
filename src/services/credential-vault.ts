@@ -3,4 +3,5 @@ export {
   CredentialVault,
   type EncryptedCredential,
   type CredentialVaultConfig,
+  type CredentialVaultMetadata,
 } from "../security/credential-vault.js";

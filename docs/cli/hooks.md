@@ -1,30 +1,27 @@
 ---
-summary: "CLI reference for `openclaw hooks` (agent hooks)"
+summary: "CLI reference for `clawdbot hooks` (agent hooks)"
 read_when:
   - You want to manage agent hooks
   - You want to install or update hooks
-title: "hooks"
 ---
 
-# `openclaw hooks`
+# `clawdbot hooks`
 
 Manage agent hooks (event-driven automations for commands like `/new`, `/reset`, and gateway startup).
 
 Related:
-
 - Hooks: [Hooks](/hooks)
 - Plugin hooks: [Plugins](/plugin#plugin-hooks)
 
 ## List All Hooks
 
 ```bash
-openclaw hooks list
+clawdbot hooks list
 ```
 
 List all discovered hooks from workspace, managed, and bundled directories.
 
 **Options:**
-
 - `--eligible`: Show only eligible hooks (requirements met)
 - `--json`: Output as JSON
 - `-v, --verbose`: Show detailed information including missing requirements
@@ -44,7 +41,7 @@ Ready:
 **Example (verbose):**
 
 ```bash
-openclaw hooks list --verbose
+clawdbot hooks list --verbose
 ```
 
 Shows missing requirements for ineligible hooks.
@@ -52,7 +49,7 @@ Shows missing requirements for ineligible hooks.
 **Example (JSON):**
 
 ```bash
-openclaw hooks list --json
+clawdbot hooks list --json
 ```
 
 Returns structured JSON for programmatic use.
@@ -60,23 +57,21 @@ Returns structured JSON for programmatic use.
 ## Get Hook Information
 
 ```bash
-openclaw hooks info <name>
+clawdbot hooks info <name>
 ```
 
 Show detailed information about a specific hook.
 
 **Arguments:**
-
 - `<name>`: Hook name (e.g., `session-memory`)
 
 **Options:**
-
 - `--json`: Output as JSON
 
 **Example:**
 
 ```bash
-openclaw hooks info session-memory
+clawdbot hooks info session-memory
 ```
 
 **Output:**
@@ -87,10 +82,10 @@ openclaw hooks info session-memory
 Save session context to memory when /new command is issued
 
 Details:
-  Source: openclaw-bundled
-  Path: /path/to/openclaw/hooks/bundled/session-memory/HOOK.md
-  Handler: /path/to/openclaw/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.openclaw.ai/hooks#session-memory
+  Source: clawdbot-bundled
+  Path: /path/to/clawdbot/hooks/bundled/session-memory/HOOK.md
+  Handler: /path/to/clawdbot/hooks/bundled/session-memory/handler.ts
+  Homepage: https://docs.clawd.bot/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -100,13 +95,12 @@ Requirements:
 ## Check Hooks Eligibility
 
 ```bash
-openclaw hooks check
+clawdbot hooks check
 ```
 
 Show summary of hook eligibility status (how many are ready vs. not ready).
 
 **Options:**
-
 - `--json`: Output as JSON
 
 **Example output:**
@@ -122,22 +116,21 @@ Not ready: 0
 ## Enable a Hook
 
 ```bash
-openclaw hooks enable <name>
+clawdbot hooks enable <name>
 ```
 
-Enable a specific hook by adding it to your config (`~/.openclaw/config.json`).
+Enable a specific hook by adding it to your config (`~/.clawdbot/config.json`).
 
-**Note:** Hooks managed by plugins show `plugin:<id>` in `openclaw hooks list` and
+**Note:** Hooks managed by plugins show `plugin:<id>` in `clawdbot hooks list` and
 can’t be enabled/disabled here. Enable/disable the plugin instead.
 
 **Arguments:**
-
 - `<name>`: Hook name (e.g., `session-memory`)
 
 **Example:**
 
 ```bash
-openclaw hooks enable session-memory
+clawdbot hooks enable session-memory
 ```
 
 **Output:**
@@ -147,31 +140,28 @@ openclaw hooks enable session-memory
 ```
 
 **What it does:**
-
 - Checks if hook exists and is eligible
 - Updates `hooks.internal.entries.<name>.enabled = true` in your config
 - Saves config to disk
 
 **After enabling:**
-
 - Restart the gateway so hooks reload (menu bar app restart on macOS, or restart your gateway process in dev).
 
 ## Disable a Hook
 
 ```bash
-openclaw hooks disable <name>
+clawdbot hooks disable <name>
 ```
 
 Disable a specific hook by updating your config.
 
 **Arguments:**
-
 - `<name>`: Hook name (e.g., `command-logger`)
 
 **Example:**
 
 ```bash
-openclaw hooks disable command-logger
+clawdbot hooks disable command-logger
 ```
 
 **Output:**
@@ -181,25 +171,22 @@ openclaw hooks disable command-logger
 ```
 
 **After disabling:**
-
 - Restart the gateway so hooks reload
 
 ## Install Hooks
 
 ```bash
-openclaw hooks install <path-or-spec>
+clawdbot hooks install <path-or-spec>
 ```
 
 Install a hook pack from a local folder/archive or npm.
 
 **What it does:**
-
-- Copies the hook pack into `~/.openclaw/hooks/<id>`
+- Copies the hook pack into `~/.clawdbot/hooks/<id>`
 - Enables the installed hooks in `hooks.internal.entries.*`
 - Records the install under `hooks.internal.installs`
 
 **Options:**
-
 - `-l, --link`: Link a local directory instead of copying (adds it to `hooks.internal.load.extraDirs`)
 
 **Supported archives:** `.zip`, `.tgz`, `.tar.gz`, `.tar`
@@ -208,29 +195,28 @@ Install a hook pack from a local folder/archive or npm.
 
 ```bash
 # Local directory
-openclaw hooks install ./my-hook-pack
+clawdbot hooks install ./my-hook-pack
 
 # Local archive
-openclaw hooks install ./my-hook-pack.zip
+clawdbot hooks install ./my-hook-pack.zip
 
 # NPM package
-openclaw hooks install @openclaw/my-hook-pack
+clawdbot hooks install @clawdbot/my-hook-pack
 
 # Link a local directory without copying
-openclaw hooks install -l ./my-hook-pack
+clawdbot hooks install -l ./my-hook-pack
 ```
 
 ## Update Hooks
 
 ```bash
-openclaw hooks update <id>
-openclaw hooks update --all
+clawdbot hooks update <id>
+clawdbot hooks update --all
 ```
 
 Update installed hook packs (npm installs only).
 
 **Options:**
-
 - `--all`: Update all tracked hook packs
 - `--dry-run`: Show what would change without writing
 
@@ -243,10 +229,10 @@ Saves session context to memory when you issue `/new`.
 **Enable:**
 
 ```bash
-openclaw hooks enable session-memory
+clawdbot hooks enable session-memory
 ```
 
-**Output:** `~/.openclaw/workspace/memory/YYYY-MM-DD-slug.md`
+**Output:** `~/clawd/memory/YYYY-MM-DD-slug.md`
 
 **See:** [session-memory documentation](/hooks#session-memory)
 
@@ -257,22 +243,22 @@ Logs all command events to a centralized audit file.
 **Enable:**
 
 ```bash
-openclaw hooks enable command-logger
+clawdbot hooks enable command-logger
 ```
 
-**Output:** `~/.openclaw/logs/commands.log`
+**Output:** `~/.clawdbot/logs/commands.log`
 
 **View logs:**
 
 ```bash
 # Recent commands
-tail -n 20 ~/.openclaw/logs/commands.log
+tail -n 20 ~/.clawdbot/logs/commands.log
 
 # Pretty-print
-cat ~/.openclaw/logs/commands.log | jq .
+cat ~/.clawdbot/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .
+grep '"action":"new"' ~/.clawdbot/logs/commands.log | jq .
 ```
 
 **See:** [command-logger documentation](/hooks#command-logger)
@@ -284,7 +270,7 @@ Swaps injected `SOUL.md` content with `SOUL_EVIL.md` during a purge window or by
 **Enable:**
 
 ```bash
-openclaw hooks enable soul-evil
+clawdbot hooks enable soul-evil
 ```
 
 **See:** [SOUL Evil Hook](/hooks/soul-evil)
@@ -298,7 +284,7 @@ Runs `BOOT.md` when the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-openclaw hooks enable boot-md
+clawdbot hooks enable boot-md
 ```
 
 **See:** [boot-md documentation](/hooks#boot-md)

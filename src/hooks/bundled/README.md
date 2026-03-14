@@ -61,6 +61,20 @@ Runs `BOOT.md` whenever the gateway starts (after channels start).
 openclaw hooks enable boot-md
 ```
 
+### 🚀 boot-md
+
+Runs `BOOT.md` whenever the gateway starts (after channels start).
+
+**Events**: `gateway:startup`
+**What it does**: Executes BOOT.md instructions via the agent runner.
+**Output**: Whatever the instructions request (for example, outbound messages).
+
+**Enable**:
+
+```bash
+clawdbot hooks enable boot-md
+```
+
 ## Hook Structure
 
 Each hook is a directory containing:

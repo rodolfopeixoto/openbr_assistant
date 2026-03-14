@@ -1,0 +1,371 @@
+[2026-03-14 08:16:00] [0;34mℹ Total de branches para processar: 183[0m
+[2026-03-14 08:16:00] [0;34mℹ Log: .merge-integration.log[0m
+[2026-03-14 08:16:00] [0;34mℹ Falhas serão registradas em: .merge-failures.txt[0m
+[2026-03-14 08:16:01] [0;34mℹ [1/183] Processando branch: feat/agent-model-fallbacks[0m
+[2026-03-14 08:16:01] [1;33m⚠ Branch 'feat/agent-model-fallbacks' não existe. Pulando...[0m
+[2026-03-14 08:16:01] [0;34mℹ [2/183] Processando branch: feat/android-notification-tap[0m
+[2026-03-14 08:16:01] [1;33m⚠ Branch 'feat/android-notification-tap' não existe. Pulando...[0m
+[2026-03-14 08:16:02] [0;34mℹ [3/183] Processando branch: feat/antigravity-integration[0m
+[2026-03-14 08:16:02] [1;33m⚠ Branch 'feat/antigravity-integration' não existe. Pulando...[0m
+[2026-03-14 08:16:02] [0;34mℹ [4/183] Processando branch: feat/bedrock-converse-stream-api[0m
+[2026-03-14 08:16:02] [1;33m⚠ Branch 'feat/bedrock-converse-stream-api' não existe. Pulando...[0m
+[2026-03-14 08:16:03] [0;34mℹ [5/183] Processando branch: feat/boot-md[0m
+[2026-03-14 08:16:03] [1;33m⚠ Branch 'feat/boot-md' não existe. Pulando...[0m
+[2026-03-14 08:16:03] [0;34mℹ [6/183] Processando branch: feat/chat-ux-improvements[0m
+[2026-03-14 08:16:03] [1;33m⚠ Branch 'feat/chat-ux-improvements' não existe. Pulando...[0m
+[2026-03-14 08:16:04] [0;34mℹ [7/183] Processando branch: feat/compaction-safeguard-improvements[0m
+[2026-03-14 08:16:04] [1;33m⚠ Branch 'feat/compaction-safeguard-improvements' não existe. Pulando...[0m
+[2026-03-14 08:16:05] [0;34mℹ [8/183] Processando branch: feat/config-ui-sections[0m
+[2026-03-14 08:16:05] [1;33m⚠ Branch 'feat/config-ui-sections' não existe. Pulando...[0m
+[2026-03-14 08:16:05] [0;34mℹ [9/183] Processando branch: feat/custom-tts-endpoint[0m
+[2026-03-14 08:16:05] [1;33m⚠ Branch 'feat/custom-tts-endpoint' não existe. Pulando...[0m
+[2026-03-14 08:16:06] [0;34mℹ [10/183] Processando branch: feat/device-pair-plugin-command[0m
+[2026-03-14 08:16:06] [1;33m⚠ Branch 'feat/device-pair-plugin-command' não existe. Pulando...[0m
+[2026-03-14 08:16:06] [0;34mℹ [11/183] Processando branch: feat/gateway-config-patch[0m
+[2026-03-14 08:16:06] [1;33m⚠ Branch 'feat/gateway-config-patch' não existe. Pulando...[0m
+[2026-03-14 08:16:07] [0;34mℹ [12/183] Processando branch: feat/heartbeat-session-target[0m
+[2026-03-14 08:16:07] [1;33m⚠ Branch 'feat/heartbeat-session-target' não existe. Pulando...[0m
+[2026-03-14 08:16:07] [0;34mℹ [13/183] Processando branch: feat/llm-task-tool[0m
+[2026-03-14 08:16:07] [1;33m⚠ Branch 'feat/llm-task-tool' não existe. Pulando...[0m
+[2026-03-14 08:16:08] [0;34mℹ [14/183] Processando branch: feat/lobster-plugin[0m
+[2026-03-14 08:16:08] [1;33m⚠ Branch 'feat/lobster-plugin' não existe. Pulando...[0m
+[2026-03-14 08:16:08] [0;34mℹ [15/183] Processando branch: feat/mattermost-channel[0m
+[2026-03-14 08:16:08] [1;33m⚠ Branch 'feat/mattermost-channel' não existe. Pulando...[0m
+[2026-03-14 08:16:09] [0;34mℹ [16/183] Processando branch: feat/minimax_oauth[0m
+[2026-03-14 08:16:09] [1;33m⚠ Branch 'feat/minimax_oauth' não existe. Pulando...[0m
+[2026-03-14 08:16:10] [0;34mℹ [17/183] Processando branch: feat/models-command[0m
+[2026-03-14 08:16:10] [1;33m⚠ Branch 'feat/models-command' não existe. Pulando...[0m
+[2026-03-14 08:16:10] [0;34mℹ [18/183] Processando branch: feat/multi-account-ui-clean[0m
+[2026-03-14 08:16:10] [1;33m⚠ Branch 'feat/multi-account-ui-clean' não existe. Pulando...[0m
+[2026-03-14 08:16:11] [0;34mℹ [19/183] Processando branch: feat/newline-chunk-mode[0m
+[2026-03-14 08:16:11] [1;33m⚠ Branch 'feat/newline-chunk-mode' não existe. Pulando...[0m
+[2026-03-14 08:16:11] [0;34mℹ [20/183] Processando branch: feat/nostr-nip17-nip65[0m
+[2026-03-14 08:16:11] [1;33m⚠ Branch 'feat/nostr-nip17-nip65' não existe. Pulando...[0m
+[2026-03-14 08:16:12] [0;34mℹ [21/183] Processando branch: feat/per-channel-response-prefix[0m
+[2026-03-14 08:16:12] [1;33m⚠ Branch 'feat/per-channel-response-prefix' não existe. Pulando...[0m
+[2026-03-14 08:16:12] [0;34mℹ [22/183] Processando branch: feat/perplexity-search-provider[0m
+[2026-03-14 08:16:12] [1;33m⚠ Branch 'feat/perplexity-search-provider' não existe. Pulando...[0m
+[2026-03-14 08:16:13] [0;34mℹ [23/183] Processando branch: feat/plan-mode[0m
+[2026-03-14 08:16:13] [1;33m⚠ Branch 'feat/plan-mode' não existe. Pulando...[0m
+[2026-03-14 08:16:13] [0;34mℹ [24/183] Processando branch: feat/plugin-command-api[0m
+[2026-03-14 08:16:13] [1;33m⚠ Branch 'feat/plugin-command-api' não existe. Pulando...[0m
+[2026-03-14 08:16:14] [0;34mℹ [25/183] Processando branch: feat/prek-precommit-hooks[0m
+[2026-03-14 08:16:14] [1;33m⚠ Branch 'feat/prek-precommit-hooks' não existe. Pulando...[0m
+[2026-03-14 08:16:15] [0;34mℹ [26/183] Processando branch: feat/reaction-improvements[0m
+[2026-03-14 08:16:15] [1;33m⚠ Branch 'feat/reaction-improvements' não existe. Pulando...[0m
+[2026-03-14 08:16:15] [0;34mℹ [27/183] Processando branch: feat/security-container-isolation[0m
+[2026-03-14 08:16:15] [1;33m⚠ Branch 'feat/security-container-isolation' não existe. Pulando...[0m
+[2026-03-14 08:16:16] [0;34mℹ [28/183] Processando branch: feat/slack-dm-reply-to-mode[0m
+[2026-03-14 08:16:16] [1;33m⚠ Branch 'feat/slack-dm-reply-to-mode' não existe. Pulando...[0m
+[2026-03-14 08:16:16] [0;34mℹ [29/183] Processando branch: feat/slash-bash-command[0m
+[2026-03-14 08:16:16] [1;33m⚠ Branch 'feat/slash-bash-command' não existe. Pulando...[0m
+[2026-03-14 08:16:17] [0;34mℹ [30/183] Processando branch: feat/spec-b1-features-dashboard[0m
+[2026-03-14 08:16:17] [1;33m⚠ Branch 'feat/spec-b1-features-dashboard' não existe. Pulando...[0m
+[2026-03-14 08:16:17] [0;34mℹ [31/183] Processando branch: feat/specs-implementation[0m
+[2026-03-14 08:16:17] [1;33m⚠ Branch 'feat/specs-implementation' não existe. Pulando...[0m
+[2026-03-14 08:16:18] [0;34mℹ [32/183] Processando branch: feat/swift6-compatibility[0m
+[2026-03-14 08:16:18] [1;33m⚠ Branch 'feat/swift6-compatibility' não existe. Pulando...[0m
+[2026-03-14 08:16:18] [0;34mℹ [33/183] Processando branch: feat/table-to-bullets-telegram[0m
+[2026-03-14 08:16:19] [1;33m⚠ Branch 'feat/table-to-bullets-telegram' não existe. Pulando...[0m
+[2026-03-14 08:16:19] [0;34mℹ [34/183] Processando branch: feat/telegram-custom-commands[0m
+[2026-03-14 08:16:19] [1;33m⚠ Branch 'feat/telegram-custom-commands' não existe. Pulando...[0m
+[2026-03-14 08:16:20] [0;34mℹ [35/183] Processando branch: feat/telegram-dm-threads[0m
+[2026-03-14 08:16:20] [1;33m⚠ Branch 'feat/telegram-dm-threads' não existe. Pulando...[0m
+[2026-03-14 08:16:20] [0;34mℹ [36/183] Processando branch: feat/telegram-link-preview-config[0m
+[2026-03-14 08:16:20] [1;33m⚠ Branch 'feat/telegram-link-preview-config' não existe. Pulando...[0m
+[2026-03-14 08:16:21] [0;34mℹ [37/183] Processando branch: feat/telegram-reactions[0m
+[2026-03-14 08:16:21] [1;33m⚠ Branch 'feat/telegram-reactions' não existe. Pulando...[0m
+[2026-03-14 08:16:21] [0;34mℹ [38/183] Processando branch: feat/tool-dispatch-skill-commands[0m
+[2026-03-14 08:16:21] [1;33m⚠ Branch 'feat/tool-dispatch-skill-commands' não existe. Pulando...[0m
+[2026-03-14 08:16:22] [0;34mℹ [39/183] Processando branch: feat/tools-alsoAllow[0m
+[2026-03-14 08:16:22] [1;33m⚠ Branch 'feat/tools-alsoAllow' não existe. Pulando...[0m
+[2026-03-14 08:16:22] [0;34mℹ [40/183] Processando branch: feat/tui-syntax-highlighting[0m
+[2026-03-14 08:16:22] [1;33m⚠ Branch 'feat/tui-syntax-highlighting' não existe. Pulando...[0m
+[2026-03-14 08:16:23] [0;34mℹ [41/183] Processando branch: feat/venice-provider[0m
+[2026-03-14 08:16:23] [1;33m⚠ Branch 'feat/venice-provider' não existe. Pulando...[0m
+[2026-03-14 08:16:24] [0;34mℹ [42/183] Processando branch: feat/web-search-freshness[0m
+[2026-03-14 08:16:24] [1;33m⚠ Branch 'feat/web-search-freshness' não existe. Pulando...[0m
+[2026-03-14 08:16:24] [0;34mℹ [43/183] Processando branch: feat/webchat-heartbeat-visibility[0m
+[2026-03-14 08:16:24] [1;33m⚠ Branch 'feat/webchat-heartbeat-visibility' não existe. Pulando...[0m
+[2026-03-14 08:16:25] [0;34mℹ [44/183] Processando branch: feat/whatsapp-send-read-receipts-option[0m
+[2026-03-14 08:16:25] [1;33m⚠ Branch 'feat/whatsapp-send-read-receipts-option' não existe. Pulando...[0m
+[2026-03-14 08:16:25] [0;34mℹ [45/183] Processando branch: fix/1056-ignore-heavy-watch-paths[0m
+[2026-03-14 08:16:25] [1;33m⚠ Branch 'fix/1056-ignore-heavy-watch-paths' não existe. Pulando...[0m
+[2026-03-14 08:16:26] [0;34mℹ [46/183] Processando branch: fix/1540-openai-reasoning-transcript[0m
+[2026-03-14 08:16:26] [1;33m⚠ Branch 'fix/1540-openai-reasoning-transcript' não existe. Pulando...[0m
+[2026-03-14 08:16:26] [0;34mℹ [47/183] Processando branch: fix/2692-whatsapp-accountid-path-traversal[0m
+[2026-03-14 08:16:26] [1;33m⚠ Branch 'fix/2692-whatsapp-accountid-path-traversal' não existe. Pulando...[0m
+[2026-03-14 08:16:27] [0;34mℹ [48/183] Processando branch: fix/3805-message-tool-sandbox-bypass[0m
+[2026-03-14 08:16:27] [1;33m⚠ Branch 'fix/3805-message-tool-sandbox-bypass' não existe. Pulando...[0m
+[2026-03-14 08:16:27] [0;34mℹ [49/183] Processando branch: fix/4855-control-ui-assets-global-install[0m
+[2026-03-14 08:16:27] [1;33m⚠ Branch 'fix/4855-control-ui-assets-global-install' não existe. Pulando...[0m
+[2026-03-14 08:16:28] [0;34mℹ [50/183] Processando branch: fix/5266-tlon-sse-timeout[0m
+[2026-03-14 08:16:28] [1;33m⚠ Branch 'fix/5266-tlon-sse-timeout' não existe. Pulando...[0m
+[2026-03-14 08:16:29] [0;34mℹ [51/183] Processando branch: fix/abort-error-graceful-handling[0m
+[2026-03-14 08:16:29] [1;33m⚠ Branch 'fix/abort-error-graceful-handling' não existe. Pulando...[0m
+[2026-03-14 08:16:29] [0;34mℹ [52/183] Processando branch: fix/anthropic-oauth-profile-id-2[0m
+[2026-03-14 08:16:29] [1;33m⚠ Branch 'fix/anthropic-oauth-profile-id-2' não existe. Pulando...[0m
+[2026-03-14 08:16:30] [0;34mℹ [53/183] Processando branch: fix/audio-text-extraction-bypass[0m
+[2026-03-14 08:16:30] [1;33m⚠ Branch 'fix/audio-text-extraction-bypass' não existe. Pulando...[0m
+[2026-03-14 08:16:30] [0;34mℹ [54/183] Processando branch: fix/avatar-relative-url-validation[0m
+[2026-03-14 08:16:30] [1;33m⚠ Branch 'fix/avatar-relative-url-validation' não existe. Pulando...[0m
+[2026-03-14 08:16:31] [0;34mℹ [55/183] Processando branch: fix/background-abort-sigkill[0m
+[2026-03-14 08:16:31] [1;33m⚠ Branch 'fix/background-abort-sigkill' não existe. Pulando...[0m
+[2026-03-14 08:16:31] [0;34mℹ [56/183] Processando branch: fix/bluebubbles-gc-guid-resolution[0m
+[2026-03-14 08:16:31] [1;33m⚠ Branch 'fix/bluebubbles-gc-guid-resolution' não existe. Pulando...[0m
+[2026-03-14 08:16:32] [0;34mℹ [57/183] Processando branch: fix/bluebubbles-message-routing[0m
+[2026-03-14 08:16:32] [1;33m⚠ Branch 'fix/bluebubbles-message-routing' não existe. Pulando...[0m
+[2026-03-14 08:16:32] [0;34mℹ [58/183] Processando branch: fix/build-errors-missing-imports[0m
+[2026-03-14 08:16:32] [1;33m⚠ Branch 'fix/build-errors-missing-imports' não existe. Pulando...[0m
+[2026-03-14 08:16:33] [0;34mℹ [59/183] Processando branch: fix/capabilities-object-format[0m
+[2026-03-14 08:16:33] [1;33m⚠ Branch 'fix/capabilities-object-format' não existe. Pulando...[0m
+[2026-03-14 08:16:34] [0;34mℹ [60/183] Processando branch: fix/chrome-restore-prompt[0m
+[2026-03-14 08:16:34] [1;33m⚠ Branch 'fix/chrome-restore-prompt' não existe. Pulando...[0m
+[2026-03-14 08:16:34] [0;34mℹ [61/183] Processando branch: fix/cleanup-suspended-clawdbot-processes[0m
+[2026-03-14 08:16:34] [1;33m⚠ Branch 'fix/cleanup-suspended-clawdbot-processes' não existe. Pulando...[0m
+[2026-03-14 08:16:35] [0;34mℹ [62/183] Processando branch: fix/cli-install-version-suffix[0m
+[2026-03-14 08:16:35] [1;33m⚠ Branch 'fix/cli-install-version-suffix' não existe. Pulando...[0m
+[2026-03-14 08:16:35] [0;34mℹ [63/183] Processando branch: fix/cli-launchd-enable-before-bootstrap[0m
+[2026-03-14 08:16:35] [1;33m⚠ Branch 'fix/cli-launchd-enable-before-bootstrap' não existe. Pulando...[0m
+[2026-03-14 08:16:36] [0;34mℹ [64/183] Processando branch: fix/cli-quick-reference-system-prompt[0m
+[2026-03-14 08:16:36] [1;33m⚠ Branch 'fix/cli-quick-reference-system-prompt' não existe. Pulando...[0m
+[2026-03-14 08:16:36] [0;34mℹ [65/183] Processando branch: fix/cli-subcommand-registration-lazy-loading[0m
+[2026-03-14 08:16:36] [1;33m⚠ Branch 'fix/cli-subcommand-registration-lazy-loading' não existe. Pulando...[0m
+[2026-03-14 08:16:37] [0;34mℹ [66/183] Processando branch: fix/codesign-ad-hoc-fallback[0m
+[2026-03-14 08:16:37] [1;33m⚠ Branch 'fix/codesign-ad-hoc-fallback' não existe. Pulando...[0m
+[2026-03-14 08:16:37] [0;34mℹ [67/183] Processando branch: fix/codesign-adhoc[0m
+[2026-03-14 08:16:38] [1;33m⚠ Branch 'fix/codesign-adhoc' não existe. Pulando...[0m
+[2026-03-14 08:16:38] [0;34mℹ [68/183] Processando branch: fix/compaction-failure-silent-reset[0m
+[2026-03-14 08:16:38] [1;33m⚠ Branch 'fix/compaction-failure-silent-reset' não existe. Pulando...[0m
+[2026-03-14 08:16:39] [0;34mℹ [69/183] Processando branch: fix/config-title-overflow-1728[0m
+[2026-03-14 08:16:39] [1;33m⚠ Branch 'fix/config-title-overflow-1728' não existe. Pulando...[0m
+[2026-03-14 08:16:39] [0;34mℹ [70/183] Processando branch: fix/console-settings-recursion[0m
+[2026-03-14 08:16:39] [1;33m⚠ Branch 'fix/console-settings-recursion' não existe. Pulando...[0m
+[2026-03-14 08:16:40] [0;34mℹ [71/183] Processando branch: fix/control-ui-token-auth[0m
+[2026-03-14 08:16:40] [1;33m⚠ Branch 'fix/control-ui-token-auth' não existe. Pulando...[0m
+[2026-03-14 08:16:40] [0;34mℹ [72/183] Processando branch: fix/cron-edit-preserve-delivery-on-message[0m
+[2026-03-14 08:16:40] [1;33m⚠ Branch 'fix/cron-edit-preserve-delivery-on-message' não existe. Pulando...[0m
+[2026-03-14 08:16:41] [0;34mℹ [73/183] Processando branch: fix/cron-session-allowagents[0m
+[2026-03-14 08:16:41] [1;33m⚠ Branch 'fix/cron-session-allowagents' não existe. Pulando...[0m
+[2026-03-14 08:16:41] [0;34mℹ [74/183] Processando branch: fix/cron-tool-jobid-to-id[0m
+[2026-03-14 08:16:41] [1;33m⚠ Branch 'fix/cron-tool-jobid-to-id' não existe. Pulando...[0m
+[2026-03-14 08:16:42] [0;34mℹ [75/183] Processando branch: fix/direct-token-auth[0m
+[2026-03-14 08:16:42] [1;33m⚠ Branch 'fix/direct-token-auth' não existe. Pulando...[0m
+[2026-03-14 08:16:42] [0;34mℹ [76/183] Processando branch: fix/discord-exec-resolvedpath-validation[0m
+[2026-03-14 08:16:43] [1;33m⚠ Branch 'fix/discord-exec-resolvedpath-validation' não existe. Pulando...[0m
+[2026-03-14 08:16:43] [0;34mℹ [77/183] Processando branch: fix/dockerfile-install-bun[0m
+[2026-03-14 08:16:43] [1;33m⚠ Branch 'fix/dockerfile-install-bun' não existe. Pulando...[0m
+[2026-03-14 08:16:44] [0;34mℹ [78/183] Processando branch: fix/docs-typo-7399[0m
+[2026-03-14 08:16:44] [1;33m⚠ Branch 'fix/docs-typo-7399' não existe. Pulando...[0m
+[2026-03-14 08:16:44] [0;34mℹ [79/183] Processando branch: fix/duplicate-assistant-texts[0m
+[2026-03-14 08:16:44] [1;33m⚠ Branch 'fix/duplicate-assistant-texts' não existe. Pulando...[0m
+[2026-03-14 08:16:45] [0;34mℹ [80/183] Processando branch: fix/elevated-ask-security[0m
+[2026-03-14 08:16:45] [1;33m⚠ Branch 'fix/elevated-ask-security' não existe. Pulando...[0m
+[2026-03-14 08:16:45] [0;34mℹ [81/183] Processando branch: fix/elevated-default-off[0m
+[2026-03-14 08:16:45] [1;33m⚠ Branch 'fix/elevated-default-off' não existe. Pulando...[0m
+[2026-03-14 08:16:46] [0;34mℹ [82/183] Processando branch: fix/evaluate-esbuild-name-helper[0m
+[2026-03-14 08:16:46] [1;33m⚠ Branch 'fix/evaluate-esbuild-name-helper' não existe. Pulando...[0m
+[2026-03-14 08:16:46] [0;34mℹ [83/183] Processando branch: fix/exec-allowlist-agentid-derivation[0m
+[2026-03-14 08:16:46] [1;33m⚠ Branch 'fix/exec-allowlist-agentid-derivation' não existe. Pulando...[0m
+[2026-03-14 08:16:47] [0;34mℹ [84/183] Processando branch: fix/export-section-meta[0m
+[2026-03-14 08:16:47] [1;33m⚠ Branch 'fix/export-section-meta' não existe. Pulando...[0m
+[2026-03-14 08:16:48] [0;34mℹ [85/183] Processando branch: fix/failover-cooldown-skip[0m
+[2026-03-14 08:16:48] [1;33m⚠ Branch 'fix/failover-cooldown-skip' não existe. Pulando...[0m
+[2026-03-14 08:16:48] [0;34mℹ [86/183] Processando branch: fix/fallback-authprofile-provider-scope[0m
+[2026-03-14 08:16:48] [1;33m⚠ Branch 'fix/fallback-authprofile-provider-scope' não existe. Pulando...[0m
+[2026-03-14 08:16:49] [0;34mℹ [87/183] Processando branch: fix/fish-shell-bash[0m
+[2026-03-14 08:16:49] [1;33m⚠ Branch 'fix/fish-shell-bash' não existe. Pulando...[0m
+[2026-03-14 08:16:49] [0;34mℹ [88/183] Processando branch: fix/format-parameter-and-subagent-auth[0m
+[2026-03-14 08:16:49] [1;33m⚠ Branch 'fix/format-parameter-and-subagent-auth' não existe. Pulando...[0m
+[2026-03-14 08:16:50] [0;34mℹ [89/183] Processando branch: fix/gateway-connection-diagnostics[0m
+[2026-03-14 08:16:50] [1;33m⚠ Branch 'fix/gateway-connection-diagnostics' não existe. Pulando...[0m
+[2026-03-14 08:16:50] [0;34mℹ [90/183] Processando branch: fix/gateway-ios-client-id[0m
+[2026-03-14 08:16:50] [1;33m⚠ Branch 'fix/gateway-ios-client-id' não existe. Pulando...[0m
+[2026-03-14 08:16:51] [0;34mℹ [91/183] Processando branch: fix/gateway-token-resolution-mode-check[0m
+[2026-03-14 08:16:51] [1;33m⚠ Branch 'fix/gateway-token-resolution-mode-check' não existe. Pulando...[0m
+[2026-03-14 08:16:52] [0;34mℹ [92/183] Processando branch: fix/gemini-cli-oauth-auto-credentials[0m
+[2026-03-14 08:16:52] [1;33m⚠ Branch 'fix/gemini-cli-oauth-auto-credentials' não existe. Pulando...[0m
+[2026-03-14 08:16:52] [0;34mℹ [93/183] Processando branch: fix/gemini-compatibility[0m
+[2026-03-14 08:16:52] [1;33m⚠ Branch 'fix/gemini-compatibility' não existe. Pulando...[0m
+[2026-03-14 08:16:53] [0;34mℹ [94/183] Processando branch: fix/gemini-schema-sanitization[0m
+[2026-03-14 08:16:53] [1;33m⚠ Branch 'fix/gemini-schema-sanitization' não existe. Pulando...[0m
+[2026-03-14 08:16:53] [0;34mℹ [95/183] Processando branch: fix/gemini-session-corruption-recovery[0m
+[2026-03-14 08:16:53] [1;33m⚠ Branch 'fix/gemini-session-corruption-recovery' não existe. Pulando...[0m
+[2026-03-14 08:16:54] [0;34mℹ [96/183] Processando branch: fix/gog-gmail-search-gotcha[0m
+[2026-03-14 08:16:54] [1;33m⚠ Branch 'fix/gog-gmail-search-gotcha' não existe. Pulando...[0m
+[2026-03-14 08:16:54] [0;34mℹ [97/183] Processando branch: fix/google-antigravity-history[0m
+[2026-03-14 08:16:54] [1;33m⚠ Branch 'fix/google-antigravity-history' não existe. Pulando...[0m
+[2026-03-14 08:16:55] [0;34mℹ [98/183] Processando branch: fix/ignore-aborted-tool-calls[0m
+[2026-03-14 08:16:55] [1;33m⚠ Branch 'fix/ignore-aborted-tool-calls' não existe. Pulando...[0m
+[2026-03-14 08:16:55] [0;34mℹ [99/183] Processando branch: fix/imessage-echo-loop[0m
+[2026-03-14 08:16:56] [1;33m⚠ Branch 'fix/imessage-echo-loop' não existe. Pulando...[0m
+[2026-03-14 08:16:56] [0;34mℹ [100/183] Processando branch: fix/imessage-groupish-threads[0m
+[2026-03-14 08:16:56] [1;33m⚠ Branch 'fix/imessage-groupish-threads' não existe. Pulando...[0m
+[2026-03-14 08:16:57] [0;34mℹ [101/183] Processando branch: fix/imessage-timeout-config[0m
+[2026-03-14 08:16:57] [1;33m⚠ Branch 'fix/imessage-timeout-config' não existe. Pulando...[0m
+[2026-03-14 08:16:57] [0;34mℹ [102/183] Processando branch: fix/immediate-callback-answer[0m
+[2026-03-14 08:16:57] [1;33m⚠ Branch 'fix/immediate-callback-answer' não existe. Pulando...[0m
+[2026-03-14 08:16:58] [0;34mℹ [103/183] Processando branch: fix/imsg-remote-attachments[0m
+[2026-03-14 08:16:58] [1;33m⚠ Branch 'fix/imsg-remote-attachments' não existe. Pulando...[0m
+[2026-03-14 08:16:58] [0;34mℹ [104/183] Processando branch: fix/infer-auth-choice-from-api-key-flags[0m
+[2026-03-14 08:16:58] [1;33m⚠ Branch 'fix/infer-auth-choice-from-api-key-flags' não existe. Pulando...[0m
+[2026-03-14 08:16:59] [0;34mℹ [105/183] Processando branch: fix/ios-talkmode-simulator[0m
+[2026-03-14 08:16:59] [1;33m⚠ Branch 'fix/ios-talkmode-simulator' não existe. Pulando...[0m
+[2026-03-14 08:16:59] [0;34mℹ [106/183] Processando branch: fix/issue-1020-sessions-perms[0m
+[2026-03-14 08:16:59] [1;33m⚠ Branch 'fix/issue-1020-sessions-perms' não existe. Pulando...[0m
+[2026-03-14 08:17:00] [0;34mℹ [107/183] Processando branch: fix/issue-1107-semver-prerelease-suffix[0m
+[2026-03-14 08:17:00] [1;33m⚠ Branch 'fix/issue-1107-semver-prerelease-suffix' não existe. Pulando...[0m
+[2026-03-14 08:17:00] [0;34mℹ [108/183] Processando branch: fix/issue-1269-sanitize-tool-call-text[0m
+[2026-03-14 08:17:01] [1;33m⚠ Branch 'fix/issue-1269-sanitize-tool-call-text' não existe. Pulando...[0m
+[2026-03-14 08:17:01] [0;34mℹ [109/183] Processando branch: fix/issue-6995-zh-cn-i18n[0m
+[2026-03-14 08:17:01] [1;33m⚠ Branch 'fix/issue-6995-zh-cn-i18n' não existe. Pulando...[0m
+[2026-03-14 08:17:02] [0;34mℹ [110/183] Processando branch: fix/issue-7323-transcript-repair[0m
+[2026-03-14 08:17:02] [1;33m⚠ Branch 'fix/issue-7323-transcript-repair' não existe. Pulando...[0m
+[2026-03-14 08:17:02] [0;34mℹ [111/183] Processando branch: fix/issue-99-watchdog[0m
+[2026-03-14 08:17:02] [1;33m⚠ Branch 'fix/issue-99-watchdog' não existe. Pulando...[0m
+[2026-03-14 08:17:03] [0;34mℹ [112/183] Processando branch: fix/lfi-media-parse[0m
+[2026-03-14 08:17:03] [1;33m⚠ Branch 'fix/lfi-media-parse' não existe. Pulando...[0m
+[2026-03-14 08:17:03] [0;34mℹ [113/183] Processando branch: fix/line-webhook-timing-attack[0m
+[2026-03-14 08:17:03] [1;33m⚠ Branch 'fix/line-webhook-timing-attack' não existe. Pulando...[0m
+[2026-03-14 08:17:04] [0;34mℹ [114/183] Processando branch: fix/linux-service-path-user-dirs[0m
+[2026-03-14 08:17:04] [1;33m⚠ Branch 'fix/linux-service-path-user-dirs' não existe. Pulando...[0m
+[2026-03-14 08:17:04] [0;34mℹ [115/183] Processando branch: fix/local-embedding-l2-normalization[0m
+[2026-03-14 08:17:04] [1;33m⚠ Branch 'fix/local-embedding-l2-normalization' não existe. Pulando...[0m
+[2026-03-14 08:17:05] [0;34mℹ [116/183] Processando branch: fix/logs-follow-output[0m
+[2026-03-14 08:17:05] [1;33m⚠ Branch 'fix/logs-follow-output' não existe. Pulando...[0m
+[2026-03-14 08:17:06] [0;34mℹ [117/183] Processando branch: fix/logs-follow-spinner[0m
+[2026-03-14 08:17:06] [1;33m⚠ Branch 'fix/logs-follow-spinner' não existe. Pulando...[0m
+[2026-03-14 08:17:06] [0;34mℹ [118/183] Processando branch: fix/mac-node-approvals[0m
+[2026-03-14 08:17:06] [1;33m⚠ Branch 'fix/mac-node-approvals' não existe. Pulando...[0m
+[2026-03-14 08:17:07] [0;34mℹ [119/183] Processando branch: fix/mac-node-bridge-tunnel-865[0m
+[2026-03-14 08:17:07] [1;33m⚠ Branch 'fix/mac-node-bridge-tunnel-865' não existe. Pulando...[0m
+[2026-03-14 08:17:07] [0;34mℹ [120/183] Processando branch: fix/mdns-info-disclosure[0m
+[2026-03-14 08:17:07] [1;33m⚠ Branch 'fix/mdns-info-disclosure' não existe. Pulando...[0m
+[2026-03-14 08:17:08] [0;34mℹ [121/183] Processando branch: fix/memory-cli-hang-1121[0m
+[2026-03-14 08:17:08] [1;33m⚠ Branch 'fix/memory-cli-hang-1121' não existe. Pulando...[0m
+[2026-03-14 08:17:08] [0;34mℹ [122/183] Processando branch: fix/memory-slot-none[0m
+[2026-03-14 08:17:08] [1;33m⚠ Branch 'fix/memory-slot-none' não existe. Pulando...[0m
+[2026-03-14 08:17:09] [0;34mℹ [123/183] Processando branch: fix/message-command-plugins[0m
+[2026-03-14 08:17:09] [1;33m⚠ Branch 'fix/message-command-plugins' não existe. Pulando...[0m
+[2026-03-14 08:17:09] [0;34mℹ [124/183] Processando branch: fix/message-truncate-reasoning-tag[0m
+[2026-03-14 08:17:09] [1;33m⚠ Branch 'fix/message-truncate-reasoning-tag' não existe. Pulando...[0m
+[2026-03-14 08:17:10] [0;34mℹ [125/183] Processando branch: fix/minimax-api-endpoint[0m
+[2026-03-14 08:17:10] [1;33m⚠ Branch 'fix/minimax-api-endpoint' não existe. Pulando...[0m
+[2026-03-14 08:17:11] [0;34mℹ [126/183] Processando branch: fix/mintlify-security-subdir-conflict[0m
+[2026-03-14 08:17:11] [1;33m⚠ Branch 'fix/mintlify-security-subdir-conflict' não existe. Pulando...[0m
+[2026-03-14 08:17:11] [0;34mℹ [127/183] Processando branch: fix/model-catalog-cache-poison[0m
+[2026-03-14 08:17:11] [1;33m⚠ Branch 'fix/model-catalog-cache-poison' não existe. Pulando...[0m
+[2026-03-14 08:17:12] [0;34mℹ [128/183] Processando branch: fix/model-retry-fallback-rate-limits[0m
+[2026-03-14 08:17:12] [1;33m⚠ Branch 'fix/model-retry-fallback-rate-limits' não existe. Pulando...[0m
+[2026-03-14 08:17:12] [0;34mℹ [129/183] Processando branch: fix/model-selector-codex[0m
+[2026-03-14 08:17:12] [1;33m⚠ Branch 'fix/model-selector-codex' não existe. Pulando...[0m
+[2026-03-14 08:17:13] [0;34mℹ [130/183] Processando branch: fix/model-switch-persist-1435[0m
+[2026-03-14 08:17:13] [1;33m⚠ Branch 'fix/model-switch-persist-1435' não existe. Pulando...[0m
+[2026-03-14 08:17:13] [0;34mℹ [131/183] Processando branch: fix/node-daemon-run[0m
+[2026-03-14 08:17:13] [1;33m⚠ Branch 'fix/node-daemon-run' não existe. Pulando...[0m
+[2026-03-14 08:17:14] [0;34mℹ [132/183] Processando branch: fix/node-invoke-deadlock[0m
+[2026-03-14 08:17:14] [1;33m⚠ Branch 'fix/node-invoke-deadlock' não existe. Pulando...[0m
+[2026-03-14 08:17:15] [0;34mℹ [133/183] Processando branch: fix/node-invoke-timeout[0m
+[2026-03-14 08:17:15] [1;33m⚠ Branch 'fix/node-invoke-timeout' não existe. Pulando...[0m
+[2026-03-14 08:17:15] [0;34mℹ [134/183] Processando branch: fix/npm-extensions-workspace[0m
+[2026-03-14 08:17:15] [1;33m⚠ Branch 'fix/npm-extensions-workspace' não existe. Pulando...[0m
+[2026-03-14 08:17:16] [0;34mℹ [135/183] Processando branch: fix/opencode-zen-comment-accuracy[0m
+[2026-03-14 08:17:16] [1;33m⚠ Branch 'fix/opencode-zen-comment-accuracy' não existe. Pulando...[0m
+[2026-03-14 08:17:16] [0;34mℹ [136/183] Processando branch: fix/overloaded-error-handling[0m
+[2026-03-14 08:17:16] [1;33m⚠ Branch 'fix/overloaded-error-handling' não existe. Pulando...[0m
+[2026-03-14 08:17:17] [0;34mℹ [137/183] Processando branch: fix/pairing-cli-plugin-initialization[0m
+[2026-03-14 08:17:17] [1;33m⚠ Branch 'fix/pairing-cli-plugin-initialization' não existe. Pulando...[0m
+[2026-03-14 08:17:17] [0;34mℹ [138/183] Processando branch: fix/perplexity-web-search-provider[0m
+[2026-03-14 08:17:17] [1;33m⚠ Branch 'fix/perplexity-web-search-provider' não existe. Pulando...[0m
+[2026-03-14 08:17:18] [0;34mℹ [139/183] Processando branch: fix/preserve-command-arg-casing[0m
+[2026-03-14 08:17:18] [1;33m⚠ Branch 'fix/preserve-command-arg-casing' não existe. Pulando...[0m
+[2026-03-14 08:17:18] [0;34mℹ [140/183] Processando branch: fix/prompt-failover[0m
+[2026-03-14 08:17:18] [1;33m⚠ Branch 'fix/prompt-failover' não existe. Pulando...[0m
+[2026-03-14 08:17:19] [0;34mℹ [141/183] Processando branch: fix/remove-google-docs-editor-showcase[0m
+[2026-03-14 08:17:19] [1;33m⚠ Branch 'fix/remove-google-docs-editor-showcase' não existe. Pulando...[0m
+[2026-03-14 08:17:20] [0;34mℹ [142/183] Processando branch: fix/restart-channel-routing[0m
+[2026-03-14 08:17:20] [1;33m⚠ Branch 'fix/restart-channel-routing' não existe. Pulando...[0m
+[2026-03-14 08:17:20] [0;34mℹ [143/183] Processando branch: fix/restore-reasoning-tag-check[0m
+[2026-03-14 08:17:20] [1;33m⚠ Branch 'fix/restore-reasoning-tag-check' não existe. Pulando...[0m
+[2026-03-14 08:17:21] [0;34mℹ [144/183] Processando branch: fix/security-audit-gateway-auth[0m
+[2026-03-14 08:17:21] [1;33m⚠ Branch 'fix/security-audit-gateway-auth' não existe. Pulando...[0m
+[2026-03-14 08:17:21] [0;34mℹ [145/183] Processando branch: fix/security-sanitize-env-vars[0m
+[2026-03-14 08:17:21] [1;33m⚠ Branch 'fix/security-sanitize-env-vars' não existe. Pulando...[0m
+[2026-03-14 08:17:22] [0;34mℹ [146/183] Processando branch: fix/session-lock-cleanup[0m
+[2026-03-14 08:17:22] [1;33m⚠ Branch 'fix/session-lock-cleanup' não existe. Pulando...[0m
+[2026-03-14 08:17:22] [0;34mℹ [147/183] Processando branch: fix/session-memory-suppress-confirmation[0m
+[2026-03-14 08:17:22] [1;33m⚠ Branch 'fix/session-memory-suppress-confirmation' não existe. Pulando...[0m
+[2026-03-14 08:17:23] [0;34mℹ [148/183] Processando branch: fix/session-reset-token-counts[0m
+[2026-03-14 08:17:23] [1;33m⚠ Branch 'fix/session-reset-token-counts' não existe. Pulando...[0m
+[2026-03-14 08:17:23] [0;34mℹ [149/183] Processando branch: fix/settings-scroll-1743[0m
+[2026-03-14 08:17:24] [1;33m⚠ Branch 'fix/settings-scroll-1743' não existe. Pulando...[0m
+[2026-03-14 08:17:24] [0;34mℹ [150/183] Processando branch: fix/sidebar-scroll[0m
+[2026-03-14 08:17:24] [1;33m⚠ Branch 'fix/sidebar-scroll' não existe. Pulando...[0m
+[2026-03-14 08:17:25] [0;34mℹ [151/183] Processando branch: fix/signal-reaction-own-mode-uuid-match[0m
+[2026-03-14 08:17:25] [1;33m⚠ Branch 'fix/signal-reaction-own-mode-uuid-match' não existe. Pulando...[0m
+[2026-03-14 08:17:25] [0;34mℹ [152/183] Processando branch: fix/slack-filetype-deprecation[0m
+[2026-03-14 08:17:25] [1;33m⚠ Branch 'fix/slack-filetype-deprecation' não existe. Pulando...[0m
+[2026-03-14 08:17:26] [0;34mℹ [153/183] Processando branch: fix/slack-open-group-policy[0m
+[2026-03-14 08:17:26] [1;33m⚠ Branch 'fix/slack-open-group-policy' não existe. Pulando...[0m
+[2026-03-14 08:17:26] [0;34mℹ [154/183] Processando branch: fix/slack-top-level-require-mention[0m
+[2026-03-14 08:17:26] [1;33m⚠ Branch 'fix/slack-top-level-require-mention' não existe. Pulando...[0m
+[2026-03-14 08:17:27] [0;34mℹ [155/183] Processando branch: fix/stable-launchagent-path[0m
+[2026-03-14 08:17:27] [1;33m⚠ Branch 'fix/stable-launchagent-path' não existe. Pulando...[0m
+[2026-03-14 08:17:27] [0;34mℹ [156/183] Processando branch: fix/subagent-announce-channel-routing[0m
+[2026-03-14 08:17:27] [1;33m⚠ Branch 'fix/subagent-announce-channel-routing' não existe. Pulando...[0m
+[2026-03-14 08:17:28] [0;34mℹ [157/183] Processando branch: fix/subagent-skills-inheritance[0m
+[2026-03-14 08:17:28] [1;33m⚠ Branch 'fix/subagent-skills-inheritance' não existe. Pulando...[0m
+[2026-03-14 08:17:28] [0;34mℹ [158/183] Processando branch: fix/synology-docker[0m
+[2026-03-14 08:17:29] [1;33m⚠ Branch 'fix/synology-docker' não existe. Pulando...[0m
+[2026-03-14 08:17:29] [0;34mℹ [159/183] Processando branch: fix/systemd-execstart-whitespace[0m
+[2026-03-14 08:17:29] [1;33m⚠ Branch 'fix/systemd-execstart-whitespace' não existe. Pulando...[0m
+[2026-03-14 08:17:30] [0;34mℹ [160/183] Processando branch: fix/telegram-caption-split[0m
+[2026-03-14 08:17:30] [1;33m⚠ Branch 'fix/telegram-caption-split' não existe. Pulando...[0m
+[2026-03-14 08:17:30] [0;34mℹ [161/183] Processando branch: fix/telegram-general-topic-messages[0m
+[2026-03-14 08:17:30] [1;33m⚠ Branch 'fix/telegram-general-topic-messages' não existe. Pulando...[0m
+[2026-03-14 08:17:31] [0;34mℹ [162/183] Processando branch: fix/telegram-gif-animation[0m
+[2026-03-14 08:17:31] [1;33m⚠ Branch 'fix/telegram-gif-animation' não existe. Pulando...[0m
+[2026-03-14 08:17:31] [0;34mℹ [163/183] Processando branch: fix/telegram-node22-network-stability[0m
+[2026-03-14 08:17:31] [1;33m⚠ Branch 'fix/telegram-node22-network-stability' não existe. Pulando...[0m
+[2026-03-14 08:17:32] [0;34mℹ [164/183] Processando branch: fix/telegram-timed-out-recovery[0m
+[2026-03-14 08:17:32] [1;33m⚠ Branch 'fix/telegram-timed-out-recovery' não existe. Pulando...[0m
+[2026-03-14 08:17:32] [0;34mℹ [165/183] Processando branch: fix/telegram-topic-announcement[0m
+[2026-03-14 08:17:32] [1;33m⚠ Branch 'fix/telegram-topic-announcement' não existe. Pulando...[0m
+[2026-03-14 08:17:33] [0;34mℹ [166/183] Processando branch: fix/tmux-send-keys-tui[0m
+[2026-03-14 08:17:33] [1;33m⚠ Branch 'fix/tmux-send-keys-tui' não existe. Pulando...[0m
+[2026-03-14 08:17:33] [0;34mℹ [167/183] Processando branch: fix/token-count-after-compaction[0m
+[2026-03-14 08:17:34] [1;33m⚠ Branch 'fix/token-count-after-compaction' não existe. Pulando...[0m
+[2026-03-14 08:17:34] [0;34mℹ [168/183] Processando branch: fix/tool-call-id-maxlen-40[0m
+[2026-03-14 08:17:34] [1;33m⚠ Branch 'fix/tool-call-id-maxlen-40' não existe. Pulando...[0m
+[2026-03-14 08:17:35] [0;34mℹ [169/183] Processando branch: fix/tool-error-fallback[0m
+[2026-03-14 08:17:35] [1;33m⚠ Branch 'fix/tool-error-fallback' não existe. Pulando...[0m
+[2026-03-14 08:17:35] [0;34mℹ [170/183] Processando branch: fix/tool-typing-race-condition[0m
+[2026-03-14 08:17:35] [1;33m⚠ Branch 'fix/tool-typing-race-condition' não existe. Pulando...[0m
+[2026-03-14 08:17:36] [0;34mℹ [171/183] Processando branch: fix/trigger-word-mac[0m
+[2026-03-14 08:17:36] [1;33m⚠ Branch 'fix/trigger-word-mac' não existe. Pulando...[0m
+[2026-03-14 08:17:36] [0;34mℹ [172/183] Processando branch: fix/tts-base-url-runtime-read-2816[0m
+[2026-03-14 08:17:36] [1;33m⚠ Branch 'fix/tts-base-url-runtime-read-2816' não existe. Pulando...[0m
+[2026-03-14 08:17:37] [0;34mℹ [173/183] Processando branch: fix/tui-final-tag-strip[0m
+[2026-03-14 08:17:37] [1;33m⚠ Branch 'fix/tui-final-tag-strip' não existe. Pulando...[0m
+[2026-03-14 08:17:37] [0;34mℹ [174/183] Processando branch: fix/tui-token-refresh[0m
+[2026-03-14 08:17:37] [1;33m⚠ Branch 'fix/tui-token-refresh' não existe. Pulando...[0m
+[2026-03-14 08:17:38] [0;34mℹ [175/183] Processando branch: fix/ui-save-button-1609[0m
+[2026-03-14 08:17:38] [1;33m⚠ Branch 'fix/ui-save-button-1609' não existe. Pulando...[0m
+[2026-03-14 08:17:39] [0;34mℹ [176/183] Processando branch: fix/unhandled-fetch-rejections[0m
+[2026-03-14 08:17:39] [1;33m⚠ Branch 'fix/unhandled-fetch-rejections' não existe. Pulando...[0m
+[2026-03-14 08:17:39] [0;34mℹ [177/183] Processando branch: fix/versioned-node-binary[0m
+[2026-03-14 08:17:39] [1;33m⚠ Branch 'fix/versioned-node-binary' não existe. Pulando...[0m
+[2026-03-14 08:17:40] [0;34mℹ [178/183] Processando branch: fix/voice-call-statuscallback[0m
+[2026-03-14 08:17:40] [1;33m⚠ Branch 'fix/voice-call-statuscallback' não existe. Pulando...[0m
+[2026-03-14 08:17:40] [0;34mℹ [179/183] Processando branch: fix/voice-call-tts-overlap[0m
+[2026-03-14 08:17:40] [1;33m⚠ Branch 'fix/voice-call-tts-overlap' não existe. Pulando...[0m
+[2026-03-14 08:17:41] [0;34mℹ [180/183] Processando branch: fix/voicecall-tailscale-path[0m
+[2026-03-14 08:17:41] [1;33m⚠ Branch 'fix/voicecall-tailscale-path' não existe. Pulando...[0m
+[2026-03-14 08:17:42] [0;34mℹ [181/183] Processando branch: fix/webchat-scroll-position[0m
+[2026-03-14 08:17:42] [1;33m⚠ Branch 'fix/webchat-scroll-position' não existe. Pulando...[0m
+[2026-03-14 08:17:42] [0;34mℹ [182/183] Processando branch: fix/windows-gateway-startup[0m
+[2026-03-14 08:17:42] [1;33m⚠ Branch 'fix/windows-gateway-startup' não existe. Pulando...[0m
+[2026-03-14 08:17:43] [0;34mℹ [183/183] Processando branch: fix/zalo-pairing-and-webhook[0m
+[2026-03-14 08:17:43] [1;33m⚠ Branch 'fix/zalo-pairing-and-webhook' não existe. Pulando...[0m
+[2026-03-14 08:17:43] [0;34mℹ Restaurando branch inicial: develop[0m
+[2026-03-14 08:17:43] [0;32m✓ Todas as branches foram integradas com sucesso![0m

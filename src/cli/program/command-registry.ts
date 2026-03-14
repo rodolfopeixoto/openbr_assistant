@@ -100,14 +100,11 @@ const routeMemoryStatus: RouteSpec = {
   match: (path) => path[0] === "memory" && path[1] === "status",
   run: async (argv) => {
     const agent = getFlagValue(argv, "--agent");
-    if (agent === null) {
-      return false;
-    }
     const json = hasFlag(argv, "--json");
     const deep = hasFlag(argv, "--deep");
     const index = hasFlag(argv, "--index");
     const verbose = hasFlag(argv, "--verbose");
-    await runMemoryStatus({ agent, json, deep, index, verbose });
+    await runMemoryStatus({ agent: agent ?? null, json, deep, index, verbose });
     return true;
   },
 };

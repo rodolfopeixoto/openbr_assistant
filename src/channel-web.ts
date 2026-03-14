@@ -4,10 +4,10 @@ export {
   DEFAULT_WEB_MEDIA_BYTES,
   HEARTBEAT_PROMPT,
   HEARTBEAT_TOKEN,
-  monitorWebChannel,
+  monitorWebProvider as monitorWebChannel,
   resolveHeartbeatRecipients,
   runWebHeartbeatOnce,
-  type WebChannelStatus,
+  type WebProviderStatus as WebChannelStatus,
   type WebMonitorTuning,
 } from "./web/auto-reply.js";
 export {

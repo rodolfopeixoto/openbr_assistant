@@ -67,3 +67,6 @@ export {
   MOONSHOT_DEFAULT_MODEL_ID,
   MOONSHOT_DEFAULT_MODEL_REF,
 } from "./onboard-auth.models.js";
+
+// Antigravity OAuth exports
+export { loginAntigravityVpsAware, isRemoteEnvironment } from "./antigravity-oauth.js";

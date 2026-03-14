@@ -20,6 +20,8 @@ import {
   handleWhoamiCommand,
 } from "./commands-info.js";
 import { handleModelsCommand } from "./commands-models.js";
+import { handlePlanCommand } from "./commands-plan.js";
+import { handlePlansCommand } from "./commands-plans.js";
 import { handlePluginCommand } from "./commands-plugin.js";
 import {
   handleAbortTrigger,
@@ -47,6 +49,8 @@ export async function handleCommands(params: HandleCommandsParams): Promise<Comm
       handleRestartCommand,
       handleTtsCommands,
       handleHelpCommand,
+      handlePlanCommand,
+      handlePlansCommand,
       handleCommandsListCommand,
       handleStatusCommand,
       handleAllowlistCommand,

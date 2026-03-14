@@ -139,7 +139,6 @@ export async function resolveApiKeyForProvider(params: {
 }): Promise<ResolvedProviderAuth> {
   const { provider, cfg, profileId, preferredProfile } = params;
   const store = params.store ?? ensureAuthProfileStore(params.agentDir);
-
   if (profileId) {
     const resolved = await resolveApiKeyForProfile({
       cfg,
@@ -204,9 +203,12 @@ export async function resolveApiKeyForProvider(params: {
     return { apiKey: customKey, source: "models.json", mode: "api-key" };
   }
 
-  const normalized = normalizeProviderId(provider);
-  if (authOverride === undefined && normalized === "amazon-bedrock") {
+  if (authOverride === undefined && normalizeProviderId(provider) === "amazon-bedrock") {
     return resolveAwsSdkAuthInfo();
+  }
+
+  if (normalizeProviderId(provider) === "amazon-bedrock") {
+    return { apiKey: "<authenticated>", source: "aws-sdk", mode: "aws-sdk" };
   }
 
   if (provider === "openai") {
@@ -243,6 +245,12 @@ export function resolveEnvApiKey(provider: string): EnvApiKeyResult | null {
     const source = applied.has(envVar) ? `shell env: ${envVar}` : `env: ${envVar}`;
     return { apiKey: value, source };
   };
+  const pickPresent = (envVar: string): EnvApiKeyResult | null => {
+    const value = process.env[envVar]?.trim();
+    if (!value) return null;
+    const source = applied.has(envVar) ? `shell env: ${envVar}` : `env: ${envVar}`;
+    return { apiKey: "<authenticated>", source };
+  };
 
   if (normalized === "github-copilot") {
     return pick("COPILOT_GITHUB_TOKEN") ?? pick("GH_TOKEN") ?? pick("GITHUB_TOKEN");
@@ -266,6 +274,21 @@ export function resolveEnvApiKey(provider: string): EnvApiKeyResult | null {
       return null;
     }
     return { apiKey: envKey, source: "gcloud adc" };
+  }
+
+  if (normalized === "amazon-bedrock") {
+    return (
+      pickPresent("AWS_BEARER_TOKEN_BEDROCK") ??
+      pickPresent("AWS_PROFILE") ??
+      (process.env.AWS_ACCESS_KEY_ID?.trim() && process.env.AWS_SECRET_ACCESS_KEY?.trim()
+        ? {
+            apiKey: "<authenticated>",
+            source: applied.has("AWS_ACCESS_KEY_ID")
+              ? "shell env: AWS_ACCESS_KEY_ID"
+              : "env: AWS_ACCESS_KEY_ID",
+          }
+        : null)
+    );
   }
 
   if (normalized === "opencode") {

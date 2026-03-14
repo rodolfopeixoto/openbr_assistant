@@ -1005,6 +1005,8 @@
         "group": "Providers",
         "pages": [
           "providers/index",
+          "providers/user-guide",
+          "providers/developer-guide",
           "providers/models",
           "providers/openai",
           "providers/anthropic",

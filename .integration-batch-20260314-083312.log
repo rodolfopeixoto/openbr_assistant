@@ -1,0 +1,97 @@
+═══════════════════════════════════════════════════════════════
+🚀 INTEGRAÇÃO EM LOTE: Branches 1 a 15
+Início: sáb 14 mar 2026 08:33:12 -03
+═══════════════════════════════════════════════════════════════
+Already on 'develop'
+M	scripts/batch-merge-priority.sh
+M	scripts/manual-integration.sh
+M	scripts/mass-integration-v2.sh
+Your branch is ahead of 'origin/develop' by 14 commits.
+  (use "git push" to publish your local commits)
+From personal.github.com:rodolfopeixoto/rogpe_claw
+ * branch                develop    -> FETCH_HEAD
+Already up to date.
+
+[1/15] feat/bedrock-converse-stream-api
+----------------------------------------
+  ❌ Falhou (       3 conflitos)
+
+[2/15] feat/boot-md
+----------------------------------------
+  ❌ Falhou (       8 conflitos)
+
+[3/15] feat/chat-ux-improvements
+----------------------------------------
+  ❌ Falhou (       4 conflitos)
+
+[4/15] feat/compaction-safeguard-improvements
+----------------------------------------
+  ❌ Falhou (       7 conflitos)
+
+[5/15] feat/config-ui-sections
+----------------------------------------
+  ❌ Falhou (       9 conflitos)
+
+📈 Progresso: 5 processadas | 0 sucessos | 5 falhas
+
+
+[6/15] feat/custom-tts-endpoint
+----------------------------------------
+  ❌ Falhou (       2 conflitos)
+
+[7/15] feat/device-pair-plugin-command
+----------------------------------------
+  ❌ Falhou (      47 conflitos)
+
+[8/15] feat/gateway-config-patch
+----------------------------------------
+  ❌ Falhou (       4 conflitos)
+
+[9/15] feat/llm-task-tool
+----------------------------------------
+  ❌ Falhou (       8 conflitos)
+
+[10/15] feat/lobster-plugin
+----------------------------------------
+  ❌ Falhou (       8 conflitos)
+
+📈 Progresso: 10 processadas | 0 sucessos | 10 falhas
+
+
+[11/15] feat/mattermost-channel
+----------------------------------------
+  ❌ Falhou (      29 conflitos)
+
+[12/15] feat/minimax_oauth
+----------------------------------------
+  ❌ Falhou (       8 conflitos)
+
+[13/15] feat/models-command
+----------------------------------------
+  ❌ Falhou (      14 conflitos)
+
+[14/15] feat/multi-account-ui-clean
+----------------------------------------
+  ❌ Falhou (       1 conflitos)
+
+[15/15] feat/newline-chunk-mode
+----------------------------------------
+  ❌ Falhou (       8 conflitos)
+
+📈 Progresso: 15 processadas | 0 sucessos | 15 falhas
+
+
+═══════════════════════════════════════════════════════════════
+📊 RESULTADO DO LOTE
+═══════════════════════════════════════════════════════════════
+  Sucessos: 0
+  Falhas: 0
+  Total: 0
+
+🔨 Validando build...
+  ✅ PASSOU!
+
+Fim: sáb 14 mar 2026 08:33:42 -03
+Log: .integration-batch-20260314-083312.log
+Sucessos: .batch-success.txt
+Falhas: .batch-failed.txt
